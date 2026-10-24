@@ -1,0 +1,317 @@
+{
+  "site": {
+    "metaTitle": "Forkline | Nemotronを微調整して、公開して、稼ぐ",
+    "metaDescription": "NVIDIA NemotronをNebiusのGPUでLoRA微調整し、OpenAI互換のAPIとして公開。呼ばれたトークンの分だけ売上になるAIモデルのマーケットプレイス。",
+    "imageAlt": "Forkline — Nemotronを微調整して、公開して、稼ぐ",
+    "signup": "無料で始める",
+    "menu": "メニュー",
+    "nav": {
+      "explore": "モデルを探す",
+      "docs": "ドキュメント",
+      "publish": "コンソール"
+    },
+    "footer": {
+      "tagline": "Nemotronを自分のデータで微調整し、APIとして公開できるマーケットプレイス。",
+      "product": "プロダクト",
+      "explore": "モデルを探す",
+      "publish": "モデルを公開する",
+      "api": "APIドキュメント"
+    },
+    "og": {
+      "subtitle": "Nemotron を Nebius で微調整して、トークン単位で稼ぐ"
+    }
+  },
+  "auth": {
+    "login": {
+      "heroTitleLine1": "Nemotronを微調整して、",
+      "heroTitleLine2": "APIで売る。",
+      "heroDescription": "学習データを上げてNebiusのGPUで学習し、そのままOpenAI互換のAPIとして公開できます。呼ばれたトークンの分だけ売上になります。"
+    }
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "NVIDIA Nemotron × Nebius AI Cloud",
+      "title1": "Nemotronを微調整して、",
+      "title2": "呼ばれるたびに稼ぐ。",
+      "subtitle": "自分のデータでNemotronをLoRA微調整し、OpenAI互換のAPIとしてストアに公開できます。GPUの用意は要りません。誰かがモデルを呼ぶたびに、使われたトークンの分が売上になります。",
+      "ctaPrimary": "モデルを作る",
+      "ctaSecondary": "公開中のモデルを見る",
+      "ctaTertiary": "APIドキュメントを読む"
+    },
+    "flow": {
+      "aria": "図: ベースモデルのNemotronから、あなたのデータで学習したLoRAが分岐し、Nebiusのエンドポイントに載り、APIの呼び出しが売上になる流れ",
+      "base": "ベースモデル",
+      "data": "+ あなたのデータ",
+      "train": "LoRA学習",
+      "trainMeta": "Serverless AI Job",
+      "deploy": "エンドポイント",
+      "deployMeta": "Serverless AI Endpoint",
+      "calls": "APIの呼び出し",
+      "earn": "トークンごとに売上"
+    },
+    "steps": {
+      "title": "データから売上までの5つの手順",
+      "lead": "どの手順も、コンソールのモデルの画面で進めます。",
+      "s1": {
+        "title": "学習する",
+        "body": "chat形式のJSONLを上げ、Nemotronを選んで学習を始めます。終わったら、実際に使ったGPU時間で精算します。",
+        "where": "Nebius Serverless AI Jobs",
+        "assist": "手元に資料しかなければ、Nemotronが資料から学習データの下書きを作ります。"
+      },
+      "s2": {
+        "title": "デプロイする",
+        "body": "ベースモデルに学習したLoRAを載せて、vLLMのエンドポイントを立てます。{{idle}}分呼ばれないと自動で止まります。",
+        "where": "Nebius Serverless AI Endpoints"
+      },
+      "s3": {
+        "title": "試す",
+        "body": "ブラウザのプレイグラウンドで、実際の応答を確かめます。",
+        "where": "プレイグラウンド",
+        "assist": "Nemotronが同じ質問をベースモデルと微調整後のモデルに送り、回答を比べて評価します。"
+      },
+      "s4": {
+        "title": "公開する",
+        "body": "入力・出力100万トークンあたりと、1リクエストあたりの価格を決めて、ストアに公開します。",
+        "where": "Forklineのストア"
+      },
+      "s5": {
+        "title": "稼ぐ",
+        "body": "利用者は自分のAPIキーで /v1 から呼び出します。呼ばれるたびに、価格の{{share}}%が組織の売上になります。",
+        "where": "Stripe Connect"
+      }
+    },
+    "why": {
+      "title": "GPUを持たずに、モデルを売る",
+      "lead": "作る人がやるのは、データを用意して価格を決めることだけです。",
+      "gpu": {
+        "title": "GPUの管理は要らない",
+        "body": "学習も推論もNebiusのサーバーレスGPUで動きます。マシンの確保、コンテナの起動と停止はForklineが行います。"
+      },
+      "idle": {
+        "title": "動いた分だけ払う",
+        "body": "エンドポイントは動いている間だけ1分ごとに課金し、{{idle}}分呼ばれないと止まります。止まっている間のGPU代はかかりません。"
+      },
+      "api": {
+        "title": "OpenAI互換のAPI",
+        "body": "利用者はOpenAIのSDKの base_url を変えるだけで呼び出せます。ストリーミングにも対応しています。"
+      },
+      "payout": {
+        "title": "売上はStripe Connectで受け取る",
+        "body": "売上は組織にたまり、¥{{min}}からStripe Connectで出金できます。"
+      },
+      "splitTitle": "利用者が払う価格の行き先",
+      "splitCreator": "あなたの組織",
+      "splitFee": "Forklineの手数料",
+      "splitNote": "GPU代はこれとは別に、モデルを作った組織のクレジットから、動いた時間の分だけ引かれます。"
+    },
+    "stack": {
+      "title": "Nebius と NVIDIA の上で動く",
+      "lead": "学習、推論、保存はNebius AI Cloudで行い、ベースモデルにはNVIDIA Nemotronを使います。",
+      "role": "役割",
+      "service": "Nebiusのサービス",
+      "detail": "内容",
+      "rows": {
+        "train": {
+          "role": "LoRA学習",
+          "service": "Serverless AI Jobs",
+          "detail": "PEFTとTRLのコンテナで、GPU 1枚でLoRAを学習します。"
+        },
+        "serve": {
+          "role": "推論",
+          "service": "Serverless AI Endpoints",
+          "detail": "vLLMがベースモデルとLoRAを読み込んで応答します。呼ばれないと止まります。"
+        },
+        "storage": {
+          "role": "保存",
+          "service": "Object Storage",
+          "detail": "学習データと学習したLoRAを置きます（S3互換）。"
+        },
+        "assist": {
+          "role": "データ作成と評価",
+          "service": "Token Factory",
+          "detail": "Nemotronをそのまま呼び出し、資料から学習データを下書きし、学習後のモデルを評価します。"
+        }
+      },
+      "modelsTitle": "選べるベースモデル",
+      "default": "既定",
+      "trainGpu": "学習",
+      "serveGpu": "推論"
+    },
+    "models": {
+      "title": "公開中のモデル",
+      "lead": "呼び出した分だけ、前払いのクレジットから払います。",
+      "viewAll": "すべてのモデルを見る",
+      "empty": "まだ公開されたモデルはありません。",
+      "emptyCta": "最初のモデルを公開する",
+      "free": "無料",
+      "perRequest": "回",
+      "perMillionOutput": "出力100万トークン",
+      "perMillionInput": "入力100万トークン",
+      "columns": {
+        "model": "モデル",
+        "base": "ベースモデル",
+        "price": "料金"
+      }
+    },
+    "api": {
+      "title": "OpenAIのSDKがそのまま使える",
+      "lead": "base_url を Forkline に、model をストアに表示されるモデルIDにします。",
+      "requestLabel": "リクエスト",
+      "responseLabel": "レスポンス",
+      "docs": "APIドキュメントを読む",
+      "comment": "ストアに表示されるモデルID",
+      "prompt": "返品の手順を教えてください",
+      "warm": "しばらく呼ばれていないモデルは起動に数分かかります。その間は 503 と Retry-After を返すので、指定の秒数を待って送り直してください。"
+    },
+    "faq": {
+      "title": "よくある質問",
+      "q1": "どのモデルを微調整できますか？",
+      "a1": "{{models}}を選べます。既定は{{default}}です。",
+      "q2": "GPU代はいつ、誰が払いますか？",
+      "a2": "モデルを作った組織が払います。学習は見積もり額を先に押さえ、終わったら実際の時間で精算します。エンドポイントは動いている時間だけ1分ごとに請求します。",
+      "q3": "使われていないエンドポイントはどうなりますか？",
+      "a3": "{{idle}}分呼ばれないと自動で止まり、GPU代はかかりません。止まっている間に呼ばれると起動を始め、503 と Retry-After を返します。",
+      "q4": "利用者の支払いはどうなりますか？",
+      "a4": "利用者はクレジットを前払いで購入し、呼び出しのたびに価格の分が引かれます。APIキーと残高は組織ごとに持ちます。",
+      "q5": "OpenAIのSDKで使えますか？",
+      "a5": "はい。base_url を https://forkline.ai/v1 にして、model にモデルIDを指定します。ストリーミングにも対応しています。",
+      "q6": "学習データや入力は、運営者のモデルの学習に使われますか？",
+      "a6": "使いません。学習データと学習したLoRAはNebiusのObject Storageに置き、モデルや組織を削除するまで保存します。"
+    },
+    "finalCta": {
+      "title": "自分のデータで、Nemotronを公開する",
+      "cta": "コンソールを開く"
+    }
+  },
+  "catalog": {
+    "emptyTitle": "まだ公開されたモデルはありません",
+    "emptyBody": "Nemotronを自分のデータで微調整して、最初のモデルを公開できます。学習からデプロイ、公開まで、コンソールの1つの画面で進みます。",
+    "emptyDocs": "公開の手順を読む"
+  },
+  "docs": {
+    "metaTitle": "APIドキュメント | Forkline",
+    "metaDescription": "ForklineのOpenAI互換APIの使い方と、Nemotronを微調整して公開する手順。認証、ストリーミング、料金、エラー、売上の受け取りを解説します。",
+    "title": "ドキュメント",
+    "intro": "ForklineのAPIはOpenAI互換です。公開されているモデルを、1つのAPIキーと同じエンドポイントから呼び出せます。後半は、モデルを作って公開する人向けの説明です。",
+    "toc": "目次",
+    "baseUrl": "ベースURL",
+    "groups": {
+      "use": "モデルを使う",
+      "publish": "モデルを公開する"
+    },
+    "placeholder": "your-model は、ストアに表示されるモデルIDに置き換えてください。モデルIDは英小文字、数字、ハイフンでできています。",
+    "quickstart": {
+      "title": "はじめに",
+      "body": "次の3つで呼び出せます。",
+      "steps": {
+        "key": "コンソールの「APIキー」で組織のキーを発行します。キーは発行時に一度だけ表示されます。",
+        "credits": "「請求」でクレジットを購入します（1回¥{{min}}〜¥{{max}}）。",
+        "call": "ベースURLを {{url}} にして、OpenAIのSDKかcurlで呼び出します。"
+      }
+    },
+    "auth": {
+      "title": "認証",
+      "body": "APIキーを Authorization ヘッダーに Bearer トークンとして指定します。キーは組織のもので、料金はキーの組織のクレジットから引かれます。キーの発行と無効化は、組織のオーナーと管理者が行えます。"
+    },
+    "chat": {
+      "title": "チャット補完",
+      "body": "POST /v1/chat/completions で呼び出します。リクエストとレスポンスの形はOpenAIのChat Completions APIと同じです。"
+    },
+    "streaming": {
+      "title": "ストリーミング",
+      "body": "stream: true を付けると、Server-Sent Events で少しずつ返します。最後のチャンクに usage（トークン数）が入り、その後に data: [DONE] が来ます。"
+    },
+    "list": {
+      "title": "モデル一覧",
+      "body": "GET /v1/models で、ストアに公開中のモデルと、キーの組織自身のモデルを取得できます。id がモデルIDです。"
+    },
+    "pricing": {
+      "title": "料金と単位",
+      "body": "料金は、モデルを作った人が決めた価格です。GPU代は作った人の組織が払うので、利用者が払うのは表示された価格だけです。",
+      "units": {
+        "tokens": "入力トークンと出力トークンの価格は、それぞれ100万トークンあたりの円で表示します。",
+        "request": "1リクエストあたりの価格を設けているモデルもあります。",
+        "hold": "呼び出しの前に見込み額をクレジットから仮押さえし、応答のあと実際のトークン数で精算します。残高が足りなければ 402 を返します。",
+        "header": "その呼び出しで引かれた額（円）は、通常の応答では X-Forkline-Cost-JPY ヘッダーで、ストリーミングでは最後の「: cost_jpy=」で始まるコメント行で返します。コメント行はSSEのクライアントが読み飛ばします。",
+        "self": "自分の組織のモデルを呼ぶときは、価格はかかりません。"
+      }
+    },
+    "warmup": {
+      "title": "起動中の応答（503）",
+      "body": "Nebiusで動くモデルは、{{idle}}分呼ばれないとエンドポイントが止まります。止まっているときに呼ぶと起動を始め、すぐに 503 model_warming_up と Retry-After ヘッダー（{{retry}}秒）を返します。起動には数分かかることがあります。",
+      "retry": "OpenAIのSDKは 503 を自動で送り直し、Retry-After を読みます。起動を待てるよう、max_retries を増やしておくと安心です。"
+    },
+    "errors": {
+      "title": "エラー",
+      "body": "エラーはOpenAIと同じ形で返します。",
+      "status": "ステータス",
+      "code": "コード",
+      "meaning": "意味",
+      "invalidRequest": "リクエストの形が正しくない（model と messages は必須）",
+      "invalidApiKey": "APIキーが無い、形式が正しくない、または無効化されている",
+      "insufficientCredits": "組織のクレジット残高が足りない",
+      "modelSuspended": "モデルが運営者によって停止されている",
+      "modelNotFound": "モデルが存在しない、または公開されていない",
+      "modelNotDeployed": "モデルがまだエンドポイントに載っていない",
+      "rateLimit": "レート制限を超えた（APIキーごとに毎分600リクエスト）",
+      "warmingUp": "エンドポイントの起動中。Retry-After の秒数を待って送り直す",
+      "unavailable": "モデルを一時的に使えない",
+      "upstream": "モデルの実行に失敗した"
+    },
+    "publish": {
+      "title": "公開までの流れ",
+      "body": "コンソールの「モデル」で「Nemotronを微調整」を選んでモデルを作り、次の順に進めます。",
+      "steps": {
+        "dataset": "学習データ（chat形式のJSONL）を選びます。資料しかなければ、Nemotronに下書きを作らせることもできます。",
+        "train": "ベースモデルとハイパーパラメータを決めて学習を始めます。",
+        "deploy": "学習が終わったら、LoRAをエンドポイントに載せます。",
+        "test": "プレイグラウンドで応答を確かめます。Nemotronが、ベースモデルの回答と比べて評価します。",
+        "price": "価格を決め、概要を書いてストアに公開します。"
+      }
+    },
+    "dataset": {
+      "title": "学習データの形式",
+      "body": "1行に1つの会話をJSONで書きます。role は system / user / assistant のどれかで、content は空でない文字列です。",
+      "rules": {
+        "user": "各行に user と assistant の発言が少なくとも1つずつ必要です。",
+        "count": "{{min}}行以上、{{max}}行以下にしてください。",
+        "size": "ファイルは{{mb}}MBまでです。",
+        "check": "形式は、ブラウザで選んだときとサーバーで受け取ったときの両方で確かめます。"
+      }
+    },
+    "hyperparameters": {
+      "title": "ハイパーパラメータ",
+      "body": "既定値のままでも学習できます。",
+      "epochs": "学習データを何周するか（1〜10）。",
+      "learningRate": "学習率。",
+      "loraRank": "LoRAのランク（{{ranks}}）。大きいほど表現力が増え、学習は重くなります。",
+      "loraAlpha": "LoRAの重みの倍率。ランクの2倍が目安です。"
+    },
+    "baseModels": {
+      "title": "ベースモデルとGPU",
+      "body": "学習と推論には、ベースモデルごとに次のGPUを1枚使います。",
+      "model": "ベースモデル",
+      "train": "学習",
+      "serve": "推論",
+      "default": "既定"
+    },
+    "compute": {
+      "title": "GPU代と自動停止",
+      "body": "学習とエンドポイントのGPU代は、モデルを作った組織のクレジットから引きます。",
+      "items": {
+        "train": "学習: 開始時に見積もりの{{multiplier}}倍を仮押さえし、終わったら実際のGPU時間で精算します。{{hours}}時間を超えた学習は止めます。",
+        "endpoint": "エンドポイント: 起動時に、起動と待ち時間の分を仮押さえします。動いている間は1分ごとに請求します。",
+        "idle": "最後に呼ばれてから{{idle}}分たつと自動で止まり、それ以降GPU代はかかりません。次に呼ばれたときに起動し、待つ間は 503 と Retry-After を返します。"
+      }
+    },
+    "payouts": {
+      "title": "価格と売上",
+      "body": "価格は円で、モデルごとに決めます。",
+      "items": {
+        "price": "入力・出力100万トークンあたりと、1リクエストあたりの価格を決められます。すべて0にすると無料で公開できます。",
+        "fee": "売上は、利用者が払った価格から手数料（{{fee}}%）を引いた額です。組織の売上として計上します。",
+        "payout": "Stripe Connectの登録を済ませると、¥{{min}}から出金できます。"
+      }
+    }
+  }
+}

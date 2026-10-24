@@ -1,0 +1,54 @@
+# Copy to .dev.vars for local development (`npm run dev`). Production values go in `wrangler secret put`.
+
+# --- App
+VITE_PUBLIC_APP_URL=http://localhost:5173
+VITE_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+# Stop Nebius endpoints that have not been called for this many minutes
+ENDPOINT_IDLE_MINUTES=15
+# Days before creator earnings can be paid out (held for refunds and chargebacks)
+EARNINGS_HOLD_DAYS=7
+
+# --- Database (TiDB Serverless)
+DATABASE_URL=mysql://user:password@gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/forkline?sslaccept=strict
+
+# --- Auth (better-auth: email/password + Google)
+BETTER_AUTH_SECRET=replace-with-a-long-random-string
+AUTH_EMAIL_FROM=noreply@forkline.ai
+GOOGLE_OAUTH_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_OAUTH_CLIENT_SECRET=your-google-client-secret
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# AES-GCM key for Nebius endpoint tokens (32+ characters).
+# Changing it makes existing encrypted values unreadable.
+SECRET_ENCRYPTION_KEY=replace-with-at-least-32-random-characters
+
+# --- Stripe (credits via Checkout, payouts via Connect)
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+# Optional: signing secret of a separate Connect webhook endpoint
+STRIPE_CONNECT_WEBHOOK_SECRET=
+
+# --- Nebius AI Cloud (fine-tuning jobs and inference endpoints)
+NEBIUS_PROJECT_ID=project-xxxxxxxxxxxxxxxxxxxx
+NEBIUS_REGION=eu-north1
+# Production auth: service account + authorized key (PEM, \n allowed for newlines)
+NEBIUS_SERVICE_ACCOUNT_ID=serviceaccount-xxxxxxxxxxxxxxxxxxxx
+NEBIUS_AUTHORIZED_KEY_ID=publickey-xxxxxxxxxxxxxxxxxxxx
+NEBIUS_AUTHORIZED_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+# Local alternative: IAM access token from `nebius iam get-access-token` (expires in 12 hours)
+NEBIUS_API_KEY=
+# Images built from nebius-workers/train and nebius-workers/serve
+NEBIUS_TRAIN_IMAGE=cr.eu-north1.nebius.cloud/xxxx/forkline-train:0.1
+NEBIUS_SERVE_IMAGE=cr.eu-north1.nebius.cloud/xxxx/forkline-serve:0.1
+# Optional
+NEBIUS_SUBNET_ID=
+NEBIUS_API_BASE_URL=
+NEBIUS_HF_TOKEN=
+# Object Storage (S3 compatible) for datasets and LoRA adapters
+NEBIUS_S3_ENDPOINT=https://storage.eu-north1.nebius.cloud
+NEBIUS_S3_BUCKET=forkline-training
+NEBIUS_S3_ACCESS_KEY_ID=xxx
+NEBIUS_S3_SECRET_ACCESS_KEY=xxx
+# Token Factory (Nemotron as-is)
+NEBIUS_TOKEN_FACTORY_API_KEY=xxx
+NEBIUS_TOKEN_FACTORY_BASE_URL=

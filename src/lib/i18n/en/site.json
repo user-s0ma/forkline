@@ -1,0 +1,317 @@
+{
+  "site": {
+    "metaTitle": "Forkline | Fine-tune Nemotron, publish, earn per token",
+    "metaDescription": "Fine-tune NVIDIA Nemotron with LoRA on Nebius GPUs and publish it as an OpenAI-compatible API. Earn for every token your model serves.",
+    "imageAlt": "Forkline — Fine-tune Nemotron, publish, earn per token",
+    "signup": "Get started free",
+    "menu": "Menu",
+    "nav": {
+      "explore": "Models",
+      "docs": "Docs",
+      "publish": "Console"
+    },
+    "footer": {
+      "tagline": "A marketplace where you fine-tune Nemotron on your own data and publish it as an API.",
+      "product": "Product",
+      "explore": "Explore models",
+      "publish": "Publish a model",
+      "api": "API docs"
+    },
+    "og": {
+      "subtitle": "Fine-tune Nemotron on Nebius. Earn per token."
+    }
+  },
+  "auth": {
+    "login": {
+      "heroTitleLine1": "Fine-tune Nemotron,",
+      "heroTitleLine2": "sell it as an API.",
+      "heroDescription": "Upload a dataset, train on Nebius GPUs and publish the result as an OpenAI-compatible API. You earn for every token it serves."
+    }
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "NVIDIA Nemotron × Nebius AI Cloud",
+      "title1": "Fine-tune Nemotron.",
+      "title2": "Earn every time it's called.",
+      "subtitle": "Fine-tune Nemotron with LoRA on your own data and publish it to the store as an OpenAI-compatible API. No GPUs to set up. Each time someone calls your model, the tokens it serves become your earnings.",
+      "ctaPrimary": "Build a model",
+      "ctaSecondary": "Browse published models",
+      "ctaTertiary": "Read the API docs"
+    },
+    "flow": {
+      "aria": "Diagram: your data forks a LoRA off the Nemotron base model, it is deployed to a Nebius endpoint, and API calls to it become earnings",
+      "base": "Base model",
+      "data": "+ your data",
+      "train": "LoRA training",
+      "trainMeta": "Serverless AI Job",
+      "deploy": "Endpoint",
+      "deployMeta": "Serverless AI Endpoint",
+      "calls": "API calls",
+      "earn": "Earnings per token"
+    },
+    "steps": {
+      "title": "Five steps from data to earnings",
+      "lead": "Every step happens on the model page in the console.",
+      "s1": {
+        "title": "Train",
+        "body": "Upload a chat-format JSONL, pick a Nemotron base model and start training. You pay for the GPU time the run actually used.",
+        "where": "Nebius Serverless AI Jobs",
+        "assist": "Only have documents? Nemotron drafts training examples from them."
+      },
+      "s2": {
+        "title": "Deploy",
+        "body": "Your LoRA is loaded onto the base model in a vLLM endpoint. It stops on its own after {{idle}} minutes without calls.",
+        "where": "Nebius Serverless AI Endpoints"
+      },
+      "s3": {
+        "title": "Test",
+        "body": "Check real responses in the in-browser playground.",
+        "where": "Playground",
+        "assist": "Nemotron sends the same prompts to the base model and to your fine-tuned model, and compares the answers."
+      },
+      "s4": {
+        "title": "Publish",
+        "body": "Set prices per 1M input and output tokens and per request, then publish to the store.",
+        "where": "Forkline store"
+      },
+      "s5": {
+        "title": "Earn",
+        "body": "Users call your model at /v1 with their own API key. Each call credits {{share}}% of your price to your organization.",
+        "where": "Stripe Connect"
+      }
+    },
+    "why": {
+      "title": "Sell a model without running GPUs",
+      "lead": "Your part is the data and the price.",
+      "gpu": {
+        "title": "No GPUs to manage",
+        "body": "Training and inference run on Nebius serverless GPUs. Forkline reserves the machines and starts and stops the containers."
+      },
+      "idle": {
+        "title": "Pay only while it runs",
+        "body": "Endpoints are billed per minute while running and stop after {{idle}} minutes without calls. A stopped endpoint costs nothing."
+      },
+      "api": {
+        "title": "OpenAI-compatible API",
+        "body": "Users change the base_url in any OpenAI SDK and call your model. Streaming is supported."
+      },
+      "payout": {
+        "title": "Paid out through Stripe Connect",
+        "body": "Earnings collect in your organization and can be paid out through Stripe Connect from ¥{{min}}."
+      },
+      "splitTitle": "Where the user's payment goes",
+      "splitCreator": "Your organization",
+      "splitFee": "Forkline fee",
+      "splitNote": "GPU time is separate: it is deducted from the creator organization's credits for the time the endpoint runs."
+    },
+    "stack": {
+      "title": "Built on Nebius and NVIDIA",
+      "lead": "Training, inference and storage run on Nebius AI Cloud. The base models are NVIDIA Nemotron.",
+      "role": "Role",
+      "service": "Nebius service",
+      "detail": "What it does",
+      "rows": {
+        "train": {
+          "role": "LoRA training",
+          "service": "Serverless AI Jobs",
+          "detail": "A PEFT + TRL container trains the LoRA on one GPU."
+        },
+        "serve": {
+          "role": "Inference",
+          "service": "Serverless AI Endpoints",
+          "detail": "vLLM loads the base model with your LoRA and answers calls. Stops when idle."
+        },
+        "storage": {
+          "role": "Storage",
+          "service": "Object Storage",
+          "detail": "Holds datasets and trained LoRA adapters (S3-compatible)."
+        },
+        "assist": {
+          "role": "Data and evaluation",
+          "service": "Token Factory",
+          "detail": "Calls Nemotron as-is to draft training data from your documents and to evaluate the fine-tuned model."
+        }
+      },
+      "modelsTitle": "Base models",
+      "default": "Default",
+      "trainGpu": "Train",
+      "serveGpu": "Serve"
+    },
+    "models": {
+      "title": "Published models",
+      "lead": "Pay from prepaid credits for what you call.",
+      "viewAll": "See all models",
+      "empty": "No models have been published yet.",
+      "emptyCta": "Publish the first model",
+      "free": "Free",
+      "perRequest": "request",
+      "perMillionOutput": "1M output tokens",
+      "perMillionInput": "1M input tokens",
+      "columns": {
+        "model": "Model",
+        "base": "Base model",
+        "price": "Price"
+      }
+    },
+    "api": {
+      "title": "Works with the OpenAI SDK",
+      "lead": "Point base_url at Forkline and set model to the model ID shown in the store.",
+      "requestLabel": "Request",
+      "responseLabel": "Response",
+      "docs": "Read the API docs",
+      "comment": "the model ID shown in the store",
+      "prompt": "How do I return an item?",
+      "warm": "A model that hasn't been called for a while takes a few minutes to start. Until then it returns 503 with Retry-After; wait that long and send the request again."
+    },
+    "faq": {
+      "title": "FAQ",
+      "q1": "Which models can I fine-tune?",
+      "a1": "{{models}}. The default is {{default}}.",
+      "q2": "Who pays for GPU time, and when?",
+      "a2": "The organization that builds the model. For training, the estimate is held up front and settled on the actual time. Endpoints are billed per minute while they run.",
+      "q3": "What happens to endpoints nobody uses?",
+      "a3": "They stop after {{idle}} minutes without calls, and no GPU time is billed. A call to a stopped endpoint starts it and returns 503 with Retry-After.",
+      "q4": "How do users pay?",
+      "a4": "Users buy prepaid credits, and each call deducts the model's price. API keys and balances belong to an organization.",
+      "q5": "Does it work with the OpenAI SDK?",
+      "a5": "Yes. Set base_url to https://forkline.ai/v1 and model to the model ID. Streaming is supported.",
+      "q6": "Is my data used to train Forkline's own models?",
+      "a6": "No. Datasets and trained LoRA adapters are kept in Nebius Object Storage until you delete the model or organization."
+    },
+    "finalCta": {
+      "title": "Publish a Nemotron trained on your data",
+      "cta": "Open the console"
+    }
+  },
+  "catalog": {
+    "emptyTitle": "No models have been published yet",
+    "emptyBody": "Fine-tune Nemotron on your own data and publish the first one. Training, deployment and publishing all happen on one page in the console.",
+    "emptyDocs": "Read how publishing works"
+  },
+  "docs": {
+    "metaTitle": "API docs | Forkline",
+    "metaDescription": "How to call Forkline's OpenAI-compatible API, and how to fine-tune and publish Nemotron: auth, streaming, pricing, errors and payouts.",
+    "title": "Documentation",
+    "intro": "Forkline's API is OpenAI-compatible. Call any published model with one API key from the same endpoint. The second half covers building and publishing your own model.",
+    "toc": "Contents",
+    "baseUrl": "Base URL",
+    "groups": {
+      "use": "Use a model",
+      "publish": "Publish a model"
+    },
+    "placeholder": "Replace your-model with the model ID shown in the store. Model IDs use lowercase letters, digits and hyphens.",
+    "quickstart": {
+      "title": "Quickstart",
+      "body": "Three steps to your first call.",
+      "steps": {
+        "key": "Create an organization key under \"API keys\" in the console. It is shown only once.",
+        "credits": "Buy credits under \"Billing\" (¥{{min}} to ¥{{max}} per purchase).",
+        "call": "Set the base URL to {{url}} and call it with an OpenAI SDK or curl."
+      }
+    },
+    "auth": {
+      "title": "Authentication",
+      "body": "Send the API key as a Bearer token in the Authorization header. Keys belong to an organization, and calls are charged to that organization's credits. Owners and admins can create and revoke keys."
+    },
+    "chat": {
+      "title": "Chat completions",
+      "body": "Call POST /v1/chat/completions. Requests and responses have the same shape as OpenAI's Chat Completions API."
+    },
+    "streaming": {
+      "title": "Streaming",
+      "body": "Set stream: true to receive Server-Sent Events. The last chunk carries usage (token counts), followed by data: [DONE]."
+    },
+    "list": {
+      "title": "List models",
+      "body": "GET /v1/models returns the models published in the store and your organization's own models. id is the model ID."
+    },
+    "pricing": {
+      "title": "Pricing and units",
+      "body": "You pay the price the model's creator sets. The creator's organization pays for GPU time, so the listed price is all you pay.",
+      "units": {
+        "tokens": "Input and output tokens are priced in yen per 1M tokens each.",
+        "request": "Some models also charge a price per request.",
+        "hold": "Before a call, an estimate is held from your credits; after the response it is settled on the actual token counts. If the balance is too low, the call returns 402.",
+        "header": "The amount charged (JPY) is returned in the X-Forkline-Cost-JPY header for regular responses, and in a final SSE comment line starting with \": cost_jpy=\" for streams. SSE clients ignore comment lines.",
+        "self": "Calling your own organization's models does not charge the price."
+      }
+    },
+    "warmup": {
+      "title": "Cold starts (503)",
+      "body": "A Nebius-hosted model's endpoint stops after {{idle}} minutes without calls. A call to a stopped endpoint starts it and immediately returns 503 model_warming_up with a Retry-After header ({{retry}} seconds). Starting can take a few minutes.",
+      "retry": "The OpenAI SDKs retry 503 responses on their own and honour Retry-After. Raise max_retries so the client waits through a cold start."
+    },
+    "errors": {
+      "title": "Errors",
+      "body": "Errors use the same shape as OpenAI's.",
+      "status": "Status",
+      "code": "Code",
+      "meaning": "Meaning",
+      "invalidRequest": "The request body is malformed (model and messages are required)",
+      "invalidApiKey": "The API key is missing, malformed or revoked",
+      "insufficientCredits": "The organization's credit balance is too low",
+      "modelSuspended": "The model has been suspended by the operator",
+      "modelNotFound": "The model does not exist or is not published",
+      "modelNotDeployed": "The model has not been deployed to an endpoint yet",
+      "rateLimit": "Rate limit exceeded (600 requests per minute per API key)",
+      "warmingUp": "The endpoint is starting. Wait for Retry-After seconds and retry",
+      "unavailable": "The model is temporarily unavailable",
+      "upstream": "The model failed to run"
+    },
+    "publish": {
+      "title": "From dataset to store",
+      "body": "In the console, create a model under \"Models\" with \"Fine-tune Nemotron\" and follow these steps.",
+      "steps": {
+        "dataset": "Choose a training dataset (chat-format JSONL). If you only have documents, Nemotron can draft one from them.",
+        "train": "Pick a base model and hyperparameters and start training.",
+        "deploy": "When training finishes, deploy the LoRA to an endpoint.",
+        "test": "Check responses in the playground. Nemotron evaluates them against the base model's answers.",
+        "price": "Set your prices, write a summary and publish to the store."
+      }
+    },
+    "dataset": {
+      "title": "Dataset format",
+      "body": "Write one conversation per line as JSON. role is system, user or assistant, and content is a non-empty string.",
+      "rules": {
+        "user": "Each line needs at least one user turn and one assistant turn.",
+        "count": "Use between {{min}} and {{max}} lines.",
+        "size": "Files can be up to {{mb}} MB.",
+        "check": "The format is checked both in the browser and on the server."
+      }
+    },
+    "hyperparameters": {
+      "title": "Hyperparameters",
+      "body": "The defaults work for most datasets.",
+      "epochs": "How many passes over the dataset (1–10).",
+      "learningRate": "Learning rate.",
+      "loraRank": "LoRA rank ({{ranks}}). Higher is more expressive and slower to train.",
+      "loraAlpha": "Scaling of the LoRA weights. About twice the rank is a good start."
+    },
+    "baseModels": {
+      "title": "Base models and GPUs",
+      "body": "Each base model trains and serves on one GPU of the following type.",
+      "model": "Base model",
+      "train": "Training",
+      "serve": "Serving",
+      "default": "Default"
+    },
+    "compute": {
+      "title": "GPU costs and idle stop",
+      "body": "GPU time for training and endpoints is deducted from the creator organization's credits.",
+      "items": {
+        "train": "Training: {{multiplier}}× the estimate is held at the start and settled on the actual GPU time at the end. Runs longer than {{hours}} hours are stopped.",
+        "endpoint": "Endpoints: the boot and idle time is held when an endpoint starts, and running time is billed every minute.",
+        "idle": "An endpoint stops {{idle}} minutes after its last call, and no GPU time is billed after that. The next call starts it again and returns 503 with Retry-After until it is ready."
+      }
+    },
+    "payouts": {
+      "title": "Prices and payouts",
+      "body": "Prices are set in yen, per model.",
+      "items": {
+        "price": "Set prices per 1M input tokens, per 1M output tokens and per request. Set them all to 0 to publish for free.",
+        "fee": "Your earnings are the price users pay minus the platform fee ({{fee}}%), credited to your organization.",
+        "payout": "Once Stripe Connect onboarding is complete, you can request payouts from ¥{{min}}."
+      }
+    }
+  }
+}

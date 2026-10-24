@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1792814174048,
+      "tag": "0000_forkline_init",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1792820804433,
+      "tag": "0001_nemotron_dataset_eval",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1792822404774,
+      "tag": "0002_fine_tune_active_key",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1792823580274,
+      "tag": "0003_drop_endpoint_runtime_and_org_secrets",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# wrangler が生成する。整形しない。
+cloudflare-env.d.ts
+
+# ビルド成果物
+build/

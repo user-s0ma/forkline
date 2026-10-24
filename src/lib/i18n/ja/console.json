@@ -1,0 +1,657 @@
+{
+  "common": {
+    "cancel": "キャンセル",
+    "copied": "コピーしました"
+  },
+  "appShell": {
+    "nav": {
+      "models": "モデル",
+      "explore": "モデルを探す",
+      "apiKeys": "APIキー",
+      "usage": "利用履歴",
+      "billing": "クレジット",
+      "earnings": "収益と出金"
+    },
+    "navGroups": {
+      "build": "つくる・使う",
+      "billing": "利用と支払い"
+    }
+  },
+  "auditLogs": {
+    "actionGroups": {
+      "models": "モデル",
+      "compute": "学習とエンドポイント",
+      "billing": "APIキーと支払い"
+    },
+    "actions": {
+      "model": {
+        "create": "モデルを作成",
+        "update": "モデルの設定を変更",
+        "delete": "モデルを削除",
+        "publish": "モデルを公開",
+        "unpublish": "モデルを非公開に"
+      },
+      "fine_tune": {
+        "start": "学習を開始",
+        "cancel": "学習を中止"
+      },
+      "endpoint": {
+        "deploy": "エンドポイントをデプロイ",
+        "start": "エンドポイントを起動",
+        "stop": "エンドポイントを停止",
+        "delete": "エンドポイントを削除"
+      },
+      "api_key": {
+        "create": "APIキーを発行",
+        "revoke": "APIキーを無効化"
+      },
+      "billing": {
+        "topup_start": "クレジットの購入を開始",
+        "connect": "出金口座の登録を開始",
+        "payout": "出金を申請",
+        "payout_pending": "出金を申請 (Stripe の応答待ち)"
+      },
+      "dataset": {
+        "generate": "Nemotron で学習データを作成"
+      },
+      "evaluation": {
+        "start": "モデルの評価を開始"
+      },
+      "model_card": {
+        "draft": "Nemotron でモデルカードを下書き"
+      }
+    }
+  },
+  "apiKeys": {
+    "title": "APIキー",
+    "description": "キーは組織で共有します。キーで呼び出した料金は、この組織のクレジットから引かれます。",
+    "managerOnly": "キーの発行と無効化は、組織のオーナーと管理者だけができます。",
+    "create": "キーを発行",
+    "createFirst": "最初のキーを発行",
+    "loadFailed": "APIキーを読み込めませんでした",
+    "createFailed": "APIキーを発行できませんでした",
+    "revokeConfirm": "「{{name}}」を無効化しますか？このキーを使うアプリは呼び出せなくなります。",
+    "revokeFailed": "APIキーを無効化できませんでした",
+    "copyFailed": "コピーできませんでした",
+    "emptyTitle": "APIキーはまだありません",
+    "key": "キー",
+    "lastUsed": "最終利用",
+    "createdAt": "発行日時",
+    "actions": "操作",
+    "neverUsed": "未使用",
+    "revokeAria": "{{name}} を無効化",
+    "docsLink": "APIドキュメント",
+    "quickstartTitle": "クイックスタート",
+    "createTitle": "APIキーを発行",
+    "namePlaceholder": "例: 本番サーバー",
+    "createdTitle": "APIキーを発行しました",
+    "createdWarning": "このキーは今しか表示されません。コピーして保管してください。",
+    "createdDone": "コピーしました",
+    "revoke": "無効化"
+  },
+  "usage": {
+    "title": "利用履歴",
+    "description": "この組織が API とプレイグラウンドでモデルを呼び出した記録です。",
+    "loadFailed": "利用履歴を読み込めませんでした",
+    "chartTitle": "日別の利用額 (30日)",
+    "spend30": "30日の利用額",
+    "requests30": "30日のリクエスト数",
+    "topModels": "よく使うモデル",
+    "noData": "直近30日の利用はありません",
+    "historyTitle": "呼び出し履歴",
+    "emptyTitle": "まだ利用がありません",
+    "explore": "モデルを探す",
+    "failed": "失敗",
+    "sources": {
+      "api": "API",
+      "playground": "プレイグラウンド",
+      "eval": "評価"
+    },
+    "ms": "{{value}} ms",
+    "columns": {
+      "time": "日時",
+      "model": "モデル",
+      "source": "経路",
+      "tokens": "トークン (入力/出力)",
+      "latency": "レイテンシ",
+      "requests": "回数",
+      "cost": "料金"
+    },
+    "averageCost": "1回あたりの平均",
+    "topModel": "最も使ったモデル",
+    "topModelHint": "{{count}} 回"
+  },
+  "credits": {
+    "title": "クレジット",
+    "description": "組織で共有する前払いの残高です。モデルの呼び出し、学習、エンドポイントの GPU 代に使います。",
+    "managerOnly": "チャージは、組織のオーナーと管理者だけができます。",
+    "loadFailed": "クレジット情報を読み込めませんでした",
+    "balance": "クレジット残高",
+    "held": "ほかに学習とエンドポイントのため {{amount}} を押さえています",
+    "balanceHint": "学習やエンドポイントの起動では、見積もり分を先に押さえ、終わったときに実際の額で精算します。",
+    "topupTitle": "クレジットをチャージ",
+    "customAmount": "チャージ金額",
+    "amountRange": "{{min}}〜{{max}}の範囲でチャージできます",
+    "topupCanceled": "チャージをキャンセルしました",
+    "topupFailed": "チャージを開始できませんでした",
+    "ledgerTitle": "入出金履歴",
+    "ledgerEmpty": "履歴はまだありません",
+    "ledger": {
+      "date": "日時",
+      "description": "内容",
+      "balance": "対象",
+      "amount": "金額"
+    },
+    "kinds": {
+      "topup": "チャージ",
+      "payout": "出金",
+      "adjustment": "調整",
+      "refund": "返金",
+      "training": "学習の GPU 代",
+      "endpoint": "エンドポイントの GPU 代",
+      "dataset_build": "Nemotron: 学習データ作成",
+      "evaluation": "Nemotron: 評価",
+      "model_card": "Nemotron: モデルカード",
+      "payout_pending": "出金 (確認中)",
+      "chargeback": "返金・チャージバック"
+    },
+    "balances": {
+      "credit": "クレジット",
+      "earnings": "収益"
+    },
+    "customOption": "金額を指定",
+    "payAmount": "お支払い金額",
+    "payWithStripe": "Stripeで支払う"
+  },
+  "earnings": {
+    "title": "収益と出金",
+    "description": "この組織のモデルが呼ばれた分の収益です。手数料を引いた額を Stripe Connect で出金できます。",
+    "managerOnly": "出金口座の登録と出金は、組織のオーナーと管理者だけができます。",
+    "loadFailed": "収益情報を読み込めませんでした",
+    "available": "出金可能な収益",
+    "payoutTitle": "出金",
+    "connectIntro": "受け取りにはStripeでの本人確認と口座登録が必要です。",
+    "connect": "出金口座を登録",
+    "connectPending": "Stripeでの登録が完了していません。",
+    "connectContinue": "登録を続ける",
+    "refreshStatus": "状態を更新",
+    "connected": "出金口座の登録が完了しています。",
+    "payoutAmount": "出金額 (円)",
+    "payoutAll": "全額",
+    "belowMinimum": "出金は{{min}}から申請できます",
+    "dashboard": "Stripeダッシュボード",
+    "payout": "出金を申請",
+    "payoutConfirm": "{{amount}} を出金しますか？",
+    "payoutFailed": "出金できませんでした",
+    "payoutPending": "Stripe から応答がありませんでした。送金されたか確認しています。収益は確認が済むまで出金済みとして扱います",
+    "pendingEarnings": "保留中の収益 {{amount}} (計上から{{days}}日たつと出金できます)",
+    "actionFailed": "Stripe に接続できませんでした",
+    "chartTitle": "日別の収益 (30日)",
+    "byModel": "モデル別の収益 (30日)",
+    "noData": "直近30日の収益はありません",
+    "columns": {
+      "model": "モデル",
+      "requests": "回数",
+      "earned": "収益"
+    },
+    "historyTitle": "出金履歴",
+    "earned30": "直近30日の収益",
+    "requests30": "直近30日のリクエスト",
+    "steps": {
+      "register": "口座を登録",
+      "verify": "Stripeで確認",
+      "ready": "出金可能"
+    },
+    "minimumShort": "{{amount}}から"
+  },
+  "models": {
+    "categories": {
+      "text": "テキスト",
+      "code": "コード",
+      "vision": "画像認識",
+      "other": "その他"
+    },
+    "categoryHints": {
+      "text": "チャット・要約・翻訳など、文章を返すモデル",
+      "code": "コードの生成や説明が得意なモデル",
+      "vision": "画像を読み取って答えるモデル",
+      "other": "上のどれにも当てはまらないモデル"
+    },
+    "status": {
+      "draft": "下書き",
+      "published": "公開中",
+      "suspended": "停止中"
+    },
+    "visibility": {
+      "public": "ストアに公開",
+      "private": "限定公開"
+    },
+    "list": {
+      "title": "モデル",
+      "description": "この組織のモデルです。Nemotron を学習させてデプロイし、料金を決めてストアに公開します。",
+      "newButton": "モデルを作成",
+      "loadError": "モデルを読み込めませんでした",
+      "createFailed": "モデルを作成できませんでした",
+      "emptyTitle": "最初のモデルをつくりましょう",
+      "emptyDescription": "微調整した Nemotron を公開すると、呼ばれたトークンの分だけ収益になります。",
+      "createFirst": "モデルを作成",
+      "endpoint": "エンドポイント",
+      "requests": "リクエスト",
+      "updatedAt": "更新日"
+    },
+    "create": {
+      "title": "モデルを作成",
+      "namePlaceholder": "例: 社内FAQボット",
+      "submit": "作成",
+      "flowTitle": "Nemotron を微調整する",
+      "flowSummary": "学習データをアップロードし、NVIDIA Nemotron を Nebius の GPU で LoRA 学習します。そのままエンドポイントにして公開できます。"
+    },
+    "editor": {
+      "backToList": "モデル一覧へ",
+      "loadError": "モデルを読み込めませんでした",
+      "notFoundTitle": "モデルが見つかりません",
+      "notFoundDescription": "削除されたか、この組織のモデルではありません。",
+      "viewPublic": "公開ページを見る",
+      "tabsAria": "モデルの画面",
+      "tabs": {
+        "overview": "概要",
+        "training": "学習とデプロイ",
+        "test": "テスト",
+        "settings": "設定と料金",
+        "evaluation": "評価"
+      },
+      "unsaved": "保存していない変更があります",
+      "discard": "元に戻す",
+      "save": "保存",
+      "saveFailed": "保存できませんでした"
+    },
+    "settings": {
+      "navAria": "設定の項目",
+      "nav": {
+        "general": "基本情報",
+        "runtime": "実行環境",
+        "pricing": "料金",
+        "danger": "削除"
+      }
+    },
+    "general": {
+      "title": "基本情報",
+      "intro": "ストアと API で表示される情報です。",
+      "slug": "モデルID",
+      "slugHint": "API の model に指定する名前です",
+      "slugInvalid": "英小文字・数字・ハイフンの3〜64文字で入力してください",
+      "tagline": "概要",
+      "taglineHint": "ストアの一覧に出ます。ストアに公開するには必要です",
+      "taglinePlaceholder": "例: 社内規程に沿って答えるサポート用モデル",
+      "description": "説明",
+      "category": "カテゴリ",
+      "tags": "タグ",
+      "tagsPlaceholder": "入力して Enter",
+      "removeTag": "タグ「{{tag}}」を外す"
+    },
+    "runtimeForm": {
+      "title": "実行環境",
+      "maxOutputTokens": "1回の返答の上限 (トークン)",
+      "maxOutputTokensHint": "呼び出し側がこれより大きな max_tokens を指定しても、ここで抑えます。1回の料金の上限もこの長さで決まります"
+    },
+    "pricing": {
+      "title": "料金",
+      "input": "入力 (100万トークンあたり)",
+      "inputHint": "送られてきた文章の量に対する料金",
+      "output": "出力 (100万トークンあたり)",
+      "outputHint": "モデルが返した文章の量に対する料金",
+      "perRequest": "1リクエストあたり",
+      "perRequestHint": "トークン数にかかわらず1回ごとに掛かる料金",
+      "computeNote": "エンドポイントの GPU 代 ({{perHour}}/時) は、動いている間だけこの組織のクレジットから引かれます。料金は GPU 代を見込んで決めてください。",
+      "simulationTitleTokens": "売上の目安",
+      "tokensLabel": "呼ばれるトークン数",
+      "tokensOption": "{{tokens}} トークン",
+      "exampleVolume": "1回あたり入力 {{input}}・出力 {{output}} トークンとして計算",
+      "creatorGross": "あなたの価格",
+      "consumerTotal": "利用者が払う額",
+      "platformFee": "手数料 ({{fee}}%)",
+      "creatorNet": "あなたの収益",
+      "perMillionTokens": "100万トークンあたり: 利用者 {{total}} / 収益 {{net}}"
+    },
+    "stats": {
+      "title": "直近30日",
+      "requests": "リクエスト",
+      "failures": "失敗",
+      "revenue": "収益",
+      "latency": "平均レイテンシ",
+      "ms": "{{value}} ms",
+      "empty": "まだ呼び出しがありません",
+      "loadFailed": "統計を読み込めませんでした",
+      "chartTitle": "日別のリクエスト",
+      "barTitle": "{{day}}: {{requests}} 回 / {{revenue}}"
+    },
+    "snippet": {
+      "title": "API で呼び出す"
+    },
+    "test": {
+      "title": "テスト",
+      "description": "この組織のモデルなので、クリエイター価格は掛かりません。エンドポイントの GPU 代だけが掛かります。",
+      "deployFirst": "学習した LoRA をデプロイすると試せます。"
+    },
+    "launch": {
+      "title": "公開までの手順",
+      "openSettings": "設定を開く",
+      "train": {
+        "title": "学習する",
+        "todo": "学習データをアップロードして LoRA を学習します",
+        "running": "学習しています",
+        "done": "学習済みの LoRA があります",
+        "action": "学習を始める"
+      },
+      "deploy": {
+        "title": "デプロイする",
+        "waiting": "学習が終わるとデプロイできます",
+        "todo": "学習した LoRA をエンドポイントに載せます",
+        "action": "デプロイする"
+      },
+      "price": {
+        "title": "試して料金を決める",
+        "todo": "料金が未設定です (無料で公開されます)",
+        "done": "料金を設定済みです",
+        "test": "テストする",
+        "action": "料金を設定"
+      },
+      "configure": {
+        "unsaved": "保存していない変更があります。保存してから公開してください"
+      },
+      "publish": {
+        "title": "公開する",
+        "failed": "公開の設定を変えられませんでした",
+        "managerOnly": "公開と非公開の切り替えは、組織のオーナーと管理者だけができます。",
+        "needsTagline": "ストアに公開するには概要が必要です。",
+        "unpublish": "公開をやめる",
+        "unpublishConfirm": "公開をやめますか？ API からも呼べなくなります。",
+        "options": {
+          "public": {
+            "action": "ストアに公開",
+            "description": "ストアに表示され、誰でも API で呼べます"
+          },
+          "private": {
+            "action": "限定公開",
+            "switch": "限定公開に切り替える",
+            "description": "ストアには出ず、この組織の API キーで呼べます"
+          }
+        }
+      }
+    },
+    "training": {
+      "title": "LoRA で学習する",
+      "description": "chat 形式の JSONL で NVIDIA Nemotron を微調整します。学習は Nebius の GPU で動き、料金はこの組織のクレジットから引かれます。",
+      "baseModel": "ベースモデル",
+      "baseModelHint": "小さいモデルほど安く、速く学習できます",
+      "trainRate": "学習の GPU",
+      "serveRate": "推論の GPU",
+      "perHour": "{{amount}}/時",
+      "dataset": "学習データ (JSONL)",
+      "datasetPick": "ファイルを選ぶ",
+      "datasetSummary": "{{size}} · {{examples}} 件",
+      "datasetHint": "1行に1つの会話。10件以上、{{mb}}MB まで。各会話に user と assistant の発言が必要です。",
+      "issues": {
+        "too_large": "ファイルが大きすぎます ({{mb}}MB まで)",
+        "too_few": "会話が少なすぎます ({{min}} 件以上必要です)",
+        "too_many": "会話が多すぎます ({{max}} 件まで)",
+        "invalid_json": "{{line}} 行目が JSON として読めません",
+        "not_object": "{{line}} 行目がオブジェクトではありません",
+        "missing_messages": "{{line}} 行目に messages の配列がありません",
+        "invalid_role": "{{line}} 行目の role は system / user / assistant にしてください",
+        "empty_content": "{{line}} 行目に空の content があります",
+        "no_user": "{{line}} 行目に user の発言がありません",
+        "no_assistant": "{{line}} 行目に assistant の発言がありません"
+      },
+      "hyperparameters": "学習の設定",
+      "epochs": "エポック数",
+      "epochsHint": "データを何周学習するか",
+      "learningRate": "学習率",
+      "loraRank": "LoRA のランク",
+      "loraAlpha": "LoRA の alpha",
+      "estimate": "見積もり: 約 {{duration}}・{{amount}}",
+      "estimatePending": "学習データを選ぶと見積もりが出ます",
+      "holdNote": "始めるときに {{amount}} を押さえ、終わったら実際にかかった時間で精算して差額を戻します。",
+      "start": "学習を始める",
+      "starting": "始めています…",
+      "started": "学習を始めました",
+      "startFailed": "学習を始められませんでした",
+      "cancel": "中止",
+      "cancelConfirm": "学習を中止しますか？ ここまでの GPU 代は請求されます。",
+      "cancelFailed": "学習を中止できませんでした",
+      "status": {
+        "queued": "準備中",
+        "running": "学習中",
+        "succeeded": "完了",
+        "failed": "失敗",
+        "canceled": "中止"
+      },
+      "activeHint": {
+        "queued": "GPU を用意してモデルを読み込んでいます。数分から十数分かかります。",
+        "running": "学習しています。終わるとここからデプロイできます。この画面を閉じても学習は続きます。"
+      },
+      "activeMeta": "{{dataset}} · {{examples}} 件 · 見積もり {{estimate}} · 押さえ中 {{hold}}",
+      "historyTitle": "学習の履歴",
+      "columns": {
+        "status": "状態",
+        "dataset": "学習データ",
+        "startedAt": "開始",
+        "cost": "料金"
+      },
+      "examples": "{{count}} 件",
+      "estimated": "見積もり {{amount}}",
+      "deployed": "デプロイ中",
+      "datasetModeAria": "学習データの用意のしかた",
+      "datasetModes": {
+        "upload": "JSONL を選ぶ",
+        "builder": "Nemotron で作る"
+      },
+      "builtDataset": "Nemotron で作ったデータ",
+      "builtSummary": "学習 {{train}} 件 · 評価用 {{eval}} 件",
+      "holdOut": "{{percent}}% を評価用に取っておく",
+      "holdOutCount": "({{count}} 件)",
+      "holdOutHint": "取っておいた例は学習に使いません。デプロイしたあと、この例でベースモデルと比べます。",
+      "evalExamples": "評価用 {{count}} 件",
+      "fromBuilder": "Nemotron で作成"
+    },
+    "endpoint": {
+      "title": "エンドポイント",
+      "description": "学習した LoRA を Nemotron に載せて動かします。GPU 代は動いている間だけ掛かり、呼ばれないと自動で止まります。",
+      "notDeployed": "まだデプロイしていません。学習が終わったら、下の履歴からデプロイしてください。",
+      "baseModel": "ベースモデル",
+      "rate": "GPU の料金",
+      "lastUsed": "最後に呼ばれた日時",
+      "status": {
+        "none": "未デプロイ",
+        "deploying": "デプロイ中",
+        "starting": "起動中",
+        "running": "稼働中",
+        "stopping": "停止中",
+        "stopped": "停止",
+        "failed": "エラー"
+      },
+      "hint": {
+        "none": "",
+        "deploying": "エンドポイントを作っています。",
+        "starting": "GPU を用意し、モデルと LoRA を読み込んでいます。答えられるようになるまで数分かかります。",
+        "running": "呼び出しを受け付けています。{{minutes}} 分呼ばれないと自動で止まります。",
+        "stopping": "止めています。",
+        "stopped": "止まっています (GPU 代は掛かりません)。次の呼び出しで自動で起動し、起動するまでの間は 503 を返します。",
+        "failed": "エンドポイントでエラーが起きました。もう一度デプロイしてください。"
+      },
+      "deploy": "デプロイ",
+      "deployStarted": "エンドポイントを起動しています",
+      "deployFailed": "デプロイできませんでした",
+      "redeployConfirm": "今のエンドポイントを消して、この LoRA を載せ直しますか？",
+      "start": "起動",
+      "startFailed": "起動できませんでした",
+      "stop": "停止",
+      "stopFailed": "停止できませんでした",
+      "refresh": "状態を更新",
+      "refreshFailed": "状態を読めませんでした",
+      "remove": "削除",
+      "removeConfirm": "エンドポイントを削除しますか？ モデルは非公開に戻ります。",
+      "removeFailed": "削除できませんでした"
+    },
+    "danger": {
+      "title": "モデルを削除",
+      "description": "モデルを削除します。動いている学習とエンドポイントは止め、そこまでの GPU 代を精算します。取り消せません。",
+      "confirmPrompt": "確認のため、モデルID「{{slug}}」を入力してください",
+      "delete": "削除する",
+      "deleting": "削除しています…",
+      "failed": "削除できませんでした"
+    },
+    "builder": {
+      "intro": "FAQ・マニュアル・規約・問答の例を貼ると、Nebius Token Factory の Nemotron が会話の例に直します。学習の前に中身を確かめて直してください。Token Factory の料金はこの組織のクレジットから引かれます。",
+      "role": "アシスタントの役割",
+      "roleHint": "誰として、誰に、どんな口調で答えるか。例を作るときだけに使います。",
+      "rolePlaceholder": "靴の通販サイトの問い合わせ窓口。お客様に丁寧に、短く答える。",
+      "material": "元になる資料",
+      "loadFile": "テキストファイルを読み込む",
+      "materialPlaceholder": "FAQ・マニュアル・規約・問答の例をここに貼る",
+      "materialHint": "{{chars}} / {{max}} 文字 · {{chunks}} 回に分けて Nemotron に送ります。この資料に書かれた事実だけを使います。",
+      "perChunk": "1回で作る例の数",
+      "perChunkHint": "1〜{{max}}",
+      "estimate": "最大 {{amount}}",
+      "stop": "止める",
+      "generate": "例を作る",
+      "regenerate": "作り直す",
+      "regenerateConfirm": "作り直しますか？ いまの例と直した内容は置きかわります。",
+      "progress": "{{done}} / {{total}} 回 · {{examples}} 件 · {{amount}}",
+      "dropped": "形が崩れた例・重複した例を {{count}} 件除きました",
+      "failedChunks": "{{count}} 回失敗しました",
+      "previewTitle": "作った例を確かめる",
+      "split": "学習 {{train}} 件 · 評価用 {{eval}} 件",
+      "previewHint": "事実の誤りを直し、モデルに言わせたくない内容は消してください。「評価に使う」にした例は学習に使わず、あとでモデルを試すのに使います。",
+      "heldOut": "評価に使う",
+      "remove": "{{index}} 件目を消す",
+      "user": "ユーザー",
+      "assistant": "アシスタント",
+      "needMore": "学習用の例が {{min}} 件以上必要です",
+      "emptyRows": "空の例を埋めるか消してください",
+      "noEvalWarning": "評価用の例がないので、あとで評価できません",
+      "ready": "学習データとして使えます",
+      "use": "{{count}} 件で学習する",
+      "applied": "学習データにしました (学習 {{train}} 件 · 評価用 {{eval}} 件)",
+      "truncated": "ファイルが長いので、上限までで切りました"
+    },
+    "evaluation": {
+      "title": "Nemotron で評価する",
+      "description": "取っておいた評価用の質問を、デプロイしたモデルと Nebius Token Factory のベースの Nemotron の両方に解かせ、Nemotron が基準の答えと比べて 1〜5 で採点します。評価のあいだエンドポイントが動き、Token Factory の料金はこの組織のクレジットから引かれます。",
+      "run": "評価する",
+      "rerun": "もう一度評価する",
+      "blockers": {
+        "not_deployed": "先に微調整したモデルをデプロイしてください。",
+        "no_eval_set": "デプロイ中の学習には評価用の例がありません。評価用の例を取っておいて、もう一度学習してください。"
+      },
+      "plan": "{{questions}} 問 · 比べる相手 {{baseline}} · Token Factory 最大 {{amount}}",
+      "warming": "エンドポイントを起動中",
+      "status": {
+        "running": "評価中",
+        "succeeded": "完了",
+        "failed": "失敗",
+        "canceled": "置きかえ"
+      },
+      "progress": "{{done}} / {{total}} 問",
+      "paused": "止まっています。クレジットを足すか少し待ってから、続きを進めてください。",
+      "resume": "続ける",
+      "stepFailed": "評価を進められませんでした",
+      "startFailed": "評価を始められませんでした",
+      "fineTunedMean": "このモデル (平均)",
+      "baseMean": "ベース (平均)",
+      "winRate": "勝率",
+      "record": "勝ち / 引き分け / 負け",
+      "recordValue": "{{wins}} / {{ties}} / {{losses}}",
+      "verdicts": {
+        "better": "この質問では、ベースモデルより高い点でした (符号検定 p = {{p}})。",
+        "worse": "この質問では、ベースモデルより低い点でした (符号検定 p = {{p}})。",
+        "inconclusive": "{{n}} 問でははっきりした差は出ませんでした (符号検定 p = {{p}})。差を見るには評価用の質問を増やす必要があります。",
+        "too_few": "採点できたのは {{n}} 問だけです。結論を出すには少なすぎるので、数字は参考程度に見てください。"
+      },
+      "footnote": "採点 {{n}} 問・採点できず {{failed}} 問 · 符号検定 p = {{p}} · 点差の 95% ブートストラップ区間 {{interval}} · 比べる相手 {{baseline}} · 採点 {{judge}} · Token Factory {{amount}}",
+      "itemsTitle": "質問ごとの結果",
+      "columns": {
+        "question": "質問",
+        "fineTuned": "このモデル",
+        "base": "ベース"
+      },
+      "judgeInvalid": "採点の返事が読めなかったので、この問は集計から外しました",
+      "itemFailed": "答えが得られなかったので、この問は集計から外しました",
+      "itemPending": "待機中",
+      "reference": "基準の答え",
+      "reason": "採点",
+      "historyTitle": "これまでの評価",
+      "historyScore": "{{fineTuned}} 対 {{base}} · {{n}} 問"
+    },
+    "card": {
+      "title": "モデルカード",
+      "description": "学習データと評価の結果から、Nemotron がキャッチコピー・説明・タグを下書きします。下書きを直してから設定に移し、保存してください。",
+      "draft": "Nemotron で下書きする",
+      "redraft": "下書きし直す",
+      "drafting": "下書き中…",
+      "needsDeploy": "先にモデルを学習してデプロイしてください。",
+      "failed": "モデルカードを下書きできませんでした",
+      "cost": "Token Factory {{amount}}",
+      "apply": "設定に移す",
+      "applied": "設定に移しました。確かめてから保存してください。"
+    }
+  },
+  "server": {
+    "models": {
+      "notFound": "モデルが見つかりません",
+      "invalidInput": "入力内容を確認してください",
+      "invalidConfig": "実行環境の設定を確認してください",
+      "slugTaken": "このモデルIDはすでに使われています",
+      "deployFirst": "先にエンドポイントをデプロイしてください",
+      "taglineRequired": "ストアに公開するには概要が必要です",
+      "suspended": "このモデルは停止されています"
+    },
+    "fineTunes": {
+      "notFound": "学習が見つかりません",
+      "invalidInput": "学習の設定を確認してください",
+      "invalidDataset": "学習データに問題があります",
+      "datasetTooLarge": "学習データが大きすぎます ({{mb}}MB まで)",
+      "unknownBaseModel": "このベースモデルは選べません",
+      "alreadyRunning": "このモデルではすでに学習が動いています",
+      "insufficientCredits": "クレジットが足りません。学習を始めるには ¥{{amount}} の残高が必要です",
+      "startFailed": "学習を始められませんでした",
+      "invalidEvalSet": "評価用の例に問題があります"
+    },
+    "endpoints": {
+      "busy": "エンドポイントの起動か停止の途中です。少し待ってください",
+      "trainingNotReady": "学習が終わっていません",
+      "insufficientCredits": "クレジットが足りません。エンドポイントを動かすには ¥{{amount}} の残高が必要です",
+      "deployFailed": "エンドポイントを作れませんでした",
+      "startFailed": "エンドポイントを起動できませんでした"
+    },
+    "apiKeys": {
+      "invalidInput": "名前を1〜80文字で入力してください",
+      "limit": "有効な APIキーは {{max}} 個までです"
+    },
+    "billing": {
+      "invalidTopup": "チャージは ¥{{min}}〜¥{{max}} の範囲で指定してください",
+      "topupProduct": "Forkline クレジット",
+      "connectRequired": "先に出金口座を登録してください",
+      "payoutMinimum": "出金は ¥{{min}} から申請できます",
+      "insufficientEarnings": "出金できる収益が足りません (直近の収益は保留中です)",
+      "payoutFailed": "出金できませんでした。収益は戻しました",
+      "payoutPending": "Stripe から応答がありませんでした。送金されたか確認しています"
+    },
+    "nemotron": {
+      "insufficientCredits": "クレジットが足りません。¥{{amount}} の残高が必要です",
+      "materialTooLarge": "資料が長すぎます",
+      "invalidInput": "入力を確認してください",
+      "failed": "Nemotron から応答がありませんでした。少し待ってからもう一度試してください",
+      "evaluation": {
+        "not_deployed": "先に微調整したモデルをデプロイしてください",
+        "no_eval_set": "デプロイ中の学習には評価用の例がありません",
+        "notFound": "評価が見つかりません",
+        "paused": "評価を続けるにはクレジットが足りません。チャージしてから続けてください"
+      },
+      "card": {
+        "needsTraining": "先にモデルを学習してください",
+        "invalidOutput": "Nemotron の下書きが読めませんでした。もう一度試してください"
+      }
+    }
+  }
+}

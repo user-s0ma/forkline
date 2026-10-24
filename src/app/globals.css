@@ -1,0 +1,493 @@
+@import "tailwindcss";
+
+/*
+ * Forkline design tokens (役割ごとの色)
+ * 暗い面が既定。ライムがブランドカラーで、NVIDIA の緑 (#76B900) と混同しないよう黄色寄りにしてある。
+ * - 暗いテーマ: ライムは文字・線・塗りのどれにも使える
+ * - 明るいテーマ: ライムは塗り (濃い文字を載せる) だけ。文字・リンク・線は brand-ink (濃い緑) を使う
+ * - earn (金色) は「入ってくるお金」(収益・チャージ) だけ、signal は状態 (処理中・要対応) だけに使う
+ * 値は @theme が暗いテーマ、:root[data-theme="light"] が明るいテーマ。data-theme は root.tsx の
+ * スクリプトが描画前に付ける。コントラスト比は README ではなく、このファイルの値で計算する。
+ *
+ * canvas=ページの地 / surface=カード・パネル・ヘッダー / raised=モーダル・メニュー・トースト
+ * paper=面の中の一段違う塗り (タブの溝・hover) / line=区切り線 / line-strong=入力欄などの枠 (3:1 以上)
+ * ink=本文 / ink-soft=補足 / ink-mute=控えめな文字 (どれも 4.5:1 以上)
+ */
+@theme {
+  --font-sans: "Inter Variable", "Noto Sans JP Variable", "Hiragino Sans",
+    "Yu Gothic UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* THEME:dark */
+  --color-canvas: #1a1d1b;
+  --color-surface: #222623;
+  --color-raised: #2a2f2b;
+  --color-paper: #1e2220;
+  --color-ink: #e8ebe6;
+  --color-ink-soft: #bcc3bb;
+  --color-ink-mute: #9ba39a;
+  --color-line: #343a35;
+  --color-line-strong: #757e76;
+
+  --color-brand: #d4f54c;
+  --color-brand-hover: #e3fa82;
+  --color-brand-tint: #2f381f;
+  --color-brand-ink: #d4f54c;
+  /* ライムの塗りの上に載せる文字色 */
+  --color-on-brand: #1a2108;
+
+  --color-earn: #f2b84b;
+  --color-earn-tint: #3a3221;
+  /* 金色の広い塗り (濃い文字を載せる)。細いグラフや文字には earn を使う */
+  --color-earn-fill: #f2b84b;
+  --color-on-earn: #251a04;
+  --color-signal: #ffa06a;
+  --color-signal-tint: #3d2c21;
+  --color-danger: #ff8b86;
+  --color-danger-tint: #3e2627;
+  --color-on-danger: #2a0b0b;
+
+  --color-focus: #d4f54c;
+  --color-code: #1d211e;
+  --color-code-ink: #d3d9d1;
+  --color-overlay: rgb(12 14 13 / 0.66);
+
+  --radius-panel: 12px;
+  --radius-control: 8px;
+}
+
+/* THEME:light */
+:root[data-theme="light"] {
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-raised: #ffffff;
+  --color-paper: #f2f4ef;
+  --color-ink: #161a16;
+  --color-ink-soft: #454c44;
+  --color-ink-mute: #5f665e;
+  --color-line: #e1e4dd;
+  --color-line-strong: #858c83;
+
+  --color-brand: #d4f54c;
+  --color-brand-hover: #c4e83a;
+  --color-brand-tint: #eff8cf;
+  --color-brand-ink: #3d5f00;
+  --color-on-brand: #1a2108;
+
+  --color-earn: #8c5e00;
+  --color-earn-tint: #fcf1d5;
+  --color-earn-fill: #f0b23e;
+  --color-on-earn: #251a04;
+  --color-signal: #a24a00;
+  --color-signal-tint: #fff0e3;
+  --color-danger: #be252c;
+  --color-danger-tint: #fdeceb;
+  --color-on-danger: #ffffff;
+
+  --color-focus: #3d5f00;
+  --color-code: #f2f4ef;
+  --color-code-ink: #2b312a;
+  --color-overlay: rgb(22 26 22 / 0.5);
+}
+
+:root {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* 公開サイト (.site) のボタンはピル型にして、コンソールの作業用ボタンと区別する */
+.site .ui-button-primary,
+.site .ui-button-secondary,
+.site .ui-button-inverse {
+  border-radius: 9999px;
+}
+
+@layer base {
+  html {
+    color: var(--color-ink);
+    background: var(--color-canvas);
+    font-feature-settings: "palt" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background: var(--color-canvas);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-brand) 32%, transparent);
+  }
+}
+
+@layer components {
+  .ui-container {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .ui-card {
+    @apply rounded-(--radius-panel) border border-line bg-surface;
+  }
+
+  /* セグメント切り替え。選択中は一段明るい面、他はテキストのみ */
+  .ui-tabs {
+    @apply flex min-h-10 gap-1 rounded-(--radius-control) bg-paper p-1 ring-1 ring-line;
+  }
+
+  .ui-tab {
+    @apply flex-1 rounded-md px-3 py-1.5 text-sm text-ink-soft transition-colors hover:text-ink;
+  }
+
+  .ui-tab[aria-pressed="true"],
+  .ui-tab[aria-selected="true"],
+  .ui-tab[aria-checked="true"] {
+    @apply bg-raised font-semibold text-ink ring-1 ring-line-strong;
+  }
+
+  .ui-button-primary,
+  .ui-button-secondary,
+  .ui-button-inverse {
+    @apply inline-flex items-center justify-center gap-2 rounded-(--radius-control) px-5 py-3 text-base font-semibold transition-colors;
+  }
+
+  .ui-button-primary {
+    @apply bg-brand text-on-brand hover:bg-brand-hover;
+  }
+
+  .ui-button-secondary {
+    @apply border border-line-strong bg-surface text-ink hover:bg-paper;
+  }
+
+  .ui-button-inverse {
+    @apply bg-ink text-canvas hover:bg-ink-soft;
+  }
+
+  .ui-button-primary:disabled,
+  .ui-button-secondary:disabled,
+  .ui-button-inverse:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  .ui-input {
+    @apply h-12 w-full rounded-(--radius-control) border border-line-strong bg-surface px-4 text-base text-ink outline-none transition placeholder:text-ink-mute focus:border-focus focus:ring-4 focus:ring-focus/30;
+  }
+
+  .console-panel {
+    @apply min-h-10 rounded-(--radius-panel) border border-line bg-surface;
+  }
+
+  .console-button-primary,
+  .console-button-secondary,
+  .console-button-danger {
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-(--radius-control) px-3.5 text-sm font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .console-button-primary {
+    @apply bg-brand text-on-brand hover:bg-brand-hover;
+  }
+
+  .console-button-secondary {
+    @apply border border-line-strong bg-surface text-ink hover:bg-paper;
+  }
+
+  .console-button-danger {
+    @apply border border-danger/50 bg-surface text-danger hover:bg-danger-tint;
+  }
+
+  .console-input {
+    @apply h-9 w-full rounded-(--radius-control) border border-line-strong bg-surface px-3 text-sm text-ink outline-none placeholder:text-ink-mute focus:border-focus focus:ring-2 focus:ring-focus/30 disabled:bg-paper disabled:text-ink-mute;
+  }
+
+  .console-label {
+    @apply mb-1.5 block text-xs font-semibold text-ink-soft;
+  }
+
+  .console-hint {
+    @apply mt-1.5 block text-xs leading-5 text-ink-mute;
+  }
+
+  .console-nav-item {
+    @apply flex h-9 w-full items-center gap-2.5 rounded-(--radius-control) px-3 text-sm text-ink-soft transition-colors hover:bg-paper hover:text-ink;
+  }
+
+  .console-nav-item[aria-current="page"] {
+    @apply bg-brand-tint font-semibold text-ink;
+  }
+
+  /* 表: パネルの中に置く前提。見出し行は薄く、行は区切り線のみ */
+  .console-table {
+    @apply w-full text-left text-sm;
+  }
+
+  .console-table thead {
+    @apply border-b border-line text-xs text-ink-mute;
+  }
+
+  .console-table th {
+    @apply px-4 py-2.5 font-medium;
+  }
+
+  .console-table td {
+    @apply px-4 py-3 align-middle;
+  }
+
+  .console-table tbody tr {
+    @apply border-b border-line last:border-b-0;
+  }
+
+  .console-table tbody tr[data-href],
+  .console-table tbody tr.is-clickable {
+    @apply cursor-pointer hover:bg-paper;
+  }
+
+  /* 金額・件数など桁を揃えたい数字 */
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .h-display {
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ヒーローの分岐線: リクエストが線に沿って各モデルへ流れる */
+@keyframes track-flow {
+  from {
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- 公開サイトの演出 (ランディング) ---- */
+
+
+/* 1px のグラデーション枠 + 上端のハイライト。影の代わりに明るさで段差を作る */
+.glow-card {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-ink) 4%, transparent), transparent 40%),
+    var(--color-surface);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-ink) 6%, transparent);
+  transition: box-shadow 0.3s ease;
+}
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-ink) 18%, transparent),
+    color-mix(in srgb, var(--color-ink) 6%, transparent) 55%,
+    color-mix(in srgb, var(--color-brand-ink) 22%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.glow-card-hover:hover {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-ink) 8%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-brand-ink) 35%, transparent),
+    0 20px 60px -24px color-mix(in srgb, var(--color-brand) 22%, transparent);
+}
+
+/* ガラス風の面 */
+.glass {
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* ヒーロー背景: 地の上に細かい格子とライムの淡い光 */
+.hero-backdrop {
+  background-image:
+    radial-gradient(55% 55% at 72% 45%, color-mix(in srgb, var(--color-brand) 9%, transparent), transparent 70%),
+    linear-gradient(color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-ink) 4%, transparent) 1px, transparent 1px);
+  background-size: auto, 32px 32px, 32px 32px;
+}
+.hero-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes yard-blink {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+.yard-blink { animation: yard-blink 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .yard-blink {
+    animation: none !important;
+  }
+}
+
+/* ---- コンソール ---- */
+
+/* サイドバーの選択中: 左にブランドカラーの線 (明るいテーマでは濃い緑) */
+.console-nav-item {
+  position: relative;
+}
+.console-nav-item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: -12px;
+  width: 3px;
+  border-radius: 9999px;
+  background: var(--color-brand-ink);
+}
+
+/* 信号灯: 状態を示す小さな灯 */
+.lamp {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--color-line-strong);
+}
+.lamp-on {
+  background: var(--color-brand-ink);
+}
+.lamp-earn {
+  background: var(--color-earn);
+}
+.lamp-fail {
+  background: var(--color-danger);
+}
+.lamp-blink {
+  animation: yard-blink 1.4s ease-in-out infinite;
+}
+
+/* 線路: 手順を縦の線路と駅で表す */
+.rail-track {
+  background-image: repeating-linear-gradient(
+    180deg,
+    var(--color-line-strong) 0 6px,
+    transparent 6px 10px
+  );
+}
+.rail-track-lit {
+  background: var(--color-brand-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lamp-blink {
+    animation: none !important;
+  }
+}
+
+
+/* 日本語を文節で折り返す (「APIキ／ー」のような語の途中の改行を防ぐ) */
+h1, h2, h3, p, dt, dd, li, summary {
+  word-break: auto-phrase;
+  line-break: strict;
+}
+
+/* ヒーローの図: 行き先が変わったとき、経路をなぞるように描く */
+@keyframes yard-route {
+  from {
+    stroke-dasharray: 700;
+    stroke-dashoffset: 700;
+  }
+  to {
+    stroke-dasharray: 700;
+    stroke-dashoffset: 0;
+  }
+}
+
+.marker {
+  background-image: linear-gradient(
+    transparent 58%,
+    color-mix(in srgb, var(--color-brand) 30%, transparent) 58%
+  );
+  padding: 0 0.08em;
+}
+
+/* 学習中の進み具合 (終わりの見えない処理を左右に流れる帯で示す) */
+@keyframes rail {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+/* トースト (sonner): 既定の白黒の配色をテーマの色に置き換える */
+html [data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--color-raised);
+  --normal-bg-hover: var(--color-paper);
+  --normal-border: var(--color-line-strong);
+  --normal-border-hover: var(--color-line-strong);
+  --normal-text: var(--color-ink);
+  --success-bg: var(--color-brand-tint);
+  --success-border: color-mix(in srgb, var(--color-brand-ink) 40%, transparent);
+  --success-text: var(--color-brand-ink);
+  --info-bg: var(--color-raised);
+  --info-border: var(--color-line-strong);
+  --info-text: var(--color-ink);
+  --warning-bg: var(--color-signal-tint);
+  --warning-border: color-mix(in srgb, var(--color-signal) 40%, transparent);
+  --warning-text: var(--color-signal);
+  --error-bg: var(--color-danger-tint);
+  --error-border: color-mix(in srgb, var(--color-danger) 40%, transparent);
+  --error-text: var(--color-danger);
+}
+html [data-sonner-toaster][data-sonner-theme] [data-description] {
+  color: inherit;
+}
+
+/*
+ * Google のログインボタン。色は Google のブランドガイドラインの指定値 (暗/明) をそのまま使う。
+ * https://developers.google.com/identity/branding-guidelines
+ */
+.google-button {
+  border: 1px solid #8e918f;
+  background: #131314;
+  color: #e3e3e3;
+}
+:root[data-theme="light"] .google-button {
+  border-color: #747775;
+  background: #ffffff;
+  color: #1f1f1f;
+}

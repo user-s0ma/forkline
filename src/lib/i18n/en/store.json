@@ -1,0 +1,110 @@
+{
+  "store": {
+    "metaTitle": "Find fine-tuned AI models | Forkline",
+    "metaDescription": "Use Nemotron models fine-tuned on Nebius by independent creators, through an OpenAI-compatible API or in your browser.",
+    "detailMetaTitle": "Model details | Forkline",
+    "explore": {
+      "title": "Explore models",
+      "subtitle": "Use published models through the API or right in your browser.",
+      "searchPlaceholder": "Search by name or tag",
+      "searchAria": "Search models",
+      "allCategories": "All",
+      "categoriesAria": "Categories",
+      "sortAria": "Sort order",
+      "sortPopular": "Popular",
+      "sortNew": "Newest",
+      "emptyTitle": "No models have been published yet",
+      "emptyDescription": "Be the first to publish one.",
+      "publishCta": "Publish a model",
+      "loadError": "Could not load models",
+      "emptyFilteredTitle": "No models match",
+      "emptyFilteredDescription": "Try a different keyword or category.",
+      "clearFilters": "Clear filters",
+      "prev": "Previous",
+      "next": "Next",
+      "count": "{{total}} models",
+      "pageAria": "Pagination"
+    },
+    "categories": {
+      "text": "Text",
+      "code": "Code",
+      "vision": "Vision",
+      "other": "Other"
+    },
+    "card": {
+      "requests": "{{n}} requests",
+      "free": "Free"
+    },
+    "pricing": {
+      "title": "Pricing",
+      "free": "Free",
+      "input": "Input",
+      "output": "Output",
+      "perMillion": "per 1M tokens",
+      "perRequest": "per request",
+      "recentAverage": "Recent average",
+      "noCompute": "GPU time is paid by the model's creator, so you only pay the prices shown."
+    },
+    "detail": {
+      "back": "All models",
+      "by": "By {{publisher}}",
+      "requests": "{{n}} requests",
+      "publishedAt": "Published {{date}}",
+      "baseModel": "Base: {{model}}",
+      "about": "About this model",
+      "noDescription": "No description yet.",
+      "notFoundTitle": "Model not found",
+      "notFoundDescription": "It may have been unpublished, or the URL is wrong.",
+      "loadError": "Could not load the model",
+      "modelId": "Model ID",
+      "copyId": "Copy model ID",
+      "coldStart": "The model is stopped right now. The first call starts it, and calls return 503 with Retry-After for a few minutes.",
+      "runtime": "Nemotron on Nebius"
+    },
+    "api": {
+      "title": "Use it with the API",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyFailed": "Could not copy",
+      "createKey": "Create an API key in the console"
+    },
+    "playground": {
+      "title": "Playground",
+      "loginTitle": "Log in to try it",
+      "login": "Log in",
+      "chooseOrganization": "Choose an organization in the console to try it",
+      "openConsole": "Open console",
+      "billedTo": "Charges go to the credits of the organization selected in the console.",
+      "messagePlaceholder": "Type a message",
+      "send": "Send",
+      "sending": "Generating...",
+      "clear": "Clear conversation",
+      "emptyChat": "Send a message to try the model.",
+      "you": "You",
+      "assistant": "Model",
+      "cost": "Cost: {{cost}}",
+      "insufficientCredits": "Not enough credits.",
+      "topUp": "Top up credits",
+      "failed": "The request failed",
+      "warmingUp": "The model is starting up. Send your message again in a few minutes.",
+      "thinking": "Thinking…",
+      "thought": "Reasoning"
+    },
+    "evaluation": {
+      "title": "Evaluated by Nemotron",
+      "chip": "Nemotron score {{score}} / 5 ({{n}} questions)",
+      "fineTuned": "This model (avg, 1–5)",
+      "base": "Base Nemotron (avg)",
+      "winRate": "Win rate",
+      "sample": "Questions",
+      "verdicts": {
+        "better": "Scored higher than the base model on the creator's held-out questions (sign test p = {{p}}).",
+        "worse": "Scored lower than the base model on the creator's held-out questions (sign test p = {{p}}).",
+        "inconclusive": "No clear difference from the base model on {{n}} questions (sign test p = {{p}}).",
+        "too_few": "Only {{n}} questions were graded, which is too few to draw conclusions."
+      },
+      "method": "{{n}} held-out questions the model did not train on, answered by this model and by {{baseline}} on Nebius Token Factory, then graded against reference answers by {{judge}}. Won / tied / lost: {{wins}} / {{ties}} / {{losses}}.",
+      "date": "Evaluated {{date}}."
+    }
+  }
+}

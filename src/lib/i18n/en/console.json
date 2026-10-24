@@ -1,0 +1,657 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "copied": "Copied"
+  },
+  "appShell": {
+    "nav": {
+      "models": "Models",
+      "explore": "Explore",
+      "apiKeys": "API keys",
+      "usage": "Usage",
+      "billing": "Credits",
+      "earnings": "Earnings"
+    },
+    "navGroups": {
+      "build": "Build",
+      "billing": "Usage and billing"
+    }
+  },
+  "auditLogs": {
+    "actionGroups": {
+      "models": "Models",
+      "compute": "Training and endpoints",
+      "billing": "API keys and billing"
+    },
+    "actions": {
+      "model": {
+        "create": "Created a model",
+        "update": "Updated a model",
+        "delete": "Deleted a model",
+        "publish": "Published a model",
+        "unpublish": "Unpublished a model"
+      },
+      "fine_tune": {
+        "start": "Started a fine-tune",
+        "cancel": "Canceled a fine-tune"
+      },
+      "endpoint": {
+        "deploy": "Deployed an endpoint",
+        "start": "Started an endpoint",
+        "stop": "Stopped an endpoint",
+        "delete": "Deleted an endpoint"
+      },
+      "api_key": {
+        "create": "Created an API key",
+        "revoke": "Revoked an API key"
+      },
+      "billing": {
+        "topup_start": "Started a credit purchase",
+        "connect": "Started payout account setup",
+        "payout": "Requested a payout",
+        "payout_pending": "Requested a payout (waiting for Stripe)"
+      },
+      "dataset": {
+        "generate": "Generated training data with Nemotron"
+      },
+      "evaluation": {
+        "start": "Started a model evaluation"
+      },
+      "model_card": {
+        "draft": "Drafted a model card with Nemotron"
+      }
+    }
+  },
+  "apiKeys": {
+    "title": "API keys",
+    "description": "Keys are shared across the organization. Calls made with a key are charged to this organization's credits.",
+    "managerOnly": "Only owners and admins can create or revoke keys.",
+    "create": "Create key",
+    "createFirst": "Create your first key",
+    "loadFailed": "Could not load API keys",
+    "createFailed": "Could not create the API key",
+    "revokeConfirm": "Revoke \"{{name}}\"? Apps using this key will stop working.",
+    "revokeFailed": "Could not revoke the API key",
+    "copyFailed": "Could not copy",
+    "emptyTitle": "No API keys yet",
+    "key": "Key",
+    "lastUsed": "Last used",
+    "createdAt": "Created",
+    "actions": "Actions",
+    "neverUsed": "Never used",
+    "revokeAria": "Revoke {{name}}",
+    "docsLink": "API docs",
+    "quickstartTitle": "Quickstart",
+    "createTitle": "Create API key",
+    "namePlaceholder": "e.g. Production server",
+    "createdTitle": "API key created",
+    "createdWarning": "This key is shown only once. Copy it and keep it safe.",
+    "createdDone": "I've copied it",
+    "revoke": "Revoke"
+  },
+  "usage": {
+    "title": "Usage",
+    "description": "Calls this organization made through the API and the playground.",
+    "loadFailed": "Could not load usage",
+    "chartTitle": "Daily spend (30 days)",
+    "spend30": "Spend, 30 days",
+    "requests30": "Requests, 30 days",
+    "topModels": "Most used models",
+    "noData": "No usage in the last 30 days",
+    "historyTitle": "Request history",
+    "emptyTitle": "No usage yet",
+    "explore": "Explore models",
+    "failed": "Failed",
+    "sources": {
+      "api": "API",
+      "playground": "Playground",
+      "eval": "Evaluation"
+    },
+    "ms": "{{value}} ms",
+    "columns": {
+      "time": "Time",
+      "model": "Model",
+      "source": "Source",
+      "tokens": "Tokens (in/out)",
+      "latency": "Latency",
+      "requests": "Requests",
+      "cost": "Cost"
+    },
+    "averageCost": "Average per request",
+    "topModel": "Top model",
+    "topModelHint": "{{count}} requests"
+  },
+  "credits": {
+    "title": "Credits",
+    "description": "Prepaid balance shared by the organization. It pays for model calls, training and endpoint GPU time.",
+    "managerOnly": "Only owners and admins can top up.",
+    "loadFailed": "Could not load credits",
+    "balance": "Credit balance",
+    "held": "{{amount}} more is held for training and endpoints",
+    "balanceHint": "Training and endpoint starts hold an estimate first and settle the actual amount when they finish.",
+    "topupTitle": "Top up credits",
+    "customAmount": "Amount",
+    "amountRange": "You can top up between {{min}} and {{max}}",
+    "topupCanceled": "Top-up canceled",
+    "topupFailed": "Could not start the top-up",
+    "ledgerTitle": "Transactions",
+    "ledgerEmpty": "No transactions yet",
+    "ledger": {
+      "date": "Date",
+      "description": "Description",
+      "balance": "Balance",
+      "amount": "Amount"
+    },
+    "kinds": {
+      "topup": "Top-up",
+      "payout": "Payout",
+      "adjustment": "Adjustment",
+      "refund": "Refund",
+      "training": "Training GPU time",
+      "endpoint": "Endpoint GPU time",
+      "dataset_build": "Nemotron: training data",
+      "evaluation": "Nemotron: evaluation",
+      "model_card": "Nemotron: model card",
+      "payout_pending": "Payout (confirming)",
+      "chargeback": "Refund / chargeback"
+    },
+    "balances": {
+      "credit": "Credits",
+      "earnings": "Earnings"
+    },
+    "customOption": "Custom",
+    "payAmount": "You pay",
+    "payWithStripe": "Pay with Stripe"
+  },
+  "earnings": {
+    "title": "Earnings and payouts",
+    "description": "Revenue from calls to this organization's models. You can pay out the amount after fees through Stripe Connect.",
+    "managerOnly": "Only owners and admins can set up payouts and withdraw.",
+    "loadFailed": "Could not load earnings",
+    "available": "Available to pay out",
+    "payoutTitle": "Payout",
+    "connectIntro": "Verify your identity and add a bank account with Stripe to get paid.",
+    "connect": "Set up payouts",
+    "connectPending": "Stripe setup is not finished.",
+    "connectContinue": "Continue setup",
+    "refreshStatus": "Refresh status",
+    "connected": "Your payout account is ready.",
+    "payoutAmount": "Amount (JPY)",
+    "payoutAll": "All",
+    "belowMinimum": "Payouts start at {{min}}",
+    "dashboard": "Stripe dashboard",
+    "payout": "Request payout",
+    "payoutConfirm": "Pay out {{amount}}?",
+    "payoutFailed": "Could not pay out",
+    "payoutPending": "Stripe did not respond. We are checking whether the transfer went through; until then the amount stays paid out",
+    "pendingEarnings": "Pending earnings {{amount}} (available {{days}} days after they are earned)",
+    "actionFailed": "Could not reach Stripe",
+    "chartTitle": "Daily earnings (30 days)",
+    "byModel": "Earnings by model (30 days)",
+    "noData": "No earnings in the last 30 days",
+    "columns": {
+      "model": "Model",
+      "requests": "Requests",
+      "earned": "Earned"
+    },
+    "historyTitle": "Payout history",
+    "earned30": "Earned, 30 days",
+    "requests30": "Requests, 30 days",
+    "steps": {
+      "register": "Register",
+      "verify": "Verify with Stripe",
+      "ready": "Ready"
+    },
+    "minimumShort": "from {{amount}}"
+  },
+  "models": {
+    "categories": {
+      "text": "Text",
+      "code": "Code",
+      "vision": "Vision",
+      "other": "Other"
+    },
+    "categoryHints": {
+      "text": "Chat, summaries, translation and other text output",
+      "code": "Models tuned for writing or explaining code",
+      "vision": "Models that answer about images",
+      "other": "Anything else"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "suspended": "Suspended"
+    },
+    "visibility": {
+      "public": "Public",
+      "private": "Unlisted"
+    },
+    "list": {
+      "title": "Models",
+      "description": "Your organization's models. Train Nemotron, deploy it, set a price and publish it to the store.",
+      "newButton": "New model",
+      "loadError": "Could not load models",
+      "createFailed": "Could not create the model",
+      "emptyTitle": "Create your first model",
+      "emptyDescription": "Publish a fine-tuned Nemotron and earn for every token it serves.",
+      "createFirst": "Create a model",
+      "endpoint": "Endpoint",
+      "requests": "Requests",
+      "updatedAt": "Updated"
+    },
+    "create": {
+      "title": "Create a model",
+      "namePlaceholder": "e.g. Support FAQ bot",
+      "submit": "Create",
+      "flowTitle": "Fine-tune Nemotron",
+      "flowSummary": "Upload a dataset and train a LoRA on NVIDIA Nemotron with Nebius GPUs, then serve it as an endpoint and publish it."
+    },
+    "editor": {
+      "backToList": "All models",
+      "loadError": "Could not load the model",
+      "notFoundTitle": "Model not found",
+      "notFoundDescription": "It was deleted or belongs to another organization.",
+      "viewPublic": "View public page",
+      "tabsAria": "Model sections",
+      "tabs": {
+        "overview": "Overview",
+        "training": "Train and deploy",
+        "test": "Test",
+        "settings": "Settings and pricing",
+        "evaluation": "Evaluate"
+      },
+      "unsaved": "You have unsaved changes",
+      "discard": "Discard",
+      "save": "Save",
+      "saveFailed": "Could not save"
+    },
+    "settings": {
+      "navAria": "Settings sections",
+      "nav": {
+        "general": "General",
+        "runtime": "Runtime",
+        "pricing": "Pricing",
+        "danger": "Delete"
+      }
+    },
+    "general": {
+      "title": "General",
+      "intro": "Shown in the store and the API.",
+      "slug": "Model ID",
+      "slugHint": "The value callers pass as model",
+      "slugInvalid": "Use 3–64 lowercase letters, digits or hyphens",
+      "tagline": "Tagline",
+      "taglineHint": "Shown in store listings. Required to publish publicly",
+      "taglinePlaceholder": "e.g. A support model that follows our internal policies",
+      "description": "Description",
+      "category": "Category",
+      "tags": "Tags",
+      "tagsPlaceholder": "Type and press Enter",
+      "removeTag": "Remove tag {{tag}}"
+    },
+    "runtimeForm": {
+      "title": "Runtime",
+      "maxOutputTokens": "Max output tokens per response",
+      "maxOutputTokensHint": "Larger max_tokens values from callers are capped to this. It also sets the maximum charge per call"
+    },
+    "pricing": {
+      "title": "Pricing",
+      "input": "Input (per 1M tokens)",
+      "inputHint": "Charged for the prompt tokens",
+      "output": "Output (per 1M tokens)",
+      "outputHint": "Charged for the generated tokens",
+      "perRequest": "Per request",
+      "perRequestHint": "Charged once per call, regardless of tokens",
+      "computeNote": "Endpoint GPU time ({{perHour}}/hour) is charged to this organization's credits while it runs. Set prices that cover it.",
+      "simulationTitleTokens": "Revenue estimate",
+      "tokensLabel": "Tokens served",
+      "tokensOption": "{{tokens}} tokens",
+      "exampleVolume": "Assumes {{input}} input and {{output}} output tokens per call",
+      "creatorGross": "Your price",
+      "consumerTotal": "Callers pay",
+      "platformFee": "Platform fee ({{fee}}%)",
+      "creatorNet": "You earn",
+      "perMillionTokens": "Per 1M tokens: callers pay {{total}}, you earn {{net}}"
+    },
+    "stats": {
+      "title": "Last 30 days",
+      "requests": "Requests",
+      "failures": "Failures",
+      "revenue": "Revenue",
+      "latency": "Avg latency",
+      "ms": "{{value}} ms",
+      "empty": "No calls yet",
+      "loadFailed": "Could not load stats",
+      "chartTitle": "Requests per day",
+      "barTitle": "{{day}}: {{requests}} requests / {{revenue}}"
+    },
+    "snippet": {
+      "title": "Call it with the API"
+    },
+    "test": {
+      "title": "Test",
+      "description": "This is your own model, so no creator price is charged. Only endpoint GPU time applies.",
+      "deployFirst": "Deploy a trained LoRA to test it."
+    },
+    "launch": {
+      "title": "Steps to publish",
+      "openSettings": "Open settings",
+      "train": {
+        "title": "Train",
+        "todo": "Upload a dataset and train a LoRA",
+        "running": "Training in progress",
+        "done": "A trained LoRA is ready",
+        "action": "Start training"
+      },
+      "deploy": {
+        "title": "Deploy",
+        "waiting": "Available after training succeeds",
+        "todo": "Serve the trained LoRA on an endpoint",
+        "action": "Deploy"
+      },
+      "price": {
+        "title": "Test and set prices",
+        "todo": "No price yet (it will be free)",
+        "done": "Prices are set",
+        "test": "Test",
+        "action": "Set prices"
+      },
+      "configure": {
+        "unsaved": "Save your changes before publishing"
+      },
+      "publish": {
+        "title": "Publish",
+        "failed": "Could not change publishing",
+        "managerOnly": "Only owners and admins can publish or unpublish.",
+        "needsTagline": "A tagline is required to publish to the store.",
+        "unpublish": "Unpublish",
+        "unpublishConfirm": "Unpublish? It will no longer be callable through the API by others.",
+        "options": {
+          "public": {
+            "action": "Publish to store",
+            "description": "Listed in the store and callable by anyone"
+          },
+          "private": {
+            "action": "Publish unlisted",
+            "switch": "Switch to unlisted",
+            "description": "Not listed; callable with this organization's keys"
+          }
+        }
+      }
+    },
+    "training": {
+      "title": "Train a LoRA",
+      "description": "Fine-tune NVIDIA Nemotron with a chat-format JSONL. Training runs on Nebius GPUs and is charged to this organization's credits.",
+      "baseModel": "Base model",
+      "baseModelHint": "Smaller models are cheaper and faster to train",
+      "trainRate": "Training GPU",
+      "serveRate": "Serving GPU",
+      "perHour": "{{amount}}/hour",
+      "dataset": "Dataset (JSONL)",
+      "datasetPick": "Choose a file",
+      "datasetSummary": "{{size}} · {{examples}} examples",
+      "datasetHint": "One conversation per line. At least 10 lines, up to {{mb}}MB. Each needs a user and an assistant message.",
+      "issues": {
+        "too_large": "The file is too large (max {{mb}}MB)",
+        "too_few": "Too few examples (at least {{min}})",
+        "too_many": "Too many examples (max {{max}})",
+        "invalid_json": "Line {{line}} is not valid JSON",
+        "not_object": "Line {{line}} is not an object",
+        "missing_messages": "Line {{line}} has no messages array",
+        "invalid_role": "Line {{line}}: role must be system, user or assistant",
+        "empty_content": "Line {{line}} has an empty content",
+        "no_user": "Line {{line}} has no user message",
+        "no_assistant": "Line {{line}} has no assistant message"
+      },
+      "hyperparameters": "Hyperparameters",
+      "epochs": "Epochs",
+      "epochsHint": "Passes over the dataset",
+      "learningRate": "Learning rate",
+      "loraRank": "LoRA rank",
+      "loraAlpha": "LoRA alpha",
+      "estimate": "Estimate: about {{duration}}, {{amount}}",
+      "estimatePending": "Choose a dataset to see an estimate",
+      "holdNote": "{{amount}} is held when training starts and settled on the actual time when it ends.",
+      "start": "Start training",
+      "starting": "Starting…",
+      "started": "Training started",
+      "startFailed": "Could not start training",
+      "cancel": "Cancel",
+      "cancelConfirm": "Cancel training? GPU time used so far is still charged.",
+      "cancelFailed": "Could not cancel training",
+      "status": {
+        "queued": "Queued",
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "failed": "Failed",
+        "canceled": "Canceled"
+      },
+      "activeHint": {
+        "queued": "Provisioning a GPU and loading the model. This takes several minutes.",
+        "running": "Training. You can deploy from here when it finishes. It keeps running if you close this page."
+      },
+      "activeMeta": "{{dataset}} · {{examples}} examples · estimate {{estimate}} · held {{hold}}",
+      "historyTitle": "Training history",
+      "columns": {
+        "status": "Status",
+        "dataset": "Dataset",
+        "startedAt": "Started",
+        "cost": "Cost"
+      },
+      "examples": "{{count}} examples",
+      "estimated": "est. {{amount}}",
+      "deployed": "Deployed",
+      "datasetModeAria": "How to prepare training data",
+      "datasetModes": {
+        "upload": "Upload JSONL",
+        "builder": "Build with Nemotron"
+      },
+      "builtDataset": "Built with Nemotron",
+      "builtSummary": "{{train}} for training · {{eval}} held out for evaluation",
+      "holdOut": "Hold out {{percent}}% for evaluation",
+      "holdOutCount": "({{count}} examples)",
+      "holdOutHint": "These examples are not used for training. After deploying, Nemotron compares your model with the base model on them.",
+      "evalExamples": "{{count}} held out",
+      "fromBuilder": "built with Nemotron"
+    },
+    "endpoint": {
+      "title": "Endpoint",
+      "description": "Serves the trained LoRA on Nemotron. GPU time is charged only while it runs, and it stops on its own when idle.",
+      "notDeployed": "Not deployed yet. When training succeeds, deploy it from the history below.",
+      "baseModel": "Base model",
+      "rate": "GPU rate",
+      "lastUsed": "Last called",
+      "status": {
+        "none": "Not deployed",
+        "deploying": "Deploying",
+        "starting": "Starting",
+        "running": "Running",
+        "stopping": "Stopping",
+        "stopped": "Stopped",
+        "failed": "Error"
+      },
+      "hint": {
+        "none": "",
+        "deploying": "Creating the endpoint.",
+        "starting": "Provisioning a GPU and loading the model and LoRA. It takes a few minutes before it can answer.",
+        "running": "Accepting calls. It stops automatically after {{minutes}} idle minutes.",
+        "stopping": "Stopping.",
+        "stopped": "Stopped (no GPU charges). The next call starts it, and calls get 503 until it is ready.",
+        "failed": "The endpoint failed. Deploy it again."
+      },
+      "deploy": "Deploy",
+      "deployStarted": "Starting the endpoint",
+      "deployFailed": "Could not deploy",
+      "redeployConfirm": "Replace the current endpoint with this LoRA?",
+      "start": "Start",
+      "startFailed": "Could not start",
+      "stop": "Stop",
+      "stopFailed": "Could not stop",
+      "refresh": "Refresh",
+      "refreshFailed": "Could not refresh",
+      "remove": "Delete",
+      "removeConfirm": "Delete the endpoint? The model will be unpublished.",
+      "removeFailed": "Could not delete"
+    },
+    "danger": {
+      "title": "Delete model",
+      "description": "Deletes the model. Running training and endpoints are stopped and settled. This cannot be undone.",
+      "confirmPrompt": "Type the model ID \"{{slug}}\" to confirm",
+      "delete": "Delete",
+      "deleting": "Deleting…",
+      "failed": "Could not delete"
+    },
+    "builder": {
+      "intro": "Paste your FAQ, manual, policy or example Q&A. Nemotron on Nebius Token Factory turns it into chat examples. Review and edit them before training. Token Factory usage is charged to this organization's credits.",
+      "role": "Assistant's role",
+      "roleHint": "Who the assistant is, who it talks to and in what tone. Used only to write the examples.",
+      "rolePlaceholder": "Support agent for an online shoe store. Answers customers politely and briefly.",
+      "material": "Source material",
+      "loadFile": "Load a text file",
+      "materialPlaceholder": "Paste FAQ, manuals, policies or example Q&A here",
+      "materialHint": "{{chars}} / {{max}} characters · sent to Nemotron in {{chunks}} parts. Only facts in this text are used.",
+      "perChunk": "Examples per part",
+      "perChunkHint": "1 to {{max}}",
+      "estimate": "Up to {{amount}}",
+      "stop": "Stop",
+      "generate": "Generate examples",
+      "regenerate": "Generate again",
+      "regenerateConfirm": "Generate again? The current examples and your edits will be replaced.",
+      "progress": "{{done}} / {{total}} parts · {{examples}} examples · {{amount}}",
+      "dropped": "{{count}} malformed or duplicate examples skipped",
+      "failedChunks": "{{count}} parts failed",
+      "previewTitle": "Review examples",
+      "split": "{{train}} for training · {{eval}} for evaluation",
+      "previewHint": "Fix wrong facts and remove anything you would not want the model to say. Examples marked for evaluation are kept out of training and used to test the model later.",
+      "heldOut": "Use for evaluation",
+      "remove": "Remove example {{index}}",
+      "user": "User",
+      "assistant": "Assistant",
+      "needMore": "At least {{min}} training examples are needed",
+      "emptyRows": "Fill in or remove empty examples",
+      "noEvalWarning": "No examples are held out, so this model cannot be evaluated later",
+      "ready": "Ready to use as training data",
+      "use": "Use {{count}} examples for training",
+      "applied": "Training data set: {{train}} for training, {{eval}} for evaluation",
+      "truncated": "The file was cut to the maximum length"
+    },
+    "evaluation": {
+      "title": "Evaluate with Nemotron",
+      "description": "Sends each held-out question to your deployed model and to the base Nemotron on Nebius Token Factory, then Nemotron grades both answers against the reference answer (1–5). Your endpoint runs while this is in progress, and Token Factory usage is charged to this organization's credits.",
+      "run": "Run evaluation",
+      "rerun": "Run again",
+      "blockers": {
+        "not_deployed": "Deploy a fine-tuned model first.",
+        "no_eval_set": "The deployed fine-tune has no held-out examples. Train again with examples held out for evaluation."
+      },
+      "plan": "{{questions}} questions · baseline {{baseline}} · Token Factory up to {{amount}}",
+      "warming": "Starting the endpoint",
+      "status": {
+        "running": "Evaluating",
+        "succeeded": "Done",
+        "failed": "Failed",
+        "canceled": "Replaced"
+      },
+      "progress": "{{done}} / {{total}} questions",
+      "paused": "Paused. Top up credits or try again, then resume.",
+      "resume": "Resume",
+      "stepFailed": "The evaluation could not continue",
+      "startFailed": "Could not start the evaluation",
+      "fineTunedMean": "Your model (avg)",
+      "baseMean": "Base model (avg)",
+      "winRate": "Win rate",
+      "record": "Won / tied / lost",
+      "recordValue": "{{wins}} / {{ties}} / {{losses}}",
+      "verdicts": {
+        "better": "Your model scored higher than the base model on these questions (sign test p = {{p}}).",
+        "worse": "Your model scored lower than the base model on these questions (sign test p = {{p}}).",
+        "inconclusive": "No clear difference on {{n}} questions (sign test p = {{p}}). More held-out questions would be needed to tell.",
+        "too_few": "Only {{n}} questions were graded. That is too few to conclude anything; treat the numbers as examples."
+      },
+      "footnote": "{{n}} graded, {{failed}} not graded · sign test p = {{p}} · 95% bootstrap interval of the score difference: {{interval}} · baseline {{baseline}} · grader {{judge}} · Token Factory {{amount}}",
+      "itemsTitle": "Questions",
+      "columns": {
+        "question": "Question",
+        "fineTuned": "Your model",
+        "base": "Base model"
+      },
+      "judgeInvalid": "The grader's answer could not be read, so this question was skipped",
+      "itemFailed": "No answer, so this question was skipped",
+      "itemPending": "Waiting",
+      "reference": "Reference answer",
+      "reason": "Grader",
+      "historyTitle": "Earlier evaluations",
+      "historyScore": "{{fineTuned}} vs {{base}} · {{n}} questions"
+    },
+    "card": {
+      "title": "Model card",
+      "description": "Nemotron drafts the tagline, description and tags from your training data and the evaluation. Edit the draft, then move it to Settings and save.",
+      "draft": "Draft with Nemotron",
+      "redraft": "Draft again",
+      "drafting": "Drafting…",
+      "needsDeploy": "Train and deploy the model first.",
+      "failed": "Could not draft the model card",
+      "cost": "Token Factory {{amount}}",
+      "apply": "Move to Settings",
+      "applied": "Moved to Settings. Check it and save."
+    }
+  },
+  "server": {
+    "models": {
+      "notFound": "Model not found",
+      "invalidInput": "Check your input",
+      "invalidConfig": "Check the runtime settings",
+      "slugTaken": "This model ID is already taken",
+      "deployFirst": "Deploy an endpoint first",
+      "taglineRequired": "A tagline is required to publish to the store",
+      "suspended": "This model is suspended"
+    },
+    "fineTunes": {
+      "notFound": "Fine-tune not found",
+      "invalidInput": "Check the training settings",
+      "invalidDataset": "The dataset has problems",
+      "datasetTooLarge": "The dataset is too large (max {{mb}}MB)",
+      "unknownBaseModel": "This base model is not available",
+      "alreadyRunning": "A fine-tune is already running for this model",
+      "insufficientCredits": "Not enough credits. Starting this training needs a balance of ¥{{amount}}",
+      "startFailed": "Could not start training",
+      "invalidEvalSet": "The evaluation examples have problems"
+    },
+    "endpoints": {
+      "busy": "The endpoint is starting or stopping. Wait a moment",
+      "trainingNotReady": "Training has not succeeded yet",
+      "insufficientCredits": "Not enough credits. Running the endpoint needs a balance of ¥{{amount}}",
+      "deployFailed": "Could not create the endpoint",
+      "startFailed": "Could not start the endpoint"
+    },
+    "apiKeys": {
+      "invalidInput": "Enter a name of 1–80 characters",
+      "limit": "You can have up to {{max}} active keys"
+    },
+    "billing": {
+      "invalidTopup": "Top-ups must be between ¥{{min}} and ¥{{max}}",
+      "topupProduct": "Forkline credits",
+      "connectRequired": "Set up a payout account first",
+      "payoutMinimum": "Payouts start at ¥{{min}}",
+      "insufficientEarnings": "Not enough earnings to pay out (recent earnings are still pending)",
+      "payoutFailed": "The payout failed. Your earnings were restored",
+      "payoutPending": "Stripe did not respond. We are checking whether the transfer went through"
+    },
+    "nemotron": {
+      "insufficientCredits": "Not enough credits. This needs a balance of ¥{{amount}}",
+      "materialTooLarge": "The material is too long",
+      "invalidInput": "Check the input",
+      "failed": "Nemotron did not respond. Try again in a moment",
+      "evaluation": {
+        "not_deployed": "Deploy a fine-tuned model first",
+        "no_eval_set": "The deployed fine-tune has no held-out examples",
+        "notFound": "Evaluation not found",
+        "paused": "Not enough credits to continue the evaluation. Top up and resume"
+      },
+      "card": {
+        "needsTraining": "Train the model first",
+        "invalidOutput": "Nemotron's draft could not be read. Try again"
+      }
+    }
+  }
+}
