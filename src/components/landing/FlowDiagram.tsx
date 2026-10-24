@@ -3,15 +3,16 @@ import { useTranslation } from "react-i18next";
 import { listModels } from "@/lib/nebius/models";
 
 /*
- * ヒーローの図。ベースモデルの線路から、あなたのデータで学習した LoRA の線がブランドカラー (ライム) で分岐し、
- * エンドポイントを通って、APIの呼び出し (売上) へ扇状に広がる。
+ * ヒーローの図。ベースモデルの駅から、そのままのモデルの線路と、あなたのデータで学習した LoRA の線 (ライム) の
+ * 2本に分かれる。分岐はここだけにし、LoRA の線はエンドポイントを通って、APIの呼び出し (売上) へ流れる。
  * 線は SVG、文字は HTML で重ねる (スマホで図が縮んでも文字の大きさを保つため)。座標は viewBox (400×240) の値。
  */
 
 const W = 400;
 const H = 240;
-const FAN = [92, 132, 172];
 const STATIONS = [140, 250];
+/** ベースモデルの駅。自分のモデルの線はここから分かれる */
+const BASE = { x: 36, y: 48 };
 
 const pos = (x: number, y: number): CSSProperties => ({
   left: `${(x / W) * 100}%`,
@@ -45,7 +46,7 @@ function Label({
 export function FlowDiagram() {
   const { t } = useTranslation();
   const base = listModels()[0]?.label ?? "Nemotron";
-  const fork = "M56 48 C 96 48, 92 132, 132 132 H 316";
+  const fork = `M${BASE.x} ${BASE.y} C ${BASE.x + 48} ${BASE.y}, 84 132, 132 132 H 316`;
 
   return (
     <figure className="relative mx-auto w-full max-w-xl">
@@ -57,14 +58,15 @@ export function FlowDiagram() {
           aria-hidden
         >
           <defs>
-            <linearGradient id="fl-base" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0" stopColor="var(--color-line-strong)" />
-              <stop offset="0.75" stopColor="var(--color-line-strong)" />
-              <stop offset="1" stopColor="var(--color-line-strong)" stopOpacity="0" />
+            {/* 水平な線は高さが 0 なので、線の大きさ基準 (objectBoundingBox) だと描かれない。座標で指定する */}
+            <linearGradient id="fl-base" gradientUnits="userSpaceOnUse" x1={BASE.x} x2={W} y1="0" y2="0">
+              <stop offset="0" stopColor="var(--color-ink-mute)" />
+              <stop offset="0.6" stopColor="var(--color-ink-mute)" stopOpacity="0.7" />
+              <stop offset="1" stopColor="var(--color-ink-mute)" stopOpacity="0" />
             </linearGradient>
           </defs>
-          {/* ベースモデルの線路 */}
-          <path d="M8 48 H400" stroke="url(#fl-base)" strokeWidth="4" strokeLinecap="round" />
+          {/* ベースモデルの線路 (そのままのモデル) */}
+          <path d={`M${BASE.x} ${BASE.y} H400`} stroke="url(#fl-base)" strokeWidth="4" strokeLinecap="round" />
           {/* 分岐した自分のモデルの線。初回だけ分岐点からなぞるように描く */}
           <path
             d={fork}
@@ -73,32 +75,25 @@ export function FlowDiagram() {
             strokeLinecap="round"
             className="animate-[yard-route_1.4s_ease-out_both]"
           />
-          {/* 呼び出しの扇: 線に沿ってリクエストが流れる */}
-          {FAN.map((y) => {
-            const d = `M316 132 C 352 132, 356 ${y}, 392 ${y}`;
-            return (
-              <g key={y}>
-                <path d={d} stroke="var(--color-earn)" strokeOpacity="0.25" strokeWidth="2.5" />
-                <path
-                  d={d}
-                  stroke="var(--color-earn)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeDasharray="6 18"
-                  className="animate-[track-flow_1.2s_linear_infinite]"
-                />
-                <circle cx="392" cy={y} r="4" fill="var(--color-earn)" />
-              </g>
-            );
-          })}
-          {/* 分岐点と駅 */}
+          {/* 呼び出し: 線に沿ってリクエストが流れる (分岐はベースモデルの1か所だけにするため、1本で描く) */}
+          <path d="M316 132 H392" stroke="var(--color-earn)" strokeOpacity="0.25" strokeWidth="2.5" />
+          <path
+            d="M316 132 H392"
+            stroke="var(--color-earn)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeDasharray="6 18"
+            className="animate-[track-flow_1.2s_linear_infinite]"
+          />
+          <circle cx="392" cy="132" r="4" fill="var(--color-earn)" />
+          {/* ベースモデルの駅 (分岐の元) と、自分のモデルの駅 */}
           <circle
-            cx="56"
-            cy="48"
-            r="7"
+            cx={BASE.x}
+            cy={BASE.y}
+            r="11"
             fill="var(--color-canvas)"
-            stroke="var(--color-ink-mute)"
-            strokeWidth="3"
+            stroke="var(--color-ink)"
+            strokeWidth="4"
           />
           {STATIONS.map((x) => (
             <circle
@@ -114,7 +109,7 @@ export function FlowDiagram() {
           <circle cx="316" cy="132" r="6" fill="var(--color-brand-ink)" />
         </svg>
 
-        <Label x={8} y={0} align="left">
+        <Label x={BASE.x - 11} y={0} align="left">
           <p className="text-xs text-ink-mute">{t("landing.flow.base")}</p>
           <p className="text-sm font-semibold whitespace-nowrap text-ink">{base}</p>
         </Label>
@@ -135,7 +130,7 @@ export function FlowDiagram() {
             {t("landing.flow.deployMeta")}
           </p>
         </Label>
-        <Label x={400} y={200} align="right">
+        <Label x={400} y={152} align="right">
           <p className="text-xs font-semibold text-ink sm:text-sm">{t("landing.flow.calls")}</p>
           <p className="mt-0.5 text-[11px] leading-tight font-semibold text-earn sm:text-xs">
             {t("landing.flow.earn")}

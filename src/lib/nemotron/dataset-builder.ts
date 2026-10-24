@@ -2,9 +2,10 @@ import { extractJsonObject } from "./json";
 
 /*
  * 学習データ作り。作者が貼った資料から、Nemotron に2段階で例を作らせる。
- *   1. 事実を取り出す: かたまりごとに1回。事実ごとに質問と答えを1つずつ (と、資料で答えられない質問を少し)
+ *   1. 事実を取り出す: かたまりごとに1回。事実ごとに質問と答えを1つずつ。取り違えやすい事実を比べる・まとめる項目と、
+ *      資料で答えられない質問も作らせる
  *   2. 言い換える: 事実を BUILDER_FACTS_PER_CALL 個ずつ渡し、事実ごとに違う言い方の質問を BUILDER_PARAPHRASES 個
- * 事実1つにつき質問が5つになり、そのうち言い換えの1つを評価用に取っておく (どの事実も学習に残る)。
+ * 事実1つにつき質問が10になり、そのうち言い換えの1つを評価用に取っておく (どの事実も学習に残る)。
  * 返事は JSON の形と長さを確かめ、合わないものは理由をつけて捨てる。
  * 作った例は画面で作者が直してから、いつもの学習の流れ (JSONL) に渡す。
  * この中の関数はブラウザとサーバーの両方で使う (Nebius は呼ばない)。
@@ -14,13 +15,13 @@ export const BUILDER_ROLE_MAX_CHARS = 1_000;
 export const BUILDER_MATERIAL_MAX_CHARS = 48_000;
 /** 1回に Nemotron に渡す資料の長さ */
 export const BUILDER_CHUNK_CHARS = 4_000;
-/** 事実1つに足す言い換えの質問の数 (元の質問と合わせて5つ) */
-export const BUILDER_PARAPHRASES = 4;
-/** 1回の言い換えで渡す事実の数。32 問なら出力は 4,000 トークンに収まる */
+/** 事実1つに足す言い換えの質問の数 (元の質問と合わせて10。言い換えが多いほど事実を取り出せるようになる) */
+export const BUILDER_PARAPHRASES = 9;
+/** 1回の言い換えで渡す事実の数。72 問なら出力は 8,000 トークンに収まる */
 export const BUILDER_FACTS_PER_CALL = 8;
 /** 1回の呼び出しの max_tokens (事実の取り出し / 言い換え) */
 export const BUILDER_FACTS_MAX_TOKENS = 12_000;
-export const BUILDER_PARAPHRASE_MAX_TOKENS = 4_000;
+export const BUILDER_PARAPHRASE_MAX_TOKENS = 8_000;
 /** プロンプトの固定部分 (指示) の文字数の見込み。料金の見積もりに使う */
 export const BUILDER_PROMPT_OVERHEAD_CHARS = 2_500;
 /** 作った例の長さの上限 (これを超えるものは捨てる) */
@@ -38,24 +39,25 @@ const qa = {
   additionalProperties: false,
 };
 
+const factItem = {
+  type: "object",
+  properties: { fact: { type: "string" }, ...qa.properties },
+  required: ["fact", "question", "answer"],
+  additionalProperties: false,
+};
+
 /** 事実の取り出しで Token Factory に出させる形 */
 export const FACTS_JSON_SCHEMA = {
   name: "facts",
   schema: {
     type: "object",
     properties: {
-      facts: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: { fact: { type: "string" }, ...qa.properties },
-          required: ["fact", "question", "answer"],
-          additionalProperties: false,
-        },
-      },
-      unanswerable: { type: "array", minItems: 1, maxItems: 3, items: qa },
+      facts: { type: "array", items: factItem },
+      // 取り違えやすい事実を比べる・まとめる項目。指示だけでは作られないので、形で求める
+      contrasts: { type: "array", items: factItem },
+      unanswerable: { type: "array", minItems: 1, items: qa },
     },
-    required: ["facts", "unanswerable"],
+    required: ["facts", "contrasts", "unanswerable"],
     additionalProperties: false,
   },
 };
@@ -359,8 +361,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * 事実の取り出しの返事 ({"facts":[{fact,question,answer}],"unanswerable":[{question,answer}]}) を読む。
- * 形が違う・空・長すぎるものは捨て、何番目をなぜ捨てたかを返す (番号は facts、unanswerable の順に通しで数える)。
+ * 事実の取り出しの返事 ({"facts":[…],"contrasts":[…],"unanswerable":[{question,answer}]}) を読む。
+ * contrasts (比べる・まとめる項目) は事実と同じに扱う。
+ * 形が違う・空・長すぎるものは捨て、何番目をなぜ捨てたかを返す (番号は facts、contrasts、unanswerable の順に通しで数える)。
  */
 export function parseFacts(content: string): {
   facts: Fact[];
@@ -371,16 +374,17 @@ export function parseFacts(content: string): {
   if (!Array.isArray(parsed?.facts)) {
     return { facts: [], unanswerable: [], dropped: [{ index: 0, reason: "invalid_json" }] };
   }
+  const items = [...parsed.facts, ...(Array.isArray(parsed.contrasts) ? parsed.contrasts : [])];
   const extra = Array.isArray(parsed.unanswerable) ? parsed.unanswerable : [];
   const facts: Fact[] = [];
   const unanswerable: GeneratedExample[] = [];
   const dropped: DroppedItem[] = [];
-  [...parsed.facts, ...extra].forEach((item: unknown, index) => {
+  [...items, ...extra].forEach((item: unknown, index) => {
     if (!isRecord(item)) {
       dropped.push({ index, reason: "not_object" });
       return;
     }
-    const isFact = index < (parsed.facts as unknown[]).length;
+    const isFact = index < items.length;
     const fields = [
       readText(item.question, GENERATED_USER_MAX_CHARS),
       readText(item.answer, GENERATED_ASSISTANT_MAX_CHARS),

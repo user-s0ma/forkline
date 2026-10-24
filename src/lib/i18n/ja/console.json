@@ -509,7 +509,7 @@
       "material": "元になる資料",
       "loadFile": "テキストファイルを読み込む",
       "materialPlaceholder": "FAQ・マニュアル・規約・問答の例をここに貼る",
-      "materialHint": "{{chars}} / {{max}} 文字 · {{chunks}} つに分けて Nemotron に送ります。資料から事実を取り出し、事実ごとに言い方を変えた質問を5つ作ります。この資料の事実だけを使います。",
+      "materialHint": "{{chars}} / {{max}} 文字 · {{chunks}} つに分けて Nemotron に送ります。資料から事実を取り出し、事実ごとに言い方を変えた質問を10作ります。この資料の事実だけを使います。",
       "estimate": "見込み: 事実 約 {{facts}} 個 · 約 {{examples}} 件 · {{calls}} 回 · 最大 {{amount}} (回数は取り出せた事実の数で変わります)",
       "estimateMore": "追加: 事実 {{facts}} 個から最大 {{examples}} 件 · {{calls}} 回 · 最大 {{amount}}",
       "stop": "止める",

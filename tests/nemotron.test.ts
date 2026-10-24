@@ -133,23 +133,41 @@ test("事実の取り出しの返事を読み、思考やコードの囲いは�
   ]);
 });
 
-test("言い換えの返事は事実の順に読み、1事実4問まで、余分な事実や崩れた質問は捨てる", () => {
+test("言い換えの返事は事実の順に読み、1事実の決まった数まで、余分な事実や崩れた質問は捨てる", () => {
+  const a = Array.from({ length: BUILDER_PARAPHRASES + 1 }, (_, i) => `a${i + 1}`);
   const content = JSON.stringify({
     paraphrases: [
-      { questions: [" a1 ", "a2", "a3", "a4", "a5"] },
+      { questions: [` ${a[0]} `, ...a.slice(1)] },
       { questions: ["b1", 3, "x".repeat(3000), "b4"] },
       "oops",
       { questions: ["d1"] },
     ],
   });
   const { questions, dropped } = parseParaphrases(content, 3);
-  assert.deepEqual(questions, [["a1", "a2", "a3", "a4"], ["b1", "b4"], []]);
+  assert.deepEqual(questions, [a.slice(0, BUILDER_PARAPHRASES), ["b1", "b4"], []]);
   assert.deepEqual(dropped, [
     { index: 1, reason: "missing_field" },
     { index: 1, reason: "too_long" },
     { index: 2, reason: "not_object" },
     { index: 3, reason: "too_many" },
   ]);
+});
+
+test("比べる・まとめる項目 (contrasts) は事実と同じに読み、言い換えに回す", () => {
+  const { facts, unanswerable, dropped } = parseFacts(
+    JSON.stringify({
+      facts: [{ fact: "食パンは7時", question: "食パンは何時？", answer: "7時です" }],
+      contrasts: [{ fact: "食パンが先", question: "食パンとクロワッサン、どっちが先？", answer: "食パンです" }, "oops"],
+      unanswerable: [{ question: "米粉のパンは？", answer: "確かめられません" }],
+    }),
+  );
+  assert.deepEqual(
+    facts.map((fact) => fact.questions),
+    [["食パンは何時？"], ["食パンとクロワッサン、どっちが先？"]],
+  );
+  assert.equal(unanswerable.length, 1);
+  assert.deepEqual(dropped, [{ index: 2, reason: "not_object" }]);
+  assert.deepEqual(FACTS_JSON_SCHEMA.schema.required, ["facts", "contrasts", "unanswerable"]);
 });
 
 test("JSON でない返事は全体を捨てる", () => {
@@ -241,9 +259,11 @@ test("事実の取り出しは1回ごとにトークン代を請求し、JSON �
   assert.equal(calls.length, 1);
 });
 
-test("言い換えは事実の数と1事実4問を JSON の形で決め、既にある質問をデータとして渡す", async () => {
+test("言い換えは事実の数と1事実の問の数を JSON の形で決め、既にある質問をデータとして渡す", async () => {
+  const q = Array.from({ length: BUILDER_PARAPHRASES }, (_, i) => `q${i + 1}`);
+  const r = Array.from({ length: BUILDER_PARAPHRASES }, (_, i) => `r${i + 1}`);
   const { chat, calls } = fakeChat(() => ({
-    content: JSON.stringify({ paraphrases: [{ questions: ["q1", "q2", "q3", "q4"] }, { questions: ["r1", "r2", "r3", "r4"] }] }),
+    content: JSON.stringify({ paraphrases: [{ questions: q }, { questions: r }] }),
   }));
   const { deps, ledger } = nemotronDeps(chat);
   const facts = [
@@ -251,10 +271,7 @@ test("言い換えは事実の数と1事実4問を JSON の形で決め、既に
     { fact: "Closed Wed.", answer: "We are closed on Wednesdays.", questions: ["Closed days?", "Open on Wednesday?"] },
   ];
   const result = await paraphraseFacts(deps, { organizationId: ORG, referenceId: "dataset:p", role: "Bakery", facts });
-  assert.deepEqual(result.questions, [
-    ["q1", "q2", "q3", "q4"],
-    ["r1", "r2", "r3", "r4"],
-  ]);
+  assert.deepEqual(result.questions, [q, r]);
   assert.equal(calls[0].maxTokens, BUILDER_PARAPHRASE_MAX_TOKENS);
   assert.deepEqual(calls[0].jsonSchema, paraphraseJsonSchema(2));
   const list = (calls[0].jsonSchema?.schema.properties as Record<string, Record<string, unknown>>).paraphrases;
@@ -268,7 +285,7 @@ test("言い換えは事実の数と1事実4問を JSON の形で決め、既に
   assert.ok(user.includes("2.\n   - Closed days?\n   - Open on Wednesday?"));
   assert.ok(!user.includes("<material>"));
   assert.ok(!user.includes("We are closed on Wednesdays."));
-  assert.ok(calls[0].messages[0].content.includes("write exactly 4 new questions"));
+  assert.ok(calls[0].messages[0].content.includes(`write exactly ${BUILDER_PARAPHRASES} new questions`));
   assert.deepEqual(ledger.map((entry) => entry.kind), ["dataset_build"]);
 });
 
@@ -303,7 +320,7 @@ test("料金の見込みは、取り出しがかたまりごとに1回、言い�
     return tokenFactoryHoldMicros(input);
   });
   assert.equal(estimate.facts, 40);
-  assert.equal(estimate.examples, 200);
+  assert.equal(estimate.examples, 40 * (1 + BUILDER_PARAPHRASES));
   assert.equal(estimate.calls, 2 + 5);
   assert.deepEqual(
     holds.map((hold) => hold.maxTokens),
@@ -358,7 +375,7 @@ function builderHooks(deps: NemotronDeps, material: string) {
   };
 }
 
-test("事実を取り出してから8個ずつ言い換え、事実ごとに5問にし、言い換えの1問を評価用にする", async () => {
+test("事実を取り出してから8個ずつ言い換え、事実ごとに 1 + BUILDER_PARAPHRASES 問にし、言い換えの1問を評価用にする", async () => {
   const { chat, calls } = fakeChat((call) => {
     if (call.jsonSchema?.name === "facts") {
       // 1つは元の質問が重なる事実 (捨てる)
@@ -385,8 +402,8 @@ test("事実を取り出してから8個ずつ言い換え、事実ごとに5問
   assert.deepEqual(paraphraseCalls.map((call) => call.jsonSchema), [8, 8, 1].map(paraphraseJsonSchema));
   assert.deepEqual(progress, [[1, 4], [2, 4], [3, 4], [4, 4]]);
   assert.equal(result.facts.length, 17);
-  // 17 × 5 問 - 重複 1 + 答えられない質問 1
-  assert.equal(result.examples.length, 17 * 5 - 1 + 1);
+  // 17 × (1 + 言い換え) 問 - 重複 1 + 答えられない質問 1
+  assert.equal(result.examples.length, 17 * (1 + BUILDER_PARAPHRASES) - 1 + 1);
   assert.equal(result.dropped, 2);
   assert.equal(new Set(result.examples.map((example) => example.user.toLowerCase())).size, result.examples.length);
   // どの事実も、元の質問を含めて学習に残り、評価用はちょうど1問 (元の質問ではない)
@@ -411,6 +428,7 @@ test("追加で作るときは、前回の事実を既にある質問ごと言�
     { fact: "closed", answer: "水曜休み", questions: ["closed?"] },
   ];
   const { chat, calls } = fakeChat((call) => ({ content: paraphraseReply(call, "more") }));
+  const more = (name: string) => Array.from({ length: BUILDER_PARAPHRASES }, (_, i) => `${name} more${i}`);
   const { deps } = nemotronDeps(chat);
   const result = await runBuild(
     { chunks: 0, facts, existingQuestions: ["open?", "open p0", "OPEN MORE1", "closed?"], heldOut: 1 },
@@ -422,17 +440,13 @@ test("追加で作るときは、前回の事実を既にある質問ごと言�
   assert.deepEqual(
     result.examples.map((example) => [example.user, example.heldOut]),
     [
-      ["open more0", false],
-      ["open more2", false],
-      ["open more3", false],
-      ["closed more0", false],
-      ["closed more1", false],
-      ["closed more2", false],
-      ["closed more3", true],
+      // open more1 は既にある質問と重なるので捨てる
+      ...more("open").filter((question) => question !== "open more1").map((question) => [question, false]),
+      ...more("closed").map((question, i) => [question, i === BUILDER_PARAPHRASES - 1]),
     ],
   );
   assert.equal(result.dropped, 1);
-  assert.equal(result.facts[0].questions.length, 8);
+  assert.equal(result.facts[0].questions.length, 5 + BUILDER_PARAPHRASES - 1);
   // 渡した事実は書きかえない
   assert.equal(facts[0].questions.length, 5);
 });

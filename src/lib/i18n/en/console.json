@@ -509,7 +509,7 @@
       "material": "Source material",
       "loadFile": "Load a text file",
       "materialPlaceholder": "Paste FAQ, manuals, policies or example Q&A here",
-      "materialHint": "{{chars}} / {{max}} characters · sent to Nemotron in {{chunks}} parts. Nemotron pulls out the facts, then writes five differently worded questions for each. Only facts in this text are used.",
+      "materialHint": "{{chars}} / {{max}} characters · sent to Nemotron in {{chunks}} parts. Nemotron pulls out the facts, then writes ten differently worded questions for each. Only facts in this text are used.",
       "estimate": "Estimate: about {{facts}} facts · about {{examples}} examples · {{calls}} requests · up to {{amount}} (the number of requests depends on the facts found)",
       "estimateMore": "More: up to {{examples}} examples from {{facts}} facts · {{calls}} requests · up to {{amount}}",
       "stop": "Stop",

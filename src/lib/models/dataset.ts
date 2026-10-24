@@ -185,8 +185,9 @@ export function summarizeDataset(
 export const DEFAULT_HYPERPARAMETERS = {
   epochs: 3,
   learningRate: 0.0002,
-  loraRank: 16,
-  loraAlpha: 32,
+  // 事実を覚えさせるには高いランクが効く。alpha はランクの2倍 (peft は alpha/r で縮めるため)
+  loraRank: 64,
+  loraAlpha: 128,
 } as const;
 
 export const hyperparametersSchema = z.object({
