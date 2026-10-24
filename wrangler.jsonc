@@ -19,7 +19,7 @@
   "vars": {
     "VITE_PUBLIC_APP_URL": "https://forkline.ai",
     // Cloudflare Turnstile のサイトキーを設定する
-    "VITE_PUBLIC_TURNSTILE_SITE_KEY": "",
+    "VITE_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAFjmFmtIhyGgYro3",
     // 呼ばれないまま、この分数が過ぎた Nebius のエンドポイントを止める
     "ENDPOINT_IDLE_MINUTES": "15",
     // 売上を出金できるようになるまでの日数 (チャージの返金・チャージバックに備えて保留する)

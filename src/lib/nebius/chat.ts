@@ -8,7 +8,7 @@ import { LORA_MODEL_NAME } from "./endpoints";
 import { NebiusError, errorDetail, requireString, trimSlash } from "./http";
 
 export const DEFAULT_TOKEN_FACTORY_BASE_URL = "https://api.tokenfactory.nebius.com/v1";
-/** 要確認: Token Factory の Nemotron の model id (Nebius の cookbook の表記)。/v1/models で確かめる */
+/** Token Factory の Nemotron の model id (2026-10-24 に /v1/models で確かめた) */
 export const DEFAULT_TOKEN_FACTORY_MODEL = "nvidia/Nemotron-3_5-Lightning";
 
 const ZERO_USAGE: ChatUsage = { inputTokens: 0, outputTokens: 0 };
