@@ -37,6 +37,13 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
+def warmup_steps(conversations: int, args: argparse.Namespace) -> int:
+    """Warm up over ~3% of the optimizer steps (transformers 5 removed warmup_ratio)."""
+    per_step = max(1, args.batch_size * args.grad_accum)
+    total = -(-conversations // per_step) * max(1, args.epochs)
+    return max(1, round(total * 0.03))
+
+
 def render_conversations(tokenizer, rows: list[dict]) -> list[str]:
     """Render each conversation with the model's chat template, reasoning turned off.
 
@@ -85,7 +92,7 @@ def main() -> int:
 
     model = AutoModelForCausalLM.from_pretrained(
         args.base_model,
-        torch_dtype=torch.bfloat16,
+        dtype=torch.bfloat16,
         trust_remote_code=True,
         device_map={"": 0},
     )
@@ -106,7 +113,7 @@ def main() -> int:
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=args.grad_accum,
         lr_scheduler_type="cosine",
-        warmup_ratio=0.03,
+        warmup_steps=warmup_steps(len(rows), args),
         logging_steps=10,
         save_strategy="no",
         bf16=True,

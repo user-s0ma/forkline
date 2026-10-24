@@ -1,7 +1,8 @@
+# Pinned to the versions train.py is tested with (a newer transformers removed warmup_ratio once already).
 # Nemotron-H (nemotron_h) needs a recent transformers; Nemotron 3.5 Lightning was saved with 4.57.6.
-transformers>=4.57.6
-peft>=0.17.0
-trl>=0.24.0
-accelerate>=1.10.0
-datasets>=4.0.0
+transformers==5.20.2
+peft==0.21.2
+trl==1.16.0
+accelerate==1.15.0
+datasets==5.1.0
 boto3>=1.40.0
