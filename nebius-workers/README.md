@@ -21,6 +21,10 @@ passes everything the containers need, so the images contain no per-model config
 Both are `NemotronHForCausalLM` (hybrid Mamba-2 / Transformer). The list lives in
 `src/lib/nebius/models.ts`.
 
+## Build with GitHub Actions
+
+`.github/workflows/workers.yml` builds both images on every push that touches `nebius-workers/` (or on demand from the Actions tab) and pushes them to GitHub Container Registry as `ghcr.io/<owner>/forkline-train` and `ghcr.io/<owner>/forkline-serve` (tags `latest` and the commit SHA). Make both packages public so Nebius can pull them without credentials, then set `NEBIUS_TRAIN_IMAGE` / `NEBIUS_SERVE_IMAGE` to those tags. The train image is built without the Mamba-2 kernels by default; run the workflow manually with `mamba_kernels = 1` to include them.
+
 ## Build and push
 
 Push both images to a Nebius Container Registry in the same project as the jobs/endpoints
