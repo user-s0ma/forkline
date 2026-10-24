@@ -3,6 +3,7 @@ import {
   BUILDER_FACTS_MAX_TOKENS,
   BUILDER_PARAPHRASE_MAX_TOKENS,
   BUILDER_PARAPHRASES,
+  BUILDER_SHORT_PARAPHRASES,
   chunkMaterial,
   FACTS_JSON_SCHEMA,
   paraphraseJsonSchema,
@@ -56,7 +57,7 @@ export async function paraphraseFacts(
     kind: "dataset_build",
     referenceId: input.referenceId,
     description: `Dataset builder: paraphrases (${input.facts.length} facts)`,
-    messages: paraphraseMessages({ role: input.role, facts: input.facts, count: BUILDER_PARAPHRASES }),
+    messages: paraphraseMessages({ role: input.role, facts: input.facts, count: BUILDER_PARAPHRASES, short: BUILDER_SHORT_PARAPHRASES }),
     maxTokens: BUILDER_PARAPHRASE_MAX_TOKENS,
     jsonSchema: paraphraseJsonSchema(input.facts.length),
   });

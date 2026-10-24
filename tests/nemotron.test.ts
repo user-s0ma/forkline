@@ -8,6 +8,7 @@ import {
   BUILDER_FACTS_MAX_TOKENS,
   BUILDER_PARAPHRASE_MAX_TOKENS,
   BUILDER_PARAPHRASES,
+  BUILDER_SHORT_PARAPHRASES,
   chunkMaterial,
   estimateBuild,
   estimateFactCount,
@@ -154,6 +155,17 @@ test("言い換えの返事は事実の順に読み、1事実の決まった数�
   ]);
 });
 
+test("短い言い換え (short) は後ろに並べ、評価用の最後の問いになる。同じ文のくり返しは捨てる", () => {
+  const content = JSON.stringify({
+    paraphrases: [{ questions: ["When are croissants baked?", "Parking? Parking?"], short: ["Croissants when?"] }],
+  });
+  const { questions, dropped } = parseParaphrases(content, 1);
+  assert.deepEqual(questions, [["When are croissants baked?", "Croissants when?"]]);
+  assert.deepEqual(dropped, [{ index: 0, reason: "repeated" }]);
+  const examples = factExamples({ fact: "f", answer: "8 am", questions: ["q", ...questions[0]] });
+  assert.deepEqual(examples.find((example) => example.heldOut)?.user, "Croissants when?");
+});
+
 test("比べる・まとめる項目 (contrasts) は事実と同じに読み、言い換えに回す", () => {
   const { facts, unanswerable, dropped } = parseFacts(
     JSON.stringify({
@@ -278,9 +290,11 @@ test("言い換えは事実の数と1事実の問の数を JSON の形で決め�
   const list = (calls[0].jsonSchema?.schema.properties as Record<string, Record<string, unknown>>).paraphrases;
   assert.equal(list.minItems, 2);
   assert.equal(list.maxItems, 2);
-  const questions = (list.items as { properties: Record<string, Record<string, unknown>> }).properties.questions;
-  assert.equal(questions.minItems, BUILDER_PARAPHRASES);
-  assert.equal(questions.maxItems, BUILDER_PARAPHRASES);
+  const { questions, short } = (list.items as { properties: Record<string, Record<string, unknown>> }).properties;
+  assert.equal(questions.minItems, BUILDER_PARAPHRASES - BUILDER_SHORT_PARAPHRASES);
+  assert.equal(questions.maxItems, BUILDER_PARAPHRASES - BUILDER_SHORT_PARAPHRASES);
+  assert.equal(short.minItems, BUILDER_SHORT_PARAPHRASES);
+  assert.equal(short.maxItems, BUILDER_SHORT_PARAPHRASES);
   // 既にある質問は <questions> の中に事実ごとに入る。資料と答えは送らない (送ると質問に答えを書いてしまう)
   const user = calls[0].messages[1].content;
   assert.ok(user.includes("2.\n   - Closed days?\n   - Open on Wednesday?"));

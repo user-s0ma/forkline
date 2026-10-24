@@ -17,6 +17,8 @@ export const BUILDER_MATERIAL_MAX_CHARS = 48_000;
 export const BUILDER_CHUNK_CHARS = 4_000;
 /** 事実1つに足す言い換えの質問の数 (元の質問と合わせて10。言い換えが多いほど事実を取り出せるようになる) */
 export const BUILDER_PARAPHRASES = 9;
+/** そのうち、店名などを入れない短い問いの数。指示だけでは長い問いばかりになるので、JSON の欄を分けて求める */
+export const BUILDER_SHORT_PARAPHRASES = 4;
 /** 1回の言い換えで渡す事実の数。72 問なら出力は 8,000 トークンに収まる */
 export const BUILDER_FACTS_PER_CALL = 8;
 /** 1回の呼び出しの max_tokens (事実の取り出し / 言い換え) */
@@ -62,7 +64,7 @@ export const FACTS_JSON_SCHEMA = {
   },
 };
 
-/** 言い換えで Token Factory に出させる形 (事実の数だけ並べ、事実ごとにちょうど4問) */
+/** 言い換えで Token Factory に出させる形 (事実の数だけ並べ、事実ごとに questions と short を決まった数ずつ) */
 export function paraphraseJsonSchema(factCount: number) {
   return {
     name: "paraphrases",
@@ -78,12 +80,18 @@ export function paraphraseJsonSchema(factCount: number) {
             properties: {
               questions: {
                 type: "array",
-                minItems: BUILDER_PARAPHRASES,
-                maxItems: BUILDER_PARAPHRASES,
+                minItems: BUILDER_PARAPHRASES - BUILDER_SHORT_PARAPHRASES,
+                maxItems: BUILDER_PARAPHRASES - BUILDER_SHORT_PARAPHRASES,
+                items: { type: "string" },
+              },
+              short: {
+                type: "array",
+                minItems: BUILDER_SHORT_PARAPHRASES,
+                maxItems: BUILDER_SHORT_PARAPHRASES,
                 items: { type: "string" },
               },
             },
-            required: ["questions"],
+            required: ["questions", "short"],
             additionalProperties: false,
           },
         },
@@ -99,7 +107,7 @@ export type BuiltExample = GeneratedExample & { heldOut: boolean };
 /** 取り出した事実。questions の先頭が元の質問、続きが言い換え */
 export type Fact = { fact: string; answer: string; questions: string[] };
 
-export type DroppedReason = "invalid_json" | "not_object" | "missing_field" | "too_long" | "too_many";
+export type DroppedReason = "invalid_json" | "not_object" | "missing_field" | "too_long" | "too_many" | "repeated";
 
 export type DroppedItem = { index: number; reason: DroppedReason };
 
@@ -356,6 +364,12 @@ function readText(value: unknown, max: number): string | DroppedReason {
   return text.length > max ? "too_long" : text;
 }
 
+/** 同じ文を2回以上くり返しているか (言い換えが崩れると「How long fresh? How long fresh?」のようになる) */
+function isRepeated(text: string) {
+  const sentences = text.split(/(?<=[?？。．.!！])\s*/u).map((sentence) => sentence.trim()).filter(Boolean);
+  return new Set(sentences).size < sentences.length;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
@@ -425,9 +439,12 @@ export function parseParaphrases(
       dropped.push({ index, reason: isRecord(item) ? "missing_field" : "not_object" });
       return;
     }
-    for (const value of item.questions.slice(0, BUILDER_PARAPHRASES)) {
+    // 短い問いを後ろに置く。評価用は最後の問いなので、短い言い方で確かめることになる
+    const values = [...item.questions, ...(Array.isArray(item.short) ? item.short : [])];
+    for (const value of values.slice(0, BUILDER_PARAPHRASES)) {
       const text = readText(value, GENERATED_USER_MAX_CHARS);
       if (text === "missing_field" || text === "too_long") dropped.push({ index, reason: text });
+      else if (isRepeated(text)) dropped.push({ index, reason: "repeated" });
       else questions[index].push(text);
     }
   });

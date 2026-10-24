@@ -33,7 +33,7 @@ export function factsMessages(input: { role: string; material: string }): ChatMe
   const system = [
     "You extract facts from source material to write supervised fine-tuning data for a chat assistant.",
     DATA_RULE,
-    "List every distinct fact in <material>: each hour, day, price, date, rule, exception, fee, contact detail, procedure step and so on, including small ones such as closing days and exceptions. One fact per item; do not merge unrelated facts or repeat one.",
+    "List every distinct fact in <material>: each hour, day, price, date, rule, exception, fee, contact detail, procedure step and so on, including small ones such as closing days and exceptions. One fact per item; do not merge unrelated facts or repeat one. When one line lists several items, times or prices (for example 'bread at 7am, croissants around 8am'), write a separate fact for each one.",
     "In contrasts, write items that keep the assistant from mixing up facts of the same kind (several times, prices, items or places), in the same shape as facts:",
     "- for each such group, one item whose answer gathers them all (for example every baking time);",
     "- items that compare two of them (for example 'Which is baked first, croissants or melon buns?');",
@@ -41,7 +41,7 @@ export function factsMessages(input: { role: string; material: string }): ChatMe
     "Leave contrasts empty only if <material> has no two facts of the same kind.",
     "For each fact and contrast write:",
     "- fact: the fact as one short sentence.",
-    "- question: a natural question that a user of the assistant described in <role> would ask to learn this fact.",
+    "- question: a natural question that a user of the assistant described in <role> would ask to learn this fact. Users talk to the assistant directly, so write it to 'you' without the business or brand name (for example 'When are croissants ready?').",
     "- answer: the ideal reply in the tone described in <role>: short, accurate, self-contained, and without phrases like 'according to the material' or 'the document says'.",
     "In unanswerable, write about one natural question for every three facts that <material> does not answer, especially ones close to the facts (an item, service or option that is not listed); the answer politely says it cannot confirm that and suggests what the user can do (for example, contact the business). Do not guess.",
     "Rules:",
@@ -64,18 +64,20 @@ export function paraphraseMessages(input: {
   role: string;
   facts: Array<{ questions: string[] }>;
   count: number;
+  short: number;
 }): ChatMessage[] {
   const system = [
     "You reword user questions for supervised fine-tuning data of a chat assistant.",
     DATA_RULE,
     "<questions> lists numbered groups. Each group holds questions that all ask for the same information.",
-    `For each group, in the same order, write exactly ${input.count} new questions that ask for exactly the same information, as a user of the assistant described in <role> might ask it.`,
+    `For each group, in the same order, write exactly ${input.count} new questions that ask for exactly the same information, as a user of the assistant described in <role> might ask it: ${input.count - input.short} in questions and ${input.short} in short.`,
+    "short holds plain, complete questions of at most seven words, the way people type into a chat box (for example 'Do you deliver?' or 'When are croissants ready?'). Users talk to the assistant directly, so never put the business or brand name in short.",
     "Each one is a question the user asks the assistant, worded the way real customers write: casual and polite, short and long, different vocabulary, and different situations (for example 'Can I come on ...?'). Never write the assistant's side (such as 'Here are our hours') or stiff, unnatural honorifics. Write them correctly, without typos.",
     "Each question must differ from the existing questions and from each other; do not just reorder words or swap one word.",
     "Each question must make sense on its own: keep what it is about (the item, service or place) in the question.",
     "Never ask about a detail the group does not ask about (such as a price, time, place or condition); when new wordings run short, reword the same request more simply instead.",
     "Do not ask for more or less than the group asks, and do not guess the answer. Write in the same language as the existing questions.",
-    'Output only one JSON object and nothing else, with one item per group in order: {"paraphrases":[{"questions":["..."]}]}',
+    'Output only one JSON object and nothing else, with one item per group in order: {"paraphrases":[{"questions":["..."],"short":["..."]}]}',
   ].join("\n");
   const groups = input.facts
     .map((fact, index) =>

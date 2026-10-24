@@ -7,7 +7,7 @@ import {
   BUILDER_FACTS_MAX_TOKENS,
   BUILDER_FACTS_PER_CALL,
   BUILDER_PARAPHRASE_MAX_TOKENS,
-  BUILDER_PARAPHRASES,
+  BUILDER_PARAPHRASES, BUILDER_SHORT_PARAPHRASES,
   FACTS_JSON_SCHEMA,
   factExamples,
   paraphraseJsonSchema,
@@ -44,7 +44,7 @@ const batch = facts.slice(0, BUILDER_FACTS_PER_CALL);
 if (batch.length) {
   const paraphrased = await tokenFactoryChat(env as never, {
     model: DEFAULT_TOKEN_FACTORY_MODEL,
-    messages: paraphraseMessages({ role, facts: batch, count: BUILDER_PARAPHRASES }),
+    messages: paraphraseMessages({ role, facts: batch, count: BUILDER_PARAPHRASES, short: BUILDER_SHORT_PARAPHRASES }),
     maxTokens: BUILDER_PARAPHRASE_MAX_TOKENS,
     jsonSchema: paraphraseJsonSchema(batch.length),
   });
