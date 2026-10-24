@@ -14,6 +14,6 @@ await db.end();
 const r = (rows as any[])[0];
 console.log("url", r.endpointUrl);
 const token = await decryptSecretValue(r.endpointToken, env.SECRET_ENCRYPTION_KEY);
-const base = r.endpointUrl ?? "https://port8000-tr4wfmgm6sb2amq.tunnel.applications.eu-north1.nebius.cloud";
+const base = process.argv[2] ?? r.endpointUrl;
 const res = await fetch(`${base}/v1/models`, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(15000) });
 console.log(res.status, (await res.text()).slice(0, 400));

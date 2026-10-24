@@ -133,6 +133,11 @@ function binomialLowerTail(n: number, k: number) {
  * 対応のある符号検定 (両側)。引き分けは除く。
  * 勝ちと負けの数が偶然この程度ずれる確率。勝ち負けが無ければ 1
  */
+/** p の表示 ("= 0.032" / "< 0.001")。保存は小数4桁なので、小さい値は 0 にならないよう上限で示す */
+export function formatPValue(p: number) {
+  return p < 0.001 ? "< 0.001" : `= ${Number(p.toPrecision(2))}`;
+}
+
 export function signTestPValue(wins: number, losses: number) {
   const n = wins + losses;
   if (n === 0) return 1;

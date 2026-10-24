@@ -16,7 +16,7 @@ import {
   type ModelRecord,
 } from "@/lib/api-client";
 import { useLocale } from "@/lib/i18n";
-import type { EvalSummary } from "@/lib/nemotron/evaluation";
+import { formatPValue, type EvalSummary } from "@/lib/nemotron/evaluation";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import { useDateFormatter, useYen } from "@/components/account/hooks";
 import { Field, Section } from "./ui";
@@ -274,14 +274,14 @@ export function EvalSummaryView({ run, summary }: { run: EvalRunRecord; summary:
       <p className="text-sm leading-6 text-ink">
         {t(`models.evaluation.verdicts.${summary.verdict}`, {
           n: summary.n,
-          p: summary.signTestP,
+          p: formatPValue(summary.signTestP),
         })}
       </p>
       <p className="num text-xs leading-5 text-ink-mute">
         {t("models.evaluation.footnote", {
           n: summary.n,
           failed: summary.failed,
-          p: summary.signTestP,
+          p: formatPValue(summary.signTestP),
           interval,
           baseline: run.baselineModel,
           judge: run.judgeModel,

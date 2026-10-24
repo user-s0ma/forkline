@@ -566,12 +566,12 @@
       "record": "Won / tied / lost",
       "recordValue": "{{wins}} / {{ties}} / {{losses}}",
       "verdicts": {
-        "better": "Your model scored higher than the base model on these questions (sign test p = {{p}}).",
-        "worse": "Your model scored lower than the base model on these questions (sign test p = {{p}}).",
-        "inconclusive": "No clear difference on {{n}} questions (sign test p = {{p}}). More held-out questions would be needed to tell.",
+        "better": "Your model scored higher than the base model on these questions (sign test p {{p}}).",
+        "worse": "Your model scored lower than the base model on these questions (sign test p {{p}}).",
+        "inconclusive": "No clear difference on {{n}} questions (sign test p {{p}}). More held-out questions would be needed to tell.",
         "too_few": "Only {{n}} questions were graded. That is too few to conclude anything; treat the numbers as examples."
       },
-      "footnote": "{{n}} graded, {{failed}} not graded · sign test p = {{p}} · 95% bootstrap interval of the score difference: {{interval}} · baseline {{baseline}} · grader {{judge}} · Token Factory {{amount}}",
+      "footnote": "{{n}} graded, {{failed}} not graded · sign test p {{p}} · 95% bootstrap interval of the score difference: {{interval}} · baseline {{baseline}} · grader {{judge}} · Token Factory {{amount}}",
       "itemsTitle": "Questions",
       "columns": {
         "question": "Question",

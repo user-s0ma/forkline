@@ -29,6 +29,7 @@ import {
   bootstrapMeanDiffInterval,
   evalPromptsFromJsonl,
   fineTunedFirstFor,
+  formatPValue,
   parseJudgeOutput,
   signTestPValue,
   summarizeEvaluation,
@@ -994,4 +995,10 @@ test("学習を始めるとき、評価用の例と学習データの要約を�
   const invalid = await startFineTune(deps, { ...base, evalJsonl: "not json" });
   assert.equal(invalid.ok, false);
   assert.equal(!invalid.ok && invalid.reason, "invalid_eval_set");
+});
+
+test("p は小さすぎると 0 ではなく < 0.001 と出す", () => {
+  assert.equal(formatPValue(signTestPValue(19, 1)), "< 0.001");
+  assert.equal(formatPValue(0.0321), "= 0.032");
+  assert.equal(formatPValue(1), "= 1");
 });
