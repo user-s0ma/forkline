@@ -37,28 +37,54 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def warmup_steps(conversations: int, args: argparse.Namespace) -> int:
+MIN_STEPS_PER_EPOCH = 10
+
+
+def effective_grad_accum(conversations: int, args: argparse.Namespace) -> int:
+    """Lower gradient accumulation for small datasets so each epoch still has ~10 optimizer steps.
+
+    With the default of 8, a 40-example dataset only got 5 updates per epoch and barely learned.
+    """
+    batch = max(1, args.batch_size)
+    return max(1, min(args.grad_accum, conversations // (MIN_STEPS_PER_EPOCH * batch)))
+
+
+def warmup_steps(conversations: int, args: argparse.Namespace, grad_accum: int) -> int:
     """Warm up over ~3% of the optimizer steps (transformers 5 removed warmup_ratio)."""
-    per_step = max(1, args.batch_size * args.grad_accum)
+    per_step = max(1, args.batch_size * grad_accum)
     total = -(-conversations // per_step) * max(1, args.epochs)
     return max(1, round(total * 0.03))
 
 
-def render_conversations(tokenizer, rows: list[dict]) -> list[str]:
-    """Render each conversation with the model's chat template, reasoning turned off.
+def _chat_template(tokenizer, messages: list[dict], **kwargs) -> str:
+    try:
+        return tokenizer.apply_chat_template(messages, tokenize=False, enable_thinking=False, **kwargs)
+    except TypeError:
+        return tokenizer.apply_chat_template(messages, tokenize=False, **kwargs)
+
+
+def render_examples(tokenizer, rows: list[dict]) -> list[dict]:
+    """Split each conversation into a prompt (everything before the last assistant turn) and a
+    completion (the last assistant turn), both rendered with the model's chat template with
+    reasoning turned off. The loss is computed on the completion only.
 
     The serving side sends chat_template_kwargs={"enable_thinking": false} by default,
     so training and inference see the same prompt format.
     """
-    texts = []
+    examples = []
     for row in rows:
         messages = [{"role": m["role"], "content": m["content"]} for m in row["messages"]]
-        try:
-            text = tokenizer.apply_chat_template(messages, tokenize=False, enable_thinking=False)
-        except TypeError:
-            text = tokenizer.apply_chat_template(messages, tokenize=False)
-        texts.append(text)
-    return texts
+        if len(messages) < 2 or messages[-1]["role"] != "assistant":
+            continue
+        full = _chat_template(tokenizer, messages)
+        prompt = _chat_template(tokenizer, messages[:-1], add_generation_prompt=True)
+        if not full.startswith(prompt) or len(full) == len(prompt):
+            # テンプレートが前方一致しないときは、答えの文だけを続きとして扱う
+            completion = messages[-1]["content"] + (tokenizer.eos_token or "")
+        else:
+            completion = full[len(prompt):]
+        examples.append({"prompt": prompt, "completion": completion})
+    return examples
 
 
 def main() -> int:
@@ -88,7 +114,13 @@ def main() -> int:
     tokenizer = AutoTokenizer.from_pretrained(args.base_model, trust_remote_code=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
-    dataset = Dataset.from_dict({"text": render_conversations(tokenizer, rows)})
+    examples = render_examples(tokenizer, rows)
+    if not examples:
+        print("[forkline] no conversation ends with an assistant turn", file=sys.stderr)
+        return 2
+    dataset = Dataset.from_list(examples)
+    grad_accum = effective_grad_accum(len(examples), args)
+    print(f"[forkline] {len(examples)} examples, gradient accumulation {grad_accum}", flush=True)
 
     model = AutoModelForCausalLM.from_pretrained(
         args.base_model,
@@ -111,16 +143,16 @@ def main() -> int:
         num_train_epochs=args.epochs,
         learning_rate=args.learning_rate,
         per_device_train_batch_size=args.batch_size,
-        gradient_accumulation_steps=args.grad_accum,
+        gradient_accumulation_steps=grad_accum,
         lr_scheduler_type="cosine",
-        warmup_steps=warmup_steps(len(rows), args),
+        warmup_steps=warmup_steps(len(examples), args, grad_accum),
         logging_steps=10,
         save_strategy="no",
         bf16=True,
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
         max_length=args.max_seq_len,
-        dataset_text_field="text",
+        completion_only_loss=True,
         packing=False,
         report_to="none",
     )
@@ -140,6 +172,9 @@ def main() -> int:
             {
                 "base_model": args.base_model,
                 "conversations": len(rows),
+                "examples": len(examples),
+                "gradient_accumulation": grad_accum,
+                "steps": result.global_step,
                 "epochs": args.epochs,
                 "train_loss": result.training_loss,
                 "seconds": round(time.time() - started),

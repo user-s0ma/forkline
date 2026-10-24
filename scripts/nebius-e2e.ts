@@ -19,6 +19,7 @@ import {
   stopEndpoint,
   uploadTrainingData,
 } from "../src/lib/nebius";
+import { s3Request } from "../src/lib/nebius/s3";
 
 const env: Record<string, string> = {};
 for (const line of readFileSync(".dev.vars", "utf8").split(/\r?\n/)) {
@@ -74,7 +75,7 @@ async function main(cmd: string | undefined) {
       baseModelId: model.id,
       datasetUri,
       outputPrefix: `e2e/${state.runId}/adapter`,
-      hyperparameters: { epochs: 3, learningRate: 0.0002, loraRank: 16, loraAlpha: 32 },
+      hyperparameters: { epochs: 5, learningRate: 0.0002, loraRank: 16, loraAlpha: 32 },
     });
     state.jobId = jobId;
     save();
@@ -108,6 +109,13 @@ async function main(cmd: string | undefined) {
       });
       const j = (await res.json()) as { choices?: { message?: { content?: string } }[] };
       console.log(res.status, q, "→", j.choices?.[0]?.message?.content);
+    }
+  } else if (cmd === "result") {
+    // 学習の記録 (損失、かかった時間) と LoRA の設定を見る
+    for (const name of ["forkline-result.json", "adapter_config.json"]) {
+      const key = `e2e/${state.runId}/adapter/${name}`;
+      const res = await s3Request(nebius, { method: "GET", key });
+      console.log(name, res.status, (await res.text()).slice(0, 1200));
     }
   } else if (cmd === "stop") {
     await stopEndpoint(nebius, state.endpointId!);
