@@ -19,6 +19,27 @@ export const GENERATED_USER_MAX_CHARS = 2_000;
 export const GENERATED_ASSISTANT_MAX_CHARS = 6_000;
 
 /** 評価用に取っておく割合と上限 */
+/** Token Factory に出させる形 ({"examples":[{"user","assistant"}]}) */
+export const EXAMPLES_JSON_SCHEMA = {
+  name: "examples",
+  schema: {
+    type: "object",
+    properties: {
+      examples: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: { user: { type: "string" }, assistant: { type: "string" } },
+          required: ["user", "assistant"],
+          additionalProperties: false,
+        },
+      },
+    },
+    required: ["examples"],
+    additionalProperties: false,
+  },
+};
+
 export const HELD_OUT_RATIO = 0.15;
 export const HELD_OUT_MAX = 50;
 

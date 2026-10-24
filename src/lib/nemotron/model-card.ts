@@ -14,6 +14,21 @@ export const CARD_MAX_TOKENS = 3_000;
 
 export type ModelCardDraft = { tagline: string; description: string; tags: string[] };
 
+/** Token Factory に出させる形 */
+export const CARD_JSON_SCHEMA = {
+  name: "model_card",
+  schema: {
+    type: "object",
+    properties: {
+      tagline: { type: "string" },
+      description: { type: "string" },
+      tags: { type: "array", items: { type: "string" } },
+    },
+    required: ["tagline", "description", "tags"],
+    additionalProperties: false,
+  },
+};
+
 /** 返事を読む。tagline と description が無ければ null。長すぎる部分は切り詰める */
 export function parseModelCardDraft(content: string): ModelCardDraft | null {
   const parsed = extractJsonObject(content);

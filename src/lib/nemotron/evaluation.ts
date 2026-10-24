@@ -59,6 +59,24 @@ export function evalPromptsFromJsonl(jsonl: string, max = EVAL_MAX_ITEMS): EvalP
 }
 
 export type JudgeScore = { score: number; reason: string };
+
+const JUDGE_SCORE_SCHEMA = {
+  type: "object",
+  properties: { score: { type: "integer", minimum: 1, maximum: 5 }, reason: { type: "string" } },
+  required: ["score", "reason"],
+  additionalProperties: false,
+};
+
+/** Token Factory に出させる形 ({"a":{score,reason},"b":{score,reason}}) */
+export const JUDGE_JSON_SCHEMA = {
+  name: "judge",
+  schema: {
+    type: "object",
+    properties: { a: JUDGE_SCORE_SCHEMA, b: JUDGE_SCORE_SCHEMA },
+    required: ["a", "b"],
+    additionalProperties: false,
+  },
+};
 export type JudgeResult = { a: JudgeScore; b: JudgeScore };
 
 function readScore(value: unknown): JudgeScore | null {

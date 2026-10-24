@@ -20,9 +20,11 @@ export function useAuthTurnstile() {
   const locale = useLocale();
   const ref = useRef<TurnstileInstance | null>(null);
 
-  const captchaHeaders = useCallback(async () => {
+  const captchaHeaders = useCallback(async (): Promise<Record<string, string>> => {
+    // サイトキーが空のとき (手元の開発) は Turnstile を使わない。サーバー側も外れている
+    if (!SITE_KEY) return {};
     const turnstile = ref.current;
-    if (!SITE_KEY || !turnstile) throw new Error(t("auth.captchaPreparing"));
+    if (!turnstile) throw new Error(t("auth.captchaPreparing"));
     if (turnstile.isExpired()) turnstile.reset();
     const token =
       turnstile.getResponse() ||

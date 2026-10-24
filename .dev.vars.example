@@ -2,6 +2,7 @@
 
 # --- App
 VITE_PUBLIC_APP_URL=http://localhost:5173
+# Leave both Turnstile keys empty to disable the captcha in local development (http:// only)
 VITE_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 # Stop Nebius endpoints that have not been called for this many minutes
 ENDPOINT_IDLE_MINUTES=15

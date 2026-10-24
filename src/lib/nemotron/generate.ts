@@ -2,11 +2,12 @@ import { chargedNemotronChat, type NemotronDeps } from "./charge";
 import {
   BUILDER_MAX_TOKENS,
   chunkMaterial,
+  EXAMPLES_JSON_SCHEMA,
   parseGeneratedExamples,
   type DroppedItem,
   type GeneratedExample,
 } from "./dataset-builder";
-import { CARD_MAX_TOKENS, parseModelCardDraft, type ModelCardDraft } from "./model-card";
+import { CARD_JSON_SCHEMA, CARD_MAX_TOKENS, parseModelCardDraft, type ModelCardDraft } from "./model-card";
 import { datasetBuilderMessages, modelCardMessages } from "./prompts";
 
 /*
@@ -46,6 +47,7 @@ export async function generateChunk(
     description: `Dataset builder (${input.chunk + 1}/${chunks.length})`,
     messages: datasetBuilderMessages({ role: input.role, material, count: input.perChunk }),
     maxTokens: BUILDER_MAX_TOKENS,
+    jsonSchema: EXAMPLES_JSON_SCHEMA,
   });
   const seen = new Set(
     (input.seenQuestions ?? []).map((question) => question.trim().toLowerCase().replace(/\s+/g, " ")),
@@ -82,6 +84,7 @@ export async function draftModelCard(
     description: `Model card draft (${input.modelName})`.slice(0, 255),
     messages: modelCardMessages(input),
     maxTokens: CARD_MAX_TOKENS,
+    jsonSchema: CARD_JSON_SCHEMA,
   });
   const draft = parseModelCardDraft(response.content);
   return draft

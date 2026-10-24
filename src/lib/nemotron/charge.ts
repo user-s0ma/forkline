@@ -46,6 +46,8 @@ export async function chargedNemotronChat(
     description: string;
     messages: ChatMessage[];
     maxTokens: number;
+    /** 返す JSON の形 (tokenFactoryChat の jsonSchema) */
+    jsonSchema?: { name: string; schema: Record<string, unknown> };
   },
 ): Promise<ChargedChat> {
   const inputChars = input.messages.reduce((sum, message) => sum + message.content.length, 0);
@@ -59,6 +61,7 @@ export async function chargedNemotronChat(
       model: deps.model,
       messages: input.messages,
       maxTokens: input.maxTokens,
+      ...(input.jsonSchema ? { jsonSchema: input.jsonSchema } : {}),
     });
   } catch (error) {
     await deps.credits.release(input.organizationId, hold);

@@ -581,7 +581,21 @@ test("Token Factory の Nemotron を呼ぶ", async () => {
   assert.deepEqual(JSON.parse(call.body ?? "{}"), {
     model: "nvidia/Nemotron-3_5-Lightning",
     messages: [{ role: "user", content: "説明して" }],
+    chat_template_kwargs: { enable_thinking: false },
     max_tokens: 100,
+  });
+
+  // 形を渡すと json_schema で出させる
+  mockFetch(() => json({ choices: [{ message: { content: '{"a":1}' } }], usage: {} }));
+  const schema = { type: "object", properties: { a: { type: "integer" } }, required: ["a"] };
+  await tokenFactoryChat(ENV, {
+    model: "nvidia/Nemotron-3_5-Lightning",
+    messages: [{ role: "user", content: "x" }],
+    jsonSchema: { name: "t", schema },
+  });
+  assert.deepEqual(JSON.parse(calls[0].body ?? "{}").response_format, {
+    type: "json_schema",
+    json_schema: { name: "t", schema, strict: true },
   });
 
   mockFetch(() => json({ detail: "unauthorized" }, 401));

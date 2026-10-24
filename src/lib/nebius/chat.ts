@@ -226,7 +226,13 @@ export async function checkEndpointReady(
 
 export async function tokenFactoryChat(
   env: NebiusEnv,
-  input: { model: string; messages: ChatMessage[]; maxTokens?: number },
+  input: {
+    model: string;
+    messages: ChatMessage[];
+    maxTokens?: number;
+    /** 返す JSON の形。渡すと Token Factory がその形どおりに出力する (response_format の json_schema) */
+    jsonSchema?: { name: string; schema: Record<string, unknown> };
+  },
 ): Promise<{ content: string; usage: ChatUsage }> {
   const apiKey = requireString(env.NEBIUS_TOKEN_FACTORY_API_KEY, "NEBIUS_TOKEN_FACTORY_API_KEY");
   if (typeof input?.model !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._\-/:]{0,199}$/.test(input.model)) {
@@ -251,8 +257,18 @@ export async function tokenFactoryChat(
   const body: Record<string, unknown> = {
     model: input.model,
     messages: input.messages.map((m) => ({ role: m.role, content: m.content })),
+    // Nemotron は既定で考えた過程を本文に書き出し、出力の上限を使い切って JSON まで届かないことがある。
+    // ここでの用途 (学習データ作り、採点、説明文) は答えだけが要るので、考える過程を止める
+    chat_template_kwargs: { enable_thinking: false },
   };
   if (input.maxTokens !== undefined) body.max_tokens = input.maxTokens;
+  // 考える過程を止めると JSON の形が崩れやすいので、形を決めて出させる
+  if (input.jsonSchema) {
+    body.response_format = {
+      type: "json_schema",
+      json_schema: { name: input.jsonSchema.name, schema: input.jsonSchema.schema, strict: true },
+    };
+  }
 
   let res: Response;
   try {

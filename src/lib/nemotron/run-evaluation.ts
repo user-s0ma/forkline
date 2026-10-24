@@ -4,6 +4,7 @@ import { errorText } from "../compute/types";
 import { chargedNemotronChat, InsufficientCreditsError, type NemotronDeps } from "./charge";
 import {
   assignScores,
+  JUDGE_JSON_SCHEMA,
   parseJudgeOutput,
   readSummary,
   summarizeEvaluation,
@@ -136,6 +137,7 @@ async function evaluateItem(
       description: `${label} judge`,
       messages: judgeMessages({ prompt, reference: item.reference, answerA, answerB }),
       maxTokens: JUDGE_MAX_TOKENS,
+      jsonSchema: JUDGE_JSON_SCHEMA,
     });
     costMicros += judge.costMicros;
     const parsed = parseJudgeOutput(judge.content);

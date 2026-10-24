@@ -71,6 +71,15 @@ function renderEmail({
   return { text, html };
 }
 
+/** Turnstile を外すのは、キーが空で、しかも http:// (手元) のときだけ */
+export function turnstileDisabled(env: Pick<CloudflareEnv, "TURNSTILE_SECRET_KEY">, baseURL: string) {
+  if (env.TURNSTILE_SECRET_KEY?.trim()) return false;
+  if (!baseURL.startsWith("http://")) {
+    throw new Error("TURNSTILE_SECRET_KEY が設定されていません");
+  }
+  return true;
+}
+
 function createAuth(env: CloudflareEnv, requestOrigin?: string) {
   const baseURL = requestOrigin || env.VITE_PUBLIC_APP_URL;
   const emailFrom = env.AUTH_EMAIL_FROM;
@@ -171,10 +180,15 @@ function createAuth(env: CloudflareEnv, requestOrigin?: string) {
       },
     },
     plugins: [
+      // 手元の開発 (http://) では TURNSTILE_SECRET_KEY を空にすれば外せる。公開先 (https://) では必ず使う
       captcha({
         provider: "cloudflare-turnstile",
-        secretKey: env.TURNSTILE_SECRET_KEY,
         allowedHostnames: [new URL(baseURL).hostname],
+        // 外すときは確かめる経路を外す (プラグイン自体は残して型を保つ。キーが空だと先に止まるので仮の値を渡す)
+        ...(turnstileDisabled(env, baseURL)
+          ? // 空の配列は既定の経路に戻されるので、どこにも当たらない経路だけを指定する
+            { secretKey: "disabled-in-local-development", endpoints: ["/__captcha-disabled-in-local-development"] }
+          : { secretKey: env.TURNSTILE_SECRET_KEY }),
       }),
       organization({
         allowUserToCreateOrganization: true,
