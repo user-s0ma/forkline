@@ -23,7 +23,7 @@ Both are `NemotronHForCausalLM` (hybrid Mamba-2 / Transformer). The list lives i
 
 ## Build with GitHub Actions
 
-`.github/workflows/workers.yml` builds both images on every push that touches `nebius-workers/` (or on demand from the Actions tab) and pushes them to GitHub Container Registry as `ghcr.io/<owner>/forkline-train` and `ghcr.io/<owner>/forkline-serve` (tags `latest` and the commit SHA). Make both packages public so Nebius can pull them without credentials, then set `NEBIUS_TRAIN_IMAGE` / `NEBIUS_SERVE_IMAGE` to those tags. The train image is built without the Mamba-2 kernels by default; run the workflow manually with `mamba_kernels = 1` to include them.
+`.github/workflows/workers.yml` builds both images on every push that touches `nebius-workers/` (or on demand from the Actions tab) and pushes them to GitHub Container Registry as `ghcr.io/<owner>/forkline-train` and `ghcr.io/<owner>/forkline-serve` (tags `latest` and the commit SHA). Make both packages public so Nebius can pull them without credentials, then set `NEBIUS_TRAIN_IMAGE` / `NEBIUS_SERVE_IMAGE` to those tags. The train image includes the Mamba-2 kernels (`mamba-ssm`, `causal-conv1d`), which the Nemotron-H modeling code requires; the build fails if they cannot be installed.
 
 ## Build and push
 

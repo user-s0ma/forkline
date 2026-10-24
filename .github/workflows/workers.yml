@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
     inputs:
       mamba_kernels:
-        description: "Compile the Mamba-2 kernels into the train image (slow build, faster training)"
+        description: "Install the Mamba-2 kernels into the train image (required by the Nemotron-H modeling code)"
         type: choice
-        options: ["0", "1"]
-        default: "0"
+        options: ["1", "0"]
+        default: "1"
 
 permissions:
   contents: read
@@ -27,7 +27,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
@@ -61,7 +61,7 @@ jobs:
           platforms: linux/amd64
           push: true
           build-args: |
-            MAMBA_KERNELS=${{ github.event.inputs.mamba_kernels || '0' }}
+            MAMBA_KERNELS=${{ github.event.inputs.mamba_kernels || '1' }}
           tags: |
             ${{ steps.name.outputs.ref }}:latest
             ${{ steps.name.outputs.ref }}:${{ github.sha }}
