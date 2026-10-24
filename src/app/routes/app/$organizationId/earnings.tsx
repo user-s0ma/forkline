@@ -33,6 +33,7 @@ import {
 import { localeTag, useLocale } from "@/lib/i18n";
 import { microsToYen, yenToMicros } from "@/lib/billing/pricing";
 import type { Route } from "./+types/earnings";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 const CONNECT_STEPS = ["register", "verify", "ready"] as const;
 
@@ -78,6 +79,7 @@ function ConnectSteps({ current }: { current: 0 | 1 | 2 }) {
 
 export default function EarningsPage({ params }: Route.ComponentProps) {
   const { t } = useTranslation();
+  const [confirm, confirmDialog] = useConfirm();
   const organizationId = params.organizationId;
   const locale = useLocale();
   const yen = useYen();
@@ -174,9 +176,9 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
     event.preventDefault();
     if (!amountValid || busy) return;
     if (
-      !window.confirm(
+      !(await confirm(
         t("earnings.payoutConfirm", { amount: yen(yenToMicros(amountYen)) }),
-      )
+      ))
     ) {
       return;
     }
@@ -206,6 +208,7 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
 
   return (
     <>
+      {confirmDialog}
       <PageHeader
         title={t("earnings.title")}
         description={t("earnings.description")}

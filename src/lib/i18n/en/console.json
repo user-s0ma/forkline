@@ -1,6 +1,9 @@
 {
   "common": {
     "cancel": "Cancel",
+    "close": "Close",
+    "confirmTitle": "Confirm",
+    "continue": "Continue",
     "copied": "Copied"
   },
   "appShell": {

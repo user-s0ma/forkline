@@ -11,6 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { authClient } from "@/lib/auth/client";
 import { localeTag, useLocale } from "@/lib/i18n";
 import type { AppLayoutContext } from "../_layout";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 type OrganizationMemberDetail = {
   id: string;
@@ -30,6 +31,7 @@ export default function OrganizationSettingsPage({
   params,
 }: Route.ComponentProps) {
   const { t } = useTranslation();
+  const [confirm, confirmDialog] = useConfirm();
   const locale = useLocale();
   const dateFormatter = useMemo(
     () =>
@@ -142,7 +144,7 @@ export default function OrganizationSettingsPage({
     const target = otherMembers.find((member) => member.id === transferTarget);
     if (!target) return;
     const label = target.user?.name || target.user?.email || "";
-    if (!window.confirm(t("settings.transferConfirm", { name: label }))) return;
+    if (!(await confirm(t("settings.transferConfirm", { name: label }), { danger: true }))) return;
     setIsTransferring(true);
     try {
       const promote = await authClient.organization.updateMemberRole({
@@ -197,6 +199,7 @@ export default function OrganizationSettingsPage({
 
   return (
     <>
+      {confirmDialog}
       <header className="sticky top-0 z-20 h-16 border-b border-line bg-surface">
         <div className="flex h-full items-center justify-between gap-2 px-2">
           <div className="flex min-w-0 flex-1 items-center gap-2">

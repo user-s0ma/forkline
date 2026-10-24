@@ -20,6 +20,7 @@ import {
 } from "@/lib/nemotron/dataset-builder";
 import { useYen } from "@/components/account/hooks";
 import { Field } from "./ui";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 type Row = BuiltExample & { key: string };
 
@@ -47,6 +48,7 @@ export function DatasetBuilder({
   onUse: (dataset: BuiltDataset) => void;
 }) {
   const { t } = useTranslation();
+  const [confirm, confirmDialog] = useConfirm();
   const yen = useYen();
   const queryClient = useQueryClient();
   const [role, setRole] = useState("");
@@ -94,7 +96,7 @@ export function DatasetBuilder({
   const generate = async (mode: "replace" | "append") => {
     const append = mode === "append";
     if (!(append ? canAppend : canBuild)) return;
-    if (!append && rows.length && !window.confirm(t("models.builder.regenerateConfirm"))) return;
+    if (!append && rows.length && !(await confirm(t("models.builder.regenerateConfirm")))) return;
     const base = append ? rows : [];
     const assistantRole = role.trim();
     stopRef.current = false;
@@ -162,6 +164,7 @@ export function DatasetBuilder({
 
   return (
     <div className="space-y-5 rounded-(--radius-control) border border-line bg-paper p-4">
+      {confirmDialog}
       <p className="text-sm leading-6 text-ink-soft">{t("models.builder.intro")}</p>
       <Field label={t("models.builder.role")} hint={t("models.builder.roleHint")}>
         <textarea

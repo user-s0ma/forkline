@@ -35,6 +35,7 @@ import { HELD_OUT_RATIO, pickHeldOut, splitHeldOut } from "@/lib/nemotron/datase
 import { datasetLines } from "@/lib/models/dataset";
 import { DatasetBuilder, type BuiltDataset } from "./DatasetBuilder";
 import { Field, NumberInput, Section, Segmented } from "./ui";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 
 const STATUS_TONES: Record<FineTuneStatus, BadgeTone> = {
@@ -84,6 +85,7 @@ export function TrainingPanel({
   onChanged: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
+  const [confirm, confirmDialog] = useConfirm();
   const yen = useYen();
   const queryClient = useQueryClient();
   const baseModels = useBaseModels(organizationId);
@@ -193,7 +195,7 @@ export function TrainingPanel({
   };
 
   const cancel = async (job: FineTuneRecord) => {
-    if (!window.confirm(t("models.training.cancelConfirm"))) return;
+    if (!(await confirm(t("models.training.cancelConfirm"), { danger: true }))) return;
     setBusy(job.id);
     try {
       await cancelFineTune(organizationId, job.id);
@@ -206,7 +208,7 @@ export function TrainingPanel({
   };
 
   const deploy = async (job: FineTuneRecord) => {
-    if (model.endpointId && !window.confirm(t("models.endpoint.redeployConfirm"))) return;
+    if (model.endpointId && !(await confirm(t("models.endpoint.redeployConfirm")))) return;
     setBusy(job.id);
     try {
       await deployModel(organizationId, model.id, job.id);
@@ -240,6 +242,7 @@ export function TrainingPanel({
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       <Section
         title={t("models.training.title")}
         description={t("models.training.description")}

@@ -1,6 +1,9 @@
 {
   "common": {
     "cancel": "キャンセル",
+    "close": "閉じる",
+    "confirmTitle": "確認",
+    "continue": "続ける",
     "copied": "コピーしました"
   },
   "appShell": {

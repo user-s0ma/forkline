@@ -12,6 +12,7 @@ import { Modal } from "@/components/ui/Modal";
 import { authClient } from "@/lib/auth/client";
 import { localeTag, useLocale } from "@/lib/i18n";
 import type { AppLayoutContext } from "../_layout";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 type MemberRole = "owner" | "admin" | "member";
 
@@ -38,6 +39,7 @@ type OrganizationInvitation = {
 
 export default function MembersPage({ params }: Route.ComponentProps) {
   const { t } = useTranslation();
+  const [confirm, confirmDialog] = useConfirm();
   const locale = useLocale();
   const dateFormatter = useMemo(
     () =>
@@ -176,7 +178,7 @@ export default function MembersPage({ params }: Route.ComponentProps) {
   const handleRemove = async (member: OrganizationMember) => {
     if (busyId) return;
     const label = member.user.name || member.user.email;
-    if (!window.confirm(t("members.removeConfirm", { name: label }))) {
+    if (!(await confirm(t("members.removeConfirm", { name: label }), { danger: true }))) {
       return;
     }
     setBusyId(member.id);
@@ -200,9 +202,10 @@ export default function MembersPage({ params }: Route.ComponentProps) {
   const handleLeave = async () => {
     if (busyId) return;
     if (
-      !window.confirm(
+      !(await confirm(
         t("members.leaveConfirm", { name: organization?.name || "" }),
-      )
+        { danger: true },
+      ))
     ) {
       return;
     }
@@ -247,6 +250,7 @@ export default function MembersPage({ params }: Route.ComponentProps) {
 
   return (
     <>
+      {confirmDialog}
       <header className="sticky top-0 z-20 h-16 border-b border-line bg-surface">
         <div className="flex h-full items-center justify-between gap-2 px-2">
           <div className="flex min-w-0 flex-1 items-center gap-2">

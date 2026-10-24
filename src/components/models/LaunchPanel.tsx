@@ -10,6 +10,7 @@ import {
 } from "@/lib/api-client";
 import { useFineTunes } from "./hooks";
 import { EndpointBadge } from "./ui";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 type StepState = "done" | "current" | "pending";
 
@@ -81,6 +82,7 @@ export function LaunchPanel({
   onChanged: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
+  const [confirm, confirmDialog] = useConfirm();
   const jobs = useFineTunes(organizationId, model.id);
   const trained = (jobs.data?.items ?? []).some((job) => job.status === "succeeded");
   const training = (jobs.data?.items ?? []).some(
@@ -109,7 +111,7 @@ export function LaunchPanel({
   };
 
   const unpublish = async () => {
-    if (busy || !window.confirm(t("models.launch.publish.unpublishConfirm"))) return;
+    if (busy || !(await confirm(t("models.launch.publish.unpublishConfirm"), { danger: true }))) return;
     setBusy(true);
     try {
       await unpublishModel(organizationId, model.id);
@@ -198,6 +200,7 @@ export function LaunchPanel({
 
   return (
     <section className="console-panel p-5 sm:p-6">
+      {confirmDialog}
       <h2 className="text-sm font-semibold text-ink">{t("models.launch.title")}</h2>
       <ol className="mt-6">
         <Step

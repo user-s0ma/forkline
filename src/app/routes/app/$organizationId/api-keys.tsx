@@ -24,11 +24,13 @@ import {
   revokeApiKey,
   type ApiKeyRecord,
 } from "@/lib/api-client";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 const API_BASE = "https://forkline.ai/v1";
 
 export default function ApiKeysPage({ params }: Route.ComponentProps) {
   const { t } = useTranslation();
+  const [confirm, confirmDialog] = useConfirm();
   const organizationId = params.organizationId;
   const { openMobileNavigation, canManageOrganization: canManage } = useAccountPage();
   const dateFormatter = useDateFormatter();
@@ -73,7 +75,7 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
   };
 
   const handleRevoke = async (key: ApiKeyRecord) => {
-    if (!window.confirm(t("apiKeys.revokeConfirm", { name: key.name }))) return;
+    if (!(await confirm(t("apiKeys.revokeConfirm", { name: key.name }), { danger: true }))) return;
     try {
       await revokeApiKey(organizationId, key.id);
       await refresh();
@@ -94,6 +96,7 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
 
   return (
     <>
+      {confirmDialog}
       <PageHeader
         title={t("apiKeys.title")}
         description={t("apiKeys.description")}

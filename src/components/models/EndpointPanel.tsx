@@ -13,6 +13,7 @@ import {
 import { useDateFormatter, useYen } from "@/components/account/hooks";
 import { useBaseModels } from "./hooks";
 import { EndpointBadge, Section } from "./ui";
+import { useConfirm } from "@/components/ui/useConfirm";
 
 /** 起動中・停止中は、この間隔で状態を問い合わせる */
 const POLL_MS = 10_000;
@@ -33,6 +34,7 @@ export function EndpointPanel({
   onChanged: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
+  const [confirm, confirmDialog] = useConfirm();
   const yen = useYen();
   const dateFormatter = useDateFormatter();
   const queryClient = useQueryClient();
@@ -85,6 +87,7 @@ export function EndpointPanel({
       description={t("models.endpoint.description")}
       actions={<EndpointBadge status={status} />}
     >
+      {confirmDialog}
       <dl className="grid gap-4 text-sm sm:grid-cols-3">
         <div>
           <dt className="text-xs text-ink-mute">{t("models.endpoint.baseModel")}</dt>
@@ -158,8 +161,8 @@ export function EndpointPanel({
             className="console-button-danger"
             type="button"
             disabled={busy}
-            onClick={() => {
-              if (!window.confirm(t("models.endpoint.removeConfirm"))) return;
+            onClick={async () => {
+              if (!(await confirm(t("models.endpoint.removeConfirm"), { danger: true }))) return;
               void run(() => undeployModel(organizationId, model.id), "models.endpoint.removeFailed");
             }}
           >
