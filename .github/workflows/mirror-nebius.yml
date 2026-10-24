@@ -1,0 +1,31 @@
+# ghcr.io のイメージを Nebius Container Registry (eu-north1) に写す。
+# Nebius の Serverless AI は、ghcr.io から数 GB を取りに行くと遅いときに起動が時間切れになるため、
+# 同じ地域の Registry から取らせる。crane で層を流して写すので、ランナーのディスクは使わない。
+# 認証は Nebius の IAM トークン (12時間で切れる) をシークレット NEBIUS_CR_TOKEN に入れて渡す。
+name: mirror-nebius
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [workers]
+    types: [completed]
+
+env:
+  REGISTRY: cr.eu-north1.nebius.cloud/e00n0estc151bxhk0g
+
+jobs:
+  mirror:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: imjasonh/setup-crane@v0.4
+      - name: Log in to Nebius Container Registry
+        env:
+          TOKEN: ${{ secrets.NEBIUS_CR_TOKEN }}
+        run: echo "$TOKEN" | crane auth login cr.eu-north1.nebius.cloud -u iam --password-stdin
+      - name: Copy images
+        run: |
+          for image in forkline-train forkline-serve; do
+            crane copy "ghcr.io/user-s0ma/$image:latest" "$REGISTRY/$image:latest"
+            crane digest "$REGISTRY/$image:latest"
+          done

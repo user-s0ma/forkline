@@ -9,7 +9,7 @@ for (const line of readFileSync(".dev.vars", "utf8").split(/\r?\n/)) {
 }
 const url = new URL(env.DATABASE_URL); url.searchParams.delete("sslaccept");
 const db = await mysql.createConnection({ uri: url.toString(), ssl: { rejectUnauthorized: true } });
-const [rows] = await db.query("SELECT endpointUrl, endpointToken FROM AiModel WHERE slug='faq'");
+const [rows] = await db.query("SELECT endpointUrl, endpointToken FROM AiModel WHERE slug = ?", [process.env.SLUG ?? "faq"]);
 await db.end();
 const r = (rows as any[])[0];
 console.log("url", r.endpointUrl);
