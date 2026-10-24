@@ -11,10 +11,11 @@ import { errorText, type FineTuneRow, type ModelRow } from "@/lib/compute/types"
 import type { ChatMessage } from "@/lib/nebius";
 import { InsufficientCreditsError } from "@/lib/nemotron/charge";
 import {
-  BUILDER_DEFAULT_PER_CHUNK,
+  BUILDER_FACTS_PER_CALL,
   BUILDER_MATERIAL_MAX_CHARS,
-  BUILDER_MAX_PER_CHUNK,
   BUILDER_ROLE_MAX_CHARS,
+  GENERATED_ASSISTANT_MAX_CHARS,
+  GENERATED_USER_MAX_CHARS,
 } from "@/lib/nemotron/dataset-builder";
 import { evalStore, latestEvaluationFor, nemotronDeps } from "@/lib/nemotron/deps";
 import {
@@ -23,7 +24,7 @@ import {
   fineTunedFirstFor,
   readSummary,
 } from "@/lib/nemotron/evaluation";
-import { draftModelCard, generateChunk } from "@/lib/nemotron/generate";
+import { draftModelCard, extractFacts, paraphraseFacts } from "@/lib/nemotron/generate";
 import { describeEvaluation } from "@/lib/nemotron/model-card";
 import {
   EVAL_ANSWER_MAX_TOKENS,
@@ -59,17 +60,34 @@ function insufficient(c: Context<ApiEnv>, holdMicros: number) {
 
 /* ---------------------------------------------------------------- 学習データ作り */
 
-/** 資料は毎回まるごと送られてくる (かたまりの番号で区切る)。上限は資料と役割と既出の質問の合計の目安 */
+/** 資料は毎回まるごと送られてくる (かたまりの番号で区切る)。上限は資料と役割の合計の目安 */
 const BUILDER_MAX_BODY_BYTES = 512 * 1024;
 
-const builderSchema = z.object({
-  role: z.string().trim().min(1).max(BUILDER_ROLE_MAX_CHARS),
-  material: z.string().trim().min(1).max(BUILDER_MATERIAL_MAX_CHARS),
-  chunk: z.number().int().min(0).max(1000),
-  perChunk: z.number().int().min(1).max(BUILDER_MAX_PER_CHUNK).default(BUILDER_DEFAULT_PER_CHUNK),
-  /** 前のかたまりで作った質問 (重複を除くため) */
-  seenQuestions: z.array(z.string().max(2_000)).max(1_000).default([]),
-});
+const role = z.string().trim().min(1).max(BUILDER_ROLE_MAX_CHARS);
+/** facts: 資料の chunk 番目から事実を取り出す / paraphrase: 事実を言い換える (画面が runBuild の順に送る) */
+const builderSchema = z.discriminatedUnion("stage", [
+  z.object({
+    stage: z.literal("facts"),
+    role,
+    material: z.string().trim().min(1).max(BUILDER_MATERIAL_MAX_CHARS),
+    chunk: z.number().int().min(0).max(1000),
+  }),
+  z.object({
+    stage: z.literal("paraphrase"),
+    role,
+    facts: z
+      .array(
+        z.object({
+          fact: z.string().max(GENERATED_ASSISTANT_MAX_CHARS),
+          answer: z.string().min(1).max(GENERATED_ASSISTANT_MAX_CHARS),
+          /** 既にある質問 (先頭が元の質問)。これと違う言い方を作らせる */
+          questions: z.array(z.string().min(1).max(GENERATED_USER_MAX_CHARS)).min(1).max(50),
+        }),
+      )
+      .min(1)
+      .max(BUILDER_FACTS_PER_CALL),
+  }),
+]);
 
 nemotron.post("/:organizationId/models/:modelId/dataset-builder", async (c) => {
   const organizationId = c.req.param("organizationId");
@@ -81,12 +99,14 @@ nemotron.post("/:organizationId/models/:modelId/dataset-builder", async (c) => {
   const input = builderSchema.safeParse(await c.req.json().catch(() => null));
   if (!input.success) return c.json(message(c, "server.nemotron.invalidInput"), 400);
 
+  const deps = nemotronDeps(c.env);
+  const data = input.data;
+  const referenceId = `dataset:${crypto.randomUUID()}`;
   try {
-    const result = await generateChunk(nemotronDeps(c.env), {
-      organizationId,
-      referenceId: `dataset:${crypto.randomUUID()}`,
-      ...input.data,
-    });
+    const result =
+      data.stage === "facts"
+        ? await extractFacts(deps, { organizationId, referenceId, ...data })
+        : await paraphraseFacts(deps, { organizationId, referenceId, ...data });
     if (!result) return c.json(message(c, "server.nemotron.invalidInput"), 400);
     await recordAuditLog(c.env, {
       organizationId,
@@ -95,14 +115,14 @@ nemotron.post("/:organizationId/models/:modelId/dataset-builder", async (c) => {
       targetId: model.id,
       targetLabel: model.name,
       metadata: {
-        chunk: input.data.chunk,
-        chunkCount: result.chunkCount,
-        examples: result.examples.length,
+        stage: data.stage,
+        ...(data.stage === "facts" ? { chunk: data.chunk } : {}),
+        facts: "facts" in result ? result.facts.length : result.questions.length,
         dropped: result.dropped.length,
         costMicros: result.costMicros,
       },
     });
-    return c.json({ chunk: input.data.chunk, ...result });
+    return c.json(result);
   } catch (error) {
     if (error instanceof InsufficientCreditsError) return insufficient(c, error.holdMicros);
     console.error("学習データを作れませんでした:", model.id, error);

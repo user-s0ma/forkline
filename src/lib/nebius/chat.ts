@@ -11,6 +11,9 @@ export const DEFAULT_TOKEN_FACTORY_BASE_URL = "https://api.tokenfactory.nebius.c
 /** Token Factory の Nemotron の model id (2026-10-24 に /v1/models で確かめた) */
 export const DEFAULT_TOKEN_FACTORY_MODEL = "nvidia/Nemotron-3_5-Lightning";
 
+/** 温度の指定が無い呼び出しに使う。事実を答える用途が多いので低め */
+export const DEFAULT_TEMPERATURE = 0.2;
+
 const ZERO_USAGE: ChatUsage = { inputTokens: 0, outputTokens: 0 };
 
 /** OpenAI 形式の usage を読む。無ければ null */
@@ -60,6 +63,10 @@ export function buildUpstreamBody(body: Record<string, unknown>): Record<string,
   // LoRA は思考なし (enable_thinking: false) の形で学習しているので、指定が無ければ揃える
   if (body.chat_template_kwargs === undefined) {
     out.chat_template_kwargs = { enable_thinking: false };
+  }
+  // vLLM の既定 (モデルの generation_config) の温度だと、小さなデータで学習した LoRA は別の言語の語が混ざって崩れる
+  if (body.temperature === undefined) {
+    out.temperature = DEFAULT_TEMPERATURE;
   }
   return out;
 }

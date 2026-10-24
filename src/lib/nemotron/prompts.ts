@@ -25,30 +25,60 @@ const DATA_RULE =
 /* ---------------------------------------------------------------- 学習データ作り */
 
 /**
- * 資料の1かたまりから、質問と答えの組を count 個作らせる。
+ * 資料の1かたまりから、事実をすべて取り出させる。事実ごとに、利用者がしそうな質問と、役割の口調での短い答えを1つずつ。
+ * 資料で答えられない質問も少し作らせる (答えは「確かめられない」と伝え、問い合わせ先などを案内する)。
  * system 役の文は学習データには入れない (利用者は system なしで呼ぶので、なしで答えられるように学習させる)。
  */
-export function datasetBuilderMessages(input: {
+export function factsMessages(input: { role: string; material: string }): ChatMessage[] {
+  const system = [
+    "You extract facts from source material to write supervised fine-tuning data for a chat assistant.",
+    DATA_RULE,
+    "List every distinct fact in <material>: each hour, day, price, date, rule, exception, fee, contact detail, procedure step and so on, including small ones such as closing days and exceptions. One fact per item; do not merge unrelated facts or repeat one.",
+    "For each fact write:",
+    "- fact: the fact as one short sentence.",
+    "- question: a natural question that a user of the assistant described in <role> would ask to learn this fact.",
+    "- answer: the ideal reply in the tone described in <role>: short, accurate, self-contained, and without phrases like 'according to the material' or 'the document says'.",
+    "In unanswerable, write 1 to 3 natural questions that <material> does not answer; the answer politely says it cannot confirm that and suggests what the user can do (for example, contact the business). Do not guess.",
+    "Rules:",
+    "- Use only facts stated in <material>. Never invent prices, dates, names, policies or numbers.",
+    "- Write in the same language as <material>.",
+    '- Output only one JSON object and nothing else (no prose, no code fences): {"facts":[{"fact":"...","question":"...","answer":"..."}],"unanswerable":[{"question":"...","answer":"..."}]}',
+  ].join("\n");
+  return [
+    { role: "system", content: system },
+    { role: "user", content: [fence("role", input.role), fence("material", input.material)].join("\n\n") },
+  ];
+}
+
+/**
+ * 事実ごとに、同じことを聞く別の言い方の質問を count 個ずつ作らせる。
+ * 答えは見せない (見せると「8時ごろと聞きましたが」のように質問に答えを書いてしまう)。
+ * 既にある質問 (元の質問と、前に作った言い換え) を事実ごとに渡し、それと違う言い方にさせる。
+ */
+export function paraphraseMessages(input: {
   role: string;
-  material: string;
+  facts: Array<{ questions: string[] }>;
   count: number;
 }): ChatMessage[] {
   const system = [
-    "You write supervised fine-tuning data for a chat assistant.",
+    "You reword user questions for supervised fine-tuning data of a chat assistant.",
     DATA_RULE,
-    `Write exactly ${input.count} question/answer pairs that real users of the assistant described in <role> would ask, grounded only in <material>.`,
-    "Rules:",
-    "- Use only facts stated in <material>. Never invent prices, dates, names, policies or numbers.",
-    "- If a natural question is not answered by the material, write the assistant answer as a short, polite statement that it cannot confirm that, and suggest what the user can do.",
-    "- Write in the same language as <material>.",
-    "- The assistant answer must be the ideal final reply in the tone described in <role>: accurate, self-contained, and without phrases like 'according to the material' or 'the document says'.",
-    "- Vary the questions: short and long, casual and formal, specific details, comparisons, edge cases. Do not repeat a question.",
-    '- Output only one JSON object and nothing else (no prose, no code fences): {"examples":[{"user":"...","assistant":"..."}]}',
+    "<questions> lists numbered groups. Each group holds questions that all ask for the same information.",
+    `For each group, in the same order, write exactly ${input.count} new questions that ask for exactly the same information, as a user of the assistant described in <role> might ask it.`,
+    "Vary them: casual and polite, short and long, different vocabulary, and different situations (for example 'Can I come on ...?'). Write them correctly, without typos.",
+    "Each question must differ from the existing questions and from each other; do not just reorder words or swap one word.",
+    "Each question must make sense on its own: keep what it is about (the item, service or place) in the question.",
+    "Do not ask for more or less than the group asks, and do not guess the answer. Write in the same language as the existing questions.",
+    'Output only one JSON object and nothing else, with one item per group in order: {"paraphrases":[{"questions":["..."]}]}',
   ].join("\n");
-  const user = [fence("role", input.role), fence("material", input.material)].join("\n\n");
+  const groups = input.facts
+    .map((fact, index) =>
+      [`${index + 1}.`, ...fact.questions.map((question) => `   - ${question}`)].join("\n"),
+    )
+    .join("\n\n");
   return [
     { role: "system", content: system },
-    { role: "user", content: user },
+    { role: "user", content: [fence("role", input.role), fence("questions", groups)].join("\n\n") },
   ];
 }
 

@@ -51,4 +51,5 @@ export {
   checkEndpointReady,
   tokenFactoryChat,
   DEFAULT_TOKEN_FACTORY_MODEL,
+  DEFAULT_TEMPERATURE,
 } from "./chat";

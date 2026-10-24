@@ -3,7 +3,7 @@ import type { ModelCategory } from "@/lib/billing/pricing";
 import type { ModelConfig } from "@/lib/models/config";
 import type { DatasetIssue } from "@/lib/models/dataset";
 import type { FineTuneHyperparameters } from "@/lib/nebius";
-import type { DroppedItem, GeneratedExample } from "@/lib/nemotron/dataset-builder";
+import type { ExtractResult, Fact, ParaphraseResult } from "@/lib/nemotron/dataset-builder";
 import type { EvalSummary } from "@/lib/nemotron/evaluation";
 
 /*
@@ -324,32 +324,34 @@ export function cancelFineTune(organizationId: string, fineTuneId: string) {
 
 // ---------------------------------------------------------------- Nemotron (学習データ作り・評価・モデルカード)
 
-export type DatasetChunkResult = {
-  chunk: number;
-  chunkCount: number;
-  examples: GeneratedExample[];
-  dropped: DroppedItem[];
-  costMicros: number;
-  inputTokens: number;
-  outputTokens: number;
-};
+type BuilderUsage = { costMicros: number; inputTokens: number; outputTokens: number };
 
-/** 資料の chunk 番目のかたまりから、Nemotron に学習データを作らせる */
-export function generateDatasetChunk(
+function datasetBuilder<T>(organizationId: string, modelId: string, body: Record<string, unknown>) {
+  return apiRequest<T & BuilderUsage>(modelPath(organizationId, modelId, "/dataset-builder"), {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+/** 資料の chunk 番目のかたまりから、Nemotron に事実を取り出させる (1回の呼び出し) */
+export function extractDatasetFacts(
   organizationId: string,
   modelId: string,
-  input: {
-    role: string;
-    material: string;
-    chunk: number;
-    perChunk: number;
-    seenQuestions: string[];
-  },
+  input: { role: string; material: string; chunk: number },
 ) {
-  return apiRequest<DatasetChunkResult>(modelPath(organizationId, modelId, "/dataset-builder"), {
-    method: "POST",
-    body: JSON.stringify(input),
+  return datasetBuilder<ExtractResult & { chunkCount: number }>(organizationId, modelId, {
+    stage: "facts",
+    ...input,
   });
+}
+
+/** 事実 (BUILDER_FACTS_PER_CALL 個まで) を、Nemotron に違う言い方の質問にさせる (1回の呼び出し) */
+export function paraphraseDatasetFacts(
+  organizationId: string,
+  modelId: string,
+  input: { role: string; facts: Fact[] },
+) {
+  return datasetBuilder<ParaphraseResult>(organizationId, modelId, { stage: "paraphrase", ...input });
 }
 
 export type EvalRunStatus = "running" | "succeeded" | "failed" | "canceled";

@@ -4,6 +4,7 @@ import test, { afterEach, beforeEach } from "node:test";
 import {
   cancelFineTune,
   checkEndpointReady,
+  DEFAULT_TEMPERATURE,
   createEndpoint,
   deleteEndpoint,
   getEndpoint,
@@ -469,6 +470,7 @@ test("stream でない中継は model を LoRA にし、usage を 1 回知らせ
   assert.equal(sent.max_tokens, 10);
   assert.equal(sent.stream_options, undefined);
   assert.deepEqual(sent.chat_template_kwargs, { enable_thinking: false });
+  assert.equal(sent.temperature, DEFAULT_TEMPERATURE);
 });
 
 function sseResponse(chunks: string[]): Response {
@@ -494,7 +496,12 @@ test("stream の中継は SSE をそのまま流し、最後の usage を 1 回�
   const res = await proxyChatCompletion(ENV, {
     endpointUrl: EP_URL,
     endpointToken: "tok-123",
-    body: { messages: [{ role: "user", content: "hi" }], stream: true, chat_template_kwargs: { enable_thinking: true } },
+    body: {
+      messages: [{ role: "user", content: "hi" }],
+      stream: true,
+      chat_template_kwargs: { enable_thinking: true },
+      temperature: 0.9,
+    },
     onUsage: (u) => usages.push(u),
   });
   assert.equal(res.headers.get("content-type"), "text/event-stream");
@@ -504,6 +511,7 @@ test("stream の中継は SSE をそのまま流し、最後の usage を 1 回�
   const sent = JSON.parse(calls[0].body ?? "{}");
   assert.deepEqual(sent.stream_options, { include_usage: true });
   assert.deepEqual(sent.chat_template_kwargs, { enable_thinking: true });
+  assert.equal(sent.temperature, 0.9);
 });
 
 test("stream を途中で切っても usage は 1 回だけ知らせる", async () => {

@@ -1,25 +1,27 @@
 import { useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { FileText, Sparkles, Square, Trash2 } from "lucide-react";
+import { FileText, Plus, Sparkles, Square, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ApiError, generateDatasetChunk } from "@/lib/api-client";
+import { ApiError, extractDatasetFacts, paraphraseDatasetFacts } from "@/lib/api-client";
 import { tokenFactoryHoldMicros } from "@/lib/billing/compute";
 import { DATASET_MIN_EXAMPLES } from "@/lib/models/dataset";
 import {
-  BUILDER_DEFAULT_PER_CHUNK,
   BUILDER_MATERIAL_MAX_CHARS,
-  BUILDER_MAX_PER_CHUNK,
-  BUILDER_MAX_TOKENS,
   BUILDER_ROLE_MAX_CHARS,
+  BUILDER_PARAPHRASES,
   chunkMaterial,
+  estimateBuild,
+  estimateParaphrase,
   examplesToJsonl,
-  pickHeldOut,
+  runBuild,
+  type BuiltExample,
+  type Fact,
 } from "@/lib/nemotron/dataset-builder";
 import { useYen } from "@/components/account/hooks";
-import { Field, NumberInput } from "./ui";
+import { Field } from "./ui";
 
-type Row = { key: string; user: string; assistant: string; heldOut: boolean };
+type Row = BuiltExample & { key: string };
 
 export type BuiltDataset = {
   trainJsonl: string;
@@ -30,7 +32,9 @@ export type BuiltDataset = {
 };
 
 /**
- * Nemotron で学習データを作る。資料をかたまりに分けて1つずつ送り、返ってきた例を並べる。
+ * Nemotron で学習データを作る。資料から事実を取り出し、事実ごとに言い方を変えた質問を作って並べる (runBuild)。
+ * 「作り直す」は資料から作って置きかえる。「追加で作る」は前回の事実をもう一度言い換えて、いまの例に足す
+ * (事実はこの画面の中だけで持つ。資料から取り出し直さないので、追加は言い換えの分の料金だけで済む)。
  * 作者は例を直したり消したり、評価用に回すかを選んでから、学習データとして使う。
  */
 export function DatasetBuilder({
@@ -47,8 +51,8 @@ export function DatasetBuilder({
   const queryClient = useQueryClient();
   const [role, setRole] = useState("");
   const [material, setMaterial] = useState("");
-  const [perChunk, setPerChunk] = useState<number | null>(BUILDER_DEFAULT_PER_CHUNK);
   const [rows, setRows] = useState<Row[]>([]);
+  const [facts, setFacts] = useState<Fact[]>([]);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [dropped, setDropped] = useState(0);
   const [failedChunks, setFailedChunks] = useState(0);
@@ -57,26 +61,22 @@ export function DatasetBuilder({
   const running = progress !== null && progress.done < progress.total;
 
   const chunks = useMemo(() => chunkMaterial(material), [material]);
+  // 回数と料金の見込み。作る前は資料から事実の数を見積もり、追加は前回の事実の数で決まる
   const estimate = useMemo(
-    () =>
-      chunks.reduce(
-        (sum, chunk) =>
-          sum +
-          tokenFactoryHoldMicros({
-            inputChars: chunk.length + role.length + 2_000,
-            maxTokens: BUILDER_MAX_TOKENS,
-          }),
-        0,
+    () => ({
+      initial: estimateBuild(chunks, role.length, tokenFactoryHoldMicros),
+      more: estimateParaphrase(
+        facts.length,
+        facts.reduce((sum, fact) => sum + JSON.stringify(fact).length, 0),
+        role.length,
+        tokenFactoryHoldMicros,
       ),
-    [chunks, role],
+    }),
+    [chunks, role, facts],
   );
-  const count = perChunk !== null && perChunk >= 1 && perChunk <= BUILDER_MAX_PER_CHUNK ? perChunk : null;
-  const canGenerate =
-    !running &&
-    count !== null &&
-    role.trim().length > 0 &&
-    material.trim().length > 0 &&
-    material.length <= BUILDER_MATERIAL_MAX_CHARS;
+  const canStart = !running && role.trim().length > 0;
+  const canBuild = canStart && material.trim().length > 0 && material.length <= BUILDER_MATERIAL_MAX_CHARS;
+  const canAppend = canStart && facts.length > 0;
 
   const trainCount = rows.filter((row) => !row.heldOut).length;
   const evalCount = rows.length - trainCount;
@@ -90,50 +90,55 @@ export function DatasetBuilder({
     if (text.length > BUILDER_MATERIAL_MAX_CHARS) toast.warning(t("models.builder.truncated"));
   };
 
-  const generate = async () => {
-    if (!canGenerate || count === null) return;
-    if (rows.length && !window.confirm(t("models.builder.regenerateConfirm"))) return;
+  /** replace: 資料から作り直す (いまの例を置きかえる) / append: 前回の事実を言い換えて、いまの例に足す */
+  const generate = async (mode: "replace" | "append") => {
+    const append = mode === "append";
+    if (!(append ? canAppend : canBuild)) return;
+    if (!append && rows.length && !window.confirm(t("models.builder.regenerateConfirm"))) return;
+    const base = append ? rows : [];
+    const assistantRole = role.trim();
     stopRef.current = false;
     setDropped(0);
     setFailedChunks(0);
     setSpent(0);
-    const collected: Row[] = [];
-    setRows([]);
-    setProgress({ done: 0, total: chunks.length });
-    for (let chunk = 0; chunk < chunks.length; chunk += 1) {
-      if (stopRef.current) break;
-      try {
-        const result = await generateDatasetChunk(organizationId, modelId, {
-          role: role.trim(),
-          material,
-          chunk,
-          perChunk: count,
-          seenQuestions: collected.map((row) => row.user),
-        });
-        collected.push(
-          ...result.examples.map((example) => ({
-            key: crypto.randomUUID(),
-            user: example.user,
-            assistant: example.assistant,
-            heldOut: false,
-          })),
-        );
-        setRows([...collected]);
-        setDropped((value) => value + result.dropped.length);
-        setSpent((value) => value + result.costMicros);
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 402) {
-          toast.error(error.message);
-          break;
-        }
-        setFailedChunks((value) => value + 1);
-      }
-      setProgress({ done: chunk + 1, total: chunks.length });
-    }
-    // 評価用に回す例を選ぶ (作者はあとで1件ずつ切り替えられる)
-    const picked = pickHeldOut(collected.length, { seed: Date.now() % 2_147_483_647 });
-    setRows(collected.map((row, index) => ({ ...row, heldOut: picked.has(index) })));
-    setProgress((value) => (value ? { done: value.total, total: value.total } : value));
+    setRows(base);
+    setProgress({ done: 0, total: append ? estimate.more.calls : chunks.length });
+    const added: Row[] = [];
+    const toRow = (example: BuiltExample): Row => ({ ...example, key: crypto.randomUUID() });
+    const result = await runBuild(
+      {
+        chunks: append ? 0 : chunks.length,
+        facts: append ? facts : [],
+        existingQuestions: base.map((row) => row.user),
+        heldOut: base.filter((row) => row.heldOut).length,
+      },
+      {
+        extract: (chunk) =>
+          extractDatasetFacts(organizationId, modelId, { role: assistantRole, material, chunk }),
+        paraphrase: (batch) =>
+          paraphraseDatasetFacts(organizationId, modelId, { role: assistantRole, facts: batch }),
+        shouldStop: () => stopRef.current,
+        isFatal: (error) => error instanceof ApiError && error.status === 402,
+        onProgress: (state) => {
+          // 新しく届いた分だけ行にする (key を保って入力欄を作り直さない)
+          added.push(...state.examples.slice(added.length).map(toRow));
+          setRows([...base, ...added]);
+          setDropped(state.dropped);
+          setFailedChunks(state.failed);
+          setSpent(state.costMicros);
+          setProgress({ done: state.done, total: state.total });
+        },
+      },
+    );
+    if (result.outcome === "fatal" && result.error instanceof Error) toast.error(result.error.message);
+    // 止めたときや失敗したときは、言い換えていない事実も元の質問だけで届く
+    added.push(...result.examples.slice(added.length).map(toRow));
+    setRows([...base, ...added]);
+    setFacts(result.facts);
+    setDropped(result.dropped);
+    setFailedChunks(result.failed);
+    setSpent(result.costMicros);
+    setProgress({ done: result.total, total: result.total });
     await queryClient.invalidateQueries({ queryKey: ["wallet", organizationId] });
   };
 
@@ -200,27 +205,32 @@ export function DatasetBuilder({
           })}
         </span>
       </div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <Field
-          className="w-48"
-          label={t("models.builder.perChunk")}
-          hint={t("models.builder.perChunkHint", { max: BUILDER_MAX_PER_CHUNK })}
-        >
-          <NumberInput
-            value={perChunk}
-            min={1}
-            max={BUILDER_MAX_PER_CHUNK}
-            step={1}
-            disabled={running}
-            onChange={setPerChunk}
-          />
-        </Field>
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="num space-y-0.5 text-xs text-ink-mute">
           {chunks.length > 0 && !running && (
-            <span className="num text-xs text-ink-mute">
-              {t("models.builder.estimate", { amount: yen(estimate) })}
-            </span>
+            <>
+              <p>
+                {t("models.builder.estimate", {
+                  facts: estimate.initial.facts,
+                  examples: estimate.initial.examples,
+                  calls: estimate.initial.calls,
+                  amount: yen(estimate.initial.holdMicros),
+                })}
+              </p>
+              {facts.length > 0 && (
+                <p>
+                  {t("models.builder.estimateMore", {
+                    facts: facts.length,
+                    examples: facts.length * BUILDER_PARAPHRASES,
+                    calls: estimate.more.calls,
+                    amount: yen(estimate.more.holdMicros),
+                  })}
+                </p>
+              )}
+            </>
           )}
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
           {running ? (
             <button
               className="console-button-secondary"
@@ -232,15 +242,36 @@ export function DatasetBuilder({
               <Square className="h-4 w-4" />
               {t("models.builder.stop")}
             </button>
+          ) : rows.length ? (
+            <>
+              <button
+                className="console-button-secondary"
+                type="button"
+                disabled={!canBuild}
+                onClick={() => void generate("replace")}
+              >
+                <Sparkles className="h-4 w-4" />
+                {t("models.builder.regenerate")}
+              </button>
+              <button
+                className="console-button-primary"
+                type="button"
+                disabled={!canAppend}
+                onClick={() => void generate("append")}
+              >
+                <Plus className="h-4 w-4" />
+                {t("models.builder.generateMore")}
+              </button>
+            </>
           ) : (
             <button
               className="console-button-primary"
               type="button"
-              disabled={!canGenerate}
-              onClick={() => void generate()}
+              disabled={!canBuild}
+              onClick={() => void generate("replace")}
             >
               <Sparkles className="h-4 w-4" />
-              {rows.length ? t("models.builder.regenerate") : t("models.builder.generate")}
+              {t("models.builder.generate")}
             </button>
           )}
         </div>

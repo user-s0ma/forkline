@@ -37,13 +37,13 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-MIN_STEPS_PER_EPOCH = 10
+MIN_STEPS_PER_EPOCH = 30
 
 
 def effective_grad_accum(conversations: int, args: argparse.Namespace) -> int:
-    """Lower gradient accumulation for small datasets so each epoch still has ~10 optimizer steps.
+    """Lower gradient accumulation for small datasets so each epoch still has ~30 optimizer steps.
 
-    With the default of 8, a 40-example dataset only got 5 updates per epoch and barely learned.
+    At ~10 steps per epoch, 62 FAQ examples (55 updates in all) still mixed up similar facts.
     """
     batch = max(1, args.batch_size)
     return max(1, min(args.grad_accum, conversations // (MIN_STEPS_PER_EPOCH * batch)))
@@ -177,6 +177,10 @@ def main() -> int:
                 "steps": result.global_step,
                 "epochs": args.epochs,
                 "train_loss": result.training_loss,
+                # train_loss は全体の平均なので、学び切ったかは最後の記録で見る
+                "final_loss": next(
+                    (log["loss"] for log in reversed(trainer.state.log_history) if "loss" in log), None
+                ),
                 "seconds": round(time.time() - started),
             }
         ),
