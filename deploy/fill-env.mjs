@@ -1,9 +1,9 @@
-// deploy/prod.env の空の項目を、手元の .env から埋める。値は画面に出さない。
+// .env.production.local (本番の設定) の空の項目を、手元の .env から埋める。値は画面に出さない。
 //   node deploy/fill-env.mjs
 // 手元の開発と本番は同じ DB と Nebius を使うので、多くはそのまま使える。最後に、まだ空の項目の名前だけを出す
 import { readFileSync, writeFileSync } from "node:fs";
 
-const PROD = "deploy/prod.env";
+const PROD = ".env.production.local";
 const parse = (file) =>
   Object.fromEntries(
     readFileSync(file, "utf8")

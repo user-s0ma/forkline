@@ -90,7 +90,7 @@ Requirements: Node.js 22, a TiDB Serverless database, a Stripe account, a Nebius
 ### Deploying to a Nebius VM
 
 - `deploy/setup.sh` installs Node 22, Caddy (HTTPS) and the app on Ubuntu 24.04; run it from cloud-init when creating the VM.
-- `deploy/forkline.env.example` lists the settings for `/etc/forkline/forkline.env`. `deploy/fill-env.mjs` fills a copy from your `.env`, and `deploy/push-env.sh` sends it to the VM and restarts the service.
+- Settings: `.env` is for local development, `.env.production` holds the public build values (committed), and `.env.production.local` holds the production settings (not committed; start from `deploy/forkline.env.example`). `deploy/fill-env.mjs` fills `.env.production.local` from `.env`, and `deploy/push-env.sh` sends it to the VM as `/etc/forkline/forkline.env` and restarts the service.
 - `deploy/update.sh` pulls `main`, rebuilds and restarts.
 
 Why a VM: the Nebius control-plane API (`auth.eu.nebius.com`, `api.nebius.cloud`) is served from addresses routed through Cloudflare, so edge runtimes on Cloudflare cannot reach it (requests end in `522`).

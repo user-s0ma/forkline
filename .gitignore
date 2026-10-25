@@ -13,4 +13,8 @@
 
 # scripts/nebius-e2e.ts の途中の状態
 .e2e-state.json
-/deploy/*.env
+
+# 手元に残っている古い作業データ (Cloudflare Workers の頃のもの)
+/.wrangler/
+/build-node/
+/deploy/relay-secret.env
