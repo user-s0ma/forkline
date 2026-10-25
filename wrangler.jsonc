@@ -51,9 +51,10 @@
       }
     }
   ],
-  // 1分ごとに、学習の状態を確かめ、エンドポイントの GPU 代を請求し、使われていないものを止める
+  // 1分ごとの見回り (学習の状態、エンドポイントの GPU 代の請求、使われていないものの停止) は、本番では Nebius の VM の server.mjs が回す。
+  // Workers からは Nebius の管理用 API に届かないので、ここでは回さない (README の "Running on a Nebius VM")
   "triggers": {
-    "crons": ["* * * * *"]
+    "crons": []
   },
   "observability": {
     "enabled": true,
