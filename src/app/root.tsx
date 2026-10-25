@@ -22,7 +22,7 @@ import {
   type SeoTags,
 } from "@/lib/i18n";
 import { applyThemePref, THEME_INIT_SCRIPT, themePrefFromRequest } from "@/lib/theme";
-import { cloudflareContext } from "@/lib/util/cloudflare-context";
+import { appContext } from "@/lib/util/app-context";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/noto-sans-jp";
 import "./globals.css";
@@ -58,7 +58,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const seo = buildSeo(request, import.meta.env.VITE_PUBLIC_APP_URL ?? "");
   const themePref = themePrefFromRequest(request);
   try {
-    const { env } = context.get(cloudflareContext);
+    const { env } = context.get(appContext);
     const session = await auth(env, new URL(request.url).origin).api.getSession(
       {
         headers: request.headers,

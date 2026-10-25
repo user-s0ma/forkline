@@ -112,7 +112,7 @@ const SECTIONS_JA: LegalSection[] = [
   {
     heading: "11. 外部サービス",
     paragraphs: [
-      "本サービスは、計算資源（Nebius）、決済（Stripe）、ホスティングとセキュリティ確認（Cloudflare）その他の外部サービスを利用しています。外部サービスの障害や仕様変更、価格の改定により、本サービスの全部または一部を提供できない場合、または料金を改定する場合があります。",
+      "本サービスは、計算資源とホスティング（Nebius）、決済（Stripe）、セキュリティ確認とメール配信（Cloudflare）その他の外部サービスを利用しています。外部サービスの障害や仕様変更、価格の改定により、本サービスの全部または一部を提供できない場合、または料金を改定する場合があります。",
     ],
   },
   {
@@ -213,7 +213,7 @@ const SECTIONS_EN: LegalSection[] = [
   {
     heading: "11. External services",
     paragraphs: [
-      "The Service uses external services for compute (Nebius), payments (Stripe), hosting and bot checks (Cloudflare) and others. Outages, specification changes or price changes in these services may prevent the Operator from providing all or part of the Service, or lead to changes in charges.",
+      "The Service uses external services for compute and hosting (Nebius), payments (Stripe), bot checks and email delivery (Cloudflare) and others. Outages, specification changes or price changes in these services may prevent the Operator from providing all or part of the Service, or lead to changes in charges.",
     ],
   },
   {

@@ -11,11 +11,11 @@ import {
   isCaptchaError,
   useAuthTurnstile,
 } from "@/lib/auth/use-auth-turnstile";
-import { cloudflareContext } from "@/lib/util/cloudflare-context";
+import { appContext } from "@/lib/util/app-context";
 import { LogoMark } from "@/components/ui/LogoMark";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const { env } = context.get(cloudflareContext);
+  const { env } = context.get(appContext);
   try {
     const session = await auth(env, new URL(request.url).origin).api.getSession(
       {

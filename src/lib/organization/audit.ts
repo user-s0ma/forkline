@@ -43,7 +43,7 @@ export type AuditActor = {
 };
 
 export async function recordAuditLog(
-  env: CloudflareEnv,
+  env: AppEnv,
   entry: {
     organizationId: string;
     actor: AuditActor;

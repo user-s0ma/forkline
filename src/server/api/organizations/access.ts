@@ -35,7 +35,7 @@ export function hasRequiredRole(
 }
 
 export async function authorizeOrganization(
-  env: CloudflareEnv,
+  env: AppEnv,
   request: Request,
   organizationId: string,
 ): Promise<

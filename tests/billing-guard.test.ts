@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { MIN_BALANCE_MICROS } from "../src/lib/billing/pricing";
 import { holdDifference, sumHeld } from "../src/lib/billing/wallet";
-import { holdMicrosFor, isFree, type Invocation } from "../src/workers/gateway/runtime";
+import { holdMicrosFor, isFree, type Invocation } from "../src/server/gateway/runtime";
 
 function invocation(overrides: {
   organizationId: string;

@@ -8,6 +8,7 @@ import { getDb } from "../db/client";
 import { detectLocale, translate } from "../i18n";
 import { leaveOrganizationsForDeletion } from "../organization/cleanup";
 import { retireOrganizationModels } from "../compute/retire";
+import { sendEmail } from "../email/send";
 import * as schema from "../db/schema";
 
 const MEMBER_AUDIT_PATHS: Record<string, AuditAction> = {
@@ -72,7 +73,7 @@ function renderEmail({
 }
 
 /** Turnstile を外すのは、キーが空で、しかも http:// (手元) のときだけ */
-export function turnstileDisabled(env: Pick<CloudflareEnv, "TURNSTILE_SECRET_KEY">, baseURL: string) {
+export function turnstileDisabled(env: Pick<AppEnv, "TURNSTILE_SECRET_KEY">, baseURL: string) {
   if (env.TURNSTILE_SECRET_KEY?.trim()) return false;
   if (!baseURL.startsWith("http://")) {
     throw new Error("TURNSTILE_SECRET_KEY が設定されていません");
@@ -80,7 +81,7 @@ export function turnstileDisabled(env: Pick<CloudflareEnv, "TURNSTILE_SECRET_KEY
   return true;
 }
 
-function createAuth(env: CloudflareEnv, requestOrigin?: string) {
+function createAuth(env: AppEnv, requestOrigin?: string) {
   const baseURL = requestOrigin || env.VITE_PUBLIC_APP_URL;
   const emailFrom = env.AUTH_EMAIL_FROM;
 
@@ -101,7 +102,7 @@ function createAuth(env: CloudflareEnv, requestOrigin?: string) {
       revokeSessionsOnPasswordReset: true,
       async sendResetPassword({ user, url }, request) {
         const locale = detectLocale(request);
-        await env.EMAIL.send({
+        await sendEmail(env, {
           from: emailFrom,
           to: user.email,
           subject: translate(locale, "email.reset.subject"),
@@ -123,7 +124,7 @@ function createAuth(env: CloudflareEnv, requestOrigin?: string) {
       expiresIn: 60 * 60,
       async sendVerificationEmail({ user, url }, request) {
         const locale = detectLocale(request);
-        await env.EMAIL.send({
+        await sendEmail(env, {
           from: emailFrom,
           to: user.email,
           subject: translate(locale, "email.verify.subject"),
@@ -176,7 +177,7 @@ function createAuth(env: CloudflareEnv, requestOrigin?: string) {
         },
       },
       ipAddress: {
-        ipAddressHeaders: ["cf-connecting-ip"],
+        ipAddressHeaders: ["x-real-ip"],
       },
     },
     plugins: [
@@ -197,7 +198,7 @@ function createAuth(env: CloudflareEnv, requestOrigin?: string) {
           const locale = detectLocale(request);
           const url = `${baseURL}/accept-invitation/${data.id}`;
           const inviterName = data.inviter.user.name || data.inviter.user.email;
-          await env.EMAIL.send({
+          await sendEmail(env, {
             from: emailFrom,
             to: data.email,
             subject: translate(locale, "email.invitation.subject", {
@@ -337,5 +338,5 @@ function createAuth(env: CloudflareEnv, requestOrigin?: string) {
   });
 }
 
-export const auth = (env: CloudflareEnv, requestOrigin?: string) =>
+export const auth = (env: AppEnv, requestOrigin?: string) =>
   createAuth(env, requestOrigin);

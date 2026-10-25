@@ -87,7 +87,7 @@ const models = new Hono<ApiEnv>();
 models.use("/:organizationId/models", organizationAuth());
 models.use("/:organizationId/models/*", organizationAuth());
 
-async function slugTaken(env: CloudflareEnv, slug: string, exceptId?: string) {
+async function slugTaken(env: AppEnv, slug: string, exceptId?: string) {
   const conditions = [eq(aiModel.slug, slug)];
   if (exceptId) conditions.push(ne(aiModel.id, exceptId));
   const [row] = await getDb(env)
@@ -98,7 +98,7 @@ async function slugTaken(env: CloudflareEnv, slug: string, exceptId?: string) {
   return Boolean(row);
 }
 
-async function uniqueSlug(env: CloudflareEnv, name: string) {
+async function uniqueSlug(env: AppEnv, name: string) {
   const base = toModelSlug(name) || "model";
   const padded = base.length < 3 ? `${base}-model` : base;
   if (!(await slugTaken(env, padded))) return padded;

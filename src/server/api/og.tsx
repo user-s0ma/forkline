@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { cache, GoogleFont, ImageResponse } from "@cf-wasm/og";
+import { GoogleFont, ImageResponse } from "@cf-wasm/og/node";
 import { OG_LOCALE, translate } from "@/lib/i18n";
 import { findPublicModel } from "./store";
 import type { ApiEnv } from "./types";
@@ -89,11 +89,6 @@ async function render(element: React.ReactNode, text: string, monoText: string) 
   headers.set("Cache-Control", CACHE_CONTROL);
   return new Response(response.body, { status: response.status, headers });
 }
-
-og.use("*", async (c, next) => {
-  cache.setExecutionContext(c.executionCtx);
-  await next();
-});
 
 /** サイト全体の OG 画像 */
 og.get("/site", async () => {

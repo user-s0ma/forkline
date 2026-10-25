@@ -26,7 +26,7 @@ import {
 export type { ModelRow };
 
 export type Invocation = {
-  env: CloudflareEnv;
+  env: AppEnv;
   waitUntil: (promise: Promise<unknown>) => void;
   model: ModelRow;
   /** モデルの実行の設定 (返答の上限など) */
@@ -44,7 +44,7 @@ export type Invocation = {
   /** テストで差し替えるとき以外は本番の Nebius・残高・DB */
   deps?: ComputeDeps;
   /** テストで差し替えるとき以外は settleUsage */
-  settleUsage?: (env: CloudflareEnv, input: SettleInput) => Promise<unknown>;
+  settleUsage?: (env: AppEnv, input: SettleInput) => Promise<unknown>;
 };
 
 /**
@@ -78,7 +78,7 @@ export function errorResponse(error: GatewayError) {
 
 /** 公開済みのモデル、または呼び出した組織自身のモデルだけを解決する。 */
 export async function resolveModel(
-  env: CloudflareEnv,
+  env: AppEnv,
   slug: string,
   consumerOrganizationId: string,
 ) {

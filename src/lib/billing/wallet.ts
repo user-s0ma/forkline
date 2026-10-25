@@ -29,7 +29,7 @@ export async function ensureWallet(db: Database, organizationId: string) {
     .onDuplicateKeyUpdate({ set: { organizationId } });
 }
 
-export async function getWallet(env: CloudflareEnv, organizationId: string) {
+export async function getWallet(env: AppEnv, organizationId: string) {
   const [row] = await getDb(env)
     .select()
     .from(wallet)
@@ -48,7 +48,7 @@ export async function getWallet(env: CloudflareEnv, organizationId: string) {
   );
 }
 
-export async function getCreditMicros(env: CloudflareEnv, organizationId: string) {
+export async function getCreditMicros(env: AppEnv, organizationId: string) {
   return (await getWallet(env, organizationId)).creditMicros;
 }
 
@@ -64,7 +64,7 @@ export function affectedRows(result: unknown) {
  * 同時にたくさん送られても押さえた分だけで止まり、残高がマイナスにならない。
  */
 export async function reserveCredit(
-  env: CloudflareEnv,
+  env: AppEnv,
   organizationId: string,
   micros: number,
 ) {
@@ -83,7 +83,7 @@ export async function reserveCredit(
 
 /** 精算に進まなかった仮押さえを戻す */
 export async function releaseCredit(
-  env: CloudflareEnv,
+  env: AppEnv,
   organizationId: string,
   micros: number,
 ) {
@@ -124,7 +124,7 @@ export function clampInt(value: number) {
  * 仮押さえした額との差だけを動かす。料金は呼び出し側 (gateway) で仮押さえ以下に抑えてあるので、
  * 呼び出しで残高がマイナスになることはない (念のため、ここでも仮押さえを上限にする)。
  */
-export async function settleUsage(env: CloudflareEnv, input: SettleInput) {
+export async function settleUsage(env: AppEnv, input: SettleInput) {
   const db = getDb(env);
   const id = input.id ?? crypto.randomUUID();
   if (input.heldMicros !== undefined && input.charge.totalMicros > input.heldMicros) {
@@ -205,7 +205,7 @@ function isRollback(error: unknown) {
  * allowNegative: 残高が足りなくても引く (返金・チャージバックは、使ってしまった分もマイナスにして取り戻す)
  */
 export async function applyLedgerEntry(
-  env: CloudflareEnv,
+  env: AppEnv,
   entry: {
     organizationId: string;
     kind: LedgerKind;
@@ -281,7 +281,7 @@ export function holdDifference(heldMicros: number, actualMicros: number) {
  * (GPU はもう使ってしまっているため)。
  */
 export async function settleHold(
-  env: CloudflareEnv,
+  env: AppEnv,
   input: HoldSettlement,
 ): Promise<"applied" | "duplicate"> {
   const db = getDb(env);
@@ -320,7 +320,7 @@ export async function writeHoldSettlement(tx: Database, input: HoldSettlement) {
 }
 
 export async function updateWallet(
-  env: CloudflareEnv,
+  env: AppEnv,
   organizationId: string,
   values: {
     stripeCustomerId?: string;

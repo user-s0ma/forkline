@@ -25,7 +25,7 @@ id forkline >/dev/null 2>&1 || useradd --system --home-dir "$APP" --shell /usr/s
 if [ ! -d "$APP/.git" ]; then git clone --depth 1 "$REPO" "$APP"; fi
 cd "$APP"
 npm ci
-npm run build:node
+npm run build
 
 install -d -m 750 -o root -g forkline /etc/forkline
 [ -f /etc/forkline/forkline.env ] || install -m 640 -o root -g forkline /dev/null /etc/forkline/forkline.env

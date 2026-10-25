@@ -18,7 +18,7 @@ import {
 import type { ComputeDeps } from "./types";
 
 /** 本番の Nebius・残高・DB をつないだ ComputeDeps */
-export function computeDeps(env: CloudflareEnv): ComputeDeps {
+export function computeDeps(env: AppEnv): ComputeDeps {
   const db = getDb(env);
   return {
     env,

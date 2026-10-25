@@ -5,8 +5,10 @@ cd /opt/forkline
 git fetch --depth 1 origin main
 git reset --hard origin/main
 npm ci
-npm run build:node
+npm run build
 install -m 644 deploy/forkline.service /etc/systemd/system/forkline.service
+install -m 644 deploy/Caddyfile /etc/caddy/Caddyfile
 systemctl daemon-reload
 systemctl restart forkline
+systemctl reload caddy
 systemctl --no-pager --lines 5 status forkline

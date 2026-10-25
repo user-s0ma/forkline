@@ -35,7 +35,7 @@ export function message(
 }
 
 export async function loadOrgModel(
-  env: CloudflareEnv,
+  env: AppEnv,
   organizationId: string,
   modelId: string,
 ) {

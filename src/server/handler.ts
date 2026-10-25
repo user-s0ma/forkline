@@ -1,18 +1,17 @@
 import { createRequestHandler, RouterContextProvider, type ServerBuild } from "react-router";
-import { cloudflareContext } from "@/lib/util/cloudflare-context";
+import { appContext } from "@/lib/util/app-context";
 import api from "./api";
 import gateway from "./gateway";
 
 /**
- * 1つのリクエストを公開 API (/v1)、画面の API (/api)、画面 (React Router) に振り分ける。
- * Cloudflare Workers (app.ts) と Node のサーバー (src/server/app.ts) で共通に使う
+ * 1つのリクエストを公開 API (/v1)、画面の API (/api)、画面 (React Router) に振り分ける
  */
 export function createAppHandler(build: () => Promise<ServerBuild>, mode: string) {
   const requestHandler = createRequestHandler(build, mode);
 
   return async function handle(
     request: Request,
-    env: CloudflareEnv,
+    env: AppEnv,
     ctx: ExecutionContext,
   ): Promise<Response> {
     const url = new URL(request.url);
@@ -27,7 +26,7 @@ export function createAppHandler(build: () => Promise<ServerBuild>, mode: string
     }
 
     const context = new RouterContextProvider();
-    context.set(cloudflareContext, { env, ctx });
+    context.set(appContext, { env, ctx });
 
     const response = await requestHandler(request, context);
     try {

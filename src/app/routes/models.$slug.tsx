@@ -11,9 +11,9 @@ import {
 } from "@/components/store/ModelDetail";
 import { StorePlayground } from "@/components/store/StorePlayground";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { cloudflareContext } from "@/lib/util/cloudflare-context";
+import { appContext } from "@/lib/util/app-context";
 import { shareMeta } from "@/lib/share-meta";
-import { findPublicModel } from "@/workers/api/store";
+import { findPublicModel } from "@/server/api/store";
 import {
   localeFromMatches,
   localizeHref,
@@ -24,7 +24,7 @@ import {
 
 /** リンクを共有したときのタイトル・説明・OG 画像のために、名前と説明だけをサーバーで読む */
 export async function loader({ params, context }: Route.LoaderArgs) {
-  const { env } = context.get(cloudflareContext);
+  const { env } = context.get(appContext);
   try {
     const row = await findPublicModel(env, params.slug);
     return row ? { name: row.model.name, tagline: row.model.tagline } : null;

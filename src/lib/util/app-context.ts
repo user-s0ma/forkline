@@ -1,7 +1,7 @@
 import { createContext } from "react-router";
 
-export const cloudflareContext = createContext<{
-  env: CloudflareEnv;
+export const appContext = createContext<{
+  env: AppEnv;
   ctx: ExecutionContext;
 }>();
 

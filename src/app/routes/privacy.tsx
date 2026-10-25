@@ -84,7 +84,7 @@ const SECTIONS_JA: LegalSection[] = [
       },
       {
         label: "その他の業務委託先:",
-        text: "決済処理（Stripe）、ホスティングとセキュリティ確認（Cloudflare）、データベース（TiDB Cloud）、メール配信など、本サービスの提供に必要な業務を委託する事業者と情報を共有することがあります。",
+        text: "決済処理（Stripe）、計算資源とホスティング（Nebius）、セキュリティ確認とメール配信（Cloudflare）、データベース（TiDB Cloud）など、本サービスの提供に必要な業務を委託する事業者と情報を共有することがあります。",
       },
       {
         label: "クリエイターへの開示:",
@@ -183,7 +183,7 @@ const SECTIONS_EN: LegalSection[] = [
       },
       {
         label: "Other service providers:",
-        text: "We may share information with providers we rely on to run the Service, such as payment processing (Stripe), hosting and bot checks (Cloudflare), the database (TiDB Cloud) and email delivery.",
+        text: "We may share information with providers we rely on to run the Service, such as payment processing (Stripe), compute and hosting (Nebius), bot checks and email delivery (Cloudflare) and the database (TiDB Cloud).",
       },
       {
         label: "Disclosure to creators:",

@@ -10,7 +10,7 @@ import { retireOrganizationModels } from "../compute/retire";
  * ほかのメンバーがいる組織のオーナーなら、先にオーナーを渡してもらう
  */
 export async function leaveOrganizationsForDeletion(
-  env: CloudflareEnv,
+  env: AppEnv,
   userId: string,
   request?: Request,
 ): Promise<void> {

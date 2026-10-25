@@ -97,7 +97,7 @@ store.get("/models", async (c) => {
 });
 
 /** ストアに公開中のモデルを slug で探す (詳細ページ・OG 画像で共通) */
-export async function findPublicModel(env: CloudflareEnv, slug: string) {
+export async function findPublicModel(env: AppEnv, slug: string) {
   const [row] = await getDb(env)
     .select({ model: aiModel, publisherName: organization.name })
     .from(aiModel)

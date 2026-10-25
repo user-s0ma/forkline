@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   hasRequiredRole,
   resolveOrganizationAuthorization,
-} from "../src/workers/api/organizations/access";
+} from "../src/server/api/organizations/access";
 
 const session = {
   user: { id: "user-1", name: "利用者", email: "user@example.com" },

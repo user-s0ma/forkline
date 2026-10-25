@@ -10,7 +10,7 @@ import { ACTIVE_FINE_TUNE_STATUSES, cancelFineTune } from "./fine-tune";
  * API キーを無効にする。
  * GPU が動き続けたり、消えた組織のモデルがストアに残ったりしないように。
  */
-export async function retireOrganizationModels(env: CloudflareEnv, organizationId: string) {
+export async function retireOrganizationModels(env: AppEnv, organizationId: string) {
   const db = getDb(env);
   const deps = computeDeps(env);
   const jobs = await db

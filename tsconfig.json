@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -17,7 +17,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["@cloudflare/workers-types", "vite/client"]
+    "types": ["node", "vite/client"]
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", ".react-router/types/**/*"],
   "exclude": ["node_modules", "build"]

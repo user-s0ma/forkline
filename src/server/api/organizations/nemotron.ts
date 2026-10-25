@@ -186,7 +186,7 @@ function perItemHoldMicros(prompt: { prompt: ChatMessage[]; reference: string })
   );
 }
 
-async function loadFineTuneRow(env: CloudflareEnv, organizationId: string, id: string | null) {
+async function loadFineTuneRow(env: AppEnv, organizationId: string, id: string | null) {
   if (!id) return null;
   const [row] = await getDb(env)
     .select()
@@ -295,7 +295,7 @@ nemotron.post("/:organizationId/models/:modelId/evaluations", async (c) => {
   return c.json(toRunDto(run), 201);
 });
 
-async function loadRun(env: CloudflareEnv, organizationId: string, runId: string) {
+async function loadRun(env: AppEnv, organizationId: string, runId: string) {
   const [row] = await getDb(env)
     .select()
     .from(evalRun)

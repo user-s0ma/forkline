@@ -27,7 +27,7 @@ import {
   LORA_RANKS,
 } from "@/lib/models/dataset";
 import { listModels } from "@/lib/nebius/models";
-import { cloudflareContext } from "@/lib/util/cloudflare-context";
+import { appContext } from "@/lib/util/app-context";
 
 export function meta({ matches }: Route.MetaArgs): Route.MetaDescriptors {
   const locale = localeFromMatches(matches);
@@ -40,7 +40,7 @@ export function meta({ matches }: Route.MetaArgs): Route.MetaDescriptors {
 /** 自動停止までの分数は環境変数で変えられるので、サーバーで読んで文面に入れる */
 export function loader({ context }: Route.LoaderArgs) {
   try {
-    const { env } = context.get(cloudflareContext);
+    const { env } = context.get(appContext);
     return { idleMinutes: endpointIdleMinutes(env) };
   } catch {
     return { idleMinutes: DEFAULT_ENDPOINT_IDLE_MINUTES };

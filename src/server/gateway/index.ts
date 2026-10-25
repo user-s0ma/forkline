@@ -1,5 +1,6 @@
 import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { Hono } from "hono";
+import { takeRateLimit } from "./rate-limit";
 import { cors } from "hono/cors";
 import { bearerToken, hashApiKey, isApiKeyFormat } from "@/lib/billing/api-keys";
 import { getDb } from "@/lib/db/client";
@@ -13,7 +14,7 @@ import {
 } from "./runtime";
 
 type GatewayEnv = {
-  Bindings: CloudflareEnv;
+  Bindings: AppEnv;
   Variables: { organizationId: string; apiKeyId: string };
 };
 
@@ -56,7 +57,7 @@ gateway.use("*", async (c, next) => {
     );
   }
 
-  const { success } = await c.env.GATEWAY_RATE_LIMITER.limit({ key: record.id });
+  const success = takeRateLimit(record.id);
   if (!success) {
     return errorResponse(
       new GatewayError(429, "rate_limit_exceeded", "Too many requests"),

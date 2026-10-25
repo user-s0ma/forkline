@@ -56,17 +56,17 @@ curl https://forkline.ai/v1/chat/completions \
 
 ## Tech stack
 
-React Router 8 and Hono on Cloudflare Workers, TiDB Serverless (MySQL) with Drizzle, better-auth (email/password, Google, organizations), Cloudflare Turnstile, Stripe and Stripe Connect, i18n (Japanese and English).
+React Router 8 and Hono on Node.js, served from a Nebius CPU VM behind Caddy. TiDB Serverless (MySQL) with Drizzle, better-auth (email/password, Google, organizations), Cloudflare Turnstile, email through the Cloudflare Email Service REST API, Stripe and Stripe Connect, i18n (Japanese and English).
 
 ## Setup
 
-Requirements: Node.js 22, a Cloudflare account, a TiDB Serverless database, a Stripe account, and a Nebius AI Cloud project.
+Requirements: Node.js 22, a TiDB Serverless database, a Stripe account, a Nebius AI Cloud project, and a Cloudflare account for Turnstile and email.
 
 1. **Install**
    ```bash
    npm install
    ```
-2. **Configure** – Copy `.dev.vars.example` to `.dev.vars` and fill in the values. In production, set the same values with `wrangler secret put`. `SECRET_ENCRYPTION_KEY` encrypts the stored Nebius endpoint tokens; changing it makes existing tokens unreadable.
+2. **Configure** – Copy `.env.example` to `.env` and fill in the values. `SECRET_ENCRYPTION_KEY` encrypts the stored Nebius endpoint tokens; changing it makes existing tokens unreadable.
 3. **Database**
    ```bash
    npm run db:migrate
@@ -79,19 +79,21 @@ Requirements: Node.js 22, a Cloudflare account, a TiDB Serverless database, a St
    ```bash
    npm run dev
    ```
-7. **Deploy**
+   `server.mjs` runs Vite in middleware mode. The every-minute sweep (training status, endpoint billing and idle stop) only runs in production; set `RUN_CRON=1` to run it locally.
+7. **Production**
    ```bash
-   npm run deploy
+   npm run build
+   npm start
    ```
-   `wrangler.jsonc` defines the R2 bucket, the email binding and a cron trigger that runs every minute (training status, endpoint billing and idle stop).
+   `server.mjs` serves `build/`, runs the sweep every minute and keeps the gateway rate limit in memory (one process).
 
-### Running on a Nebius VM (production)
+### Deploying to a Nebius VM
 
-The Nebius control-plane API (`auth.eu.nebius.com`, `api.nebius.cloud`) is served from addresses routed through Cloudflare, and Cloudflare Workers cannot open connections to them (requests end in `522`). Token Factory and endpoint URLs are reachable, but starting jobs and endpoints is not. So production runs the same code as a Node server on a Nebius CPU VM:
+- `deploy/setup.sh` installs Node 22, Caddy (HTTPS) and the app on Ubuntu 24.04; run it from cloud-init when creating the VM.
+- `deploy/forkline.env.example` lists the settings for `/etc/forkline/forkline.env`. `deploy/fill-env.mjs` fills a copy from your `.env`, and `deploy/push-env.sh` sends it to the VM and restarts the service.
+- `deploy/update.sh` pulls `main`, rebuilds and restarts.
 
-- `npm run build:node` builds into `build-node/` with `vite.node.config.ts` (server entry `src/server/app.ts`).
-- `server.mjs` serves it and replaces the Workers bindings: the cron runs in-process every minute, the gateway rate limit is counted in memory, and email goes through a small relay Worker (`deploy/mail-relay`) that keeps using Cloudflare `send_email`.
-- `deploy/setup.sh` installs Node 22, Caddy (HTTPS) and the app on Ubuntu 24.04; `deploy/forkline.env.example` lists the settings; `deploy/update.sh` pulls `main`, rebuilds and restarts.
+Why a VM: the Nebius control-plane API (`auth.eu.nebius.com`, `api.nebius.cloud`) is served from addresses routed through Cloudflare, so edge runtimes on Cloudflare cannot reach it (requests end in `522`).
 
 ## Development
 
@@ -107,9 +109,9 @@ npm test
 | `src/lib/compute/` | Fine-tune and endpoint lifecycle, credit holds and settlement |
 | `src/lib/nemotron/` | Dataset builder, evaluation and model card with Nemotron on Token Factory |
 | `src/lib/billing/` | Wallet and ledger, pricing, Stripe, API keys |
-| `src/workers/gateway/` | OpenAI-compatible API (`/v1`) |
-| `src/workers/api/` | Console and store API |
-| `src/workers/scheduled.ts` | Cron: training status, endpoint billing, idle stop |
+| `src/server/gateway/` | OpenAI-compatible API (`/v1`) |
+| `src/server/api/` | Console and store API |
+| `src/server/scheduled.ts` | Cron: training status, endpoint billing, idle stop |
 | `src/app/` | Pages (landing, store, docs, console) |
 | `nebius-workers/` | Training and serving container images |
 | `drizzle/` | Database migrations |

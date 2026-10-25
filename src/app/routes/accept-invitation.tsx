@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/accept-invitation";
 import { auth } from "@/lib/auth/server";
 import { authClient } from "@/lib/auth/client";
-import { cloudflareContext } from "@/lib/util/cloudflare-context";
+import { appContext } from "@/lib/util/app-context";
 import { LogoMark } from "@/components/ui/LogoMark";
 
 type InvitationDetail = {
@@ -28,7 +28,7 @@ const ROLE_KEYS: Record<string, string> = {
 };
 
 export async function loader({ request, params, context }: Route.LoaderArgs) {
-  const { env } = context.get(cloudflareContext);
+  const { env } = context.get(appContext);
   const session = await auth(env, new URL(request.url).origin).api.getSession({
     headers: request.headers,
   });

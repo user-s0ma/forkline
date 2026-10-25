@@ -91,12 +91,12 @@ function endpointPage(db: ReturnType<typeof getDb>, startedAt: Date, after: Mode
 }
 
 /**
- * 1分ごとの見回り (wrangler.jsonc の triggers.crons)。
+ * 1分ごとの見回り (server.mjs が回す)。
  * - 終わっていない学習の状態を Nebius に問い合わせ、終わっていれば精算する
  * - 動いているエンドポイントの GPU 代を請求し、待ち時間を過ぎたもの・残高が尽きた組織のものを止める
  * 件数が多くても全部を見られるよう、ページごとに読み進める
  */
-export async function runScheduled(env: CloudflareEnv) {
+export async function runScheduled(env: AppEnv) {
   const db = getDb(env);
   const deps = computeDeps(env);
   const startedAt = new Date();

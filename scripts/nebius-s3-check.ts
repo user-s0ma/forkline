@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { s3Exists, s3Put } from "../src/lib/nebius/s3";
 
 const env: Record<string, string> = {};
-for (const line of readFileSync(".dev.vars", "utf8").split(/\r?\n/)) {
+for (const line of readFileSync(".env", "utf8").split(/\r?\n/)) {
   const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
   if (m) env[m[1]] = m[2].replace(/^"|"$/g, "");
 }

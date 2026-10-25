@@ -61,7 +61,7 @@ function consolePath(c: { req: { url: string } }, organizationId: string, page: 
 }
 
 /** 学習とエンドポイントのために仮押さえしている額 */
-async function heldMicros(env: CloudflareEnv, organizationId: string) {
+async function heldMicros(env: AppEnv, organizationId: string) {
   const db = getDb(env);
   const [jobs, endpoints] = await Promise.all([
     db
@@ -87,7 +87,7 @@ async function heldMicros(env: CloudflareEnv, organizationId: string) {
 }
 
 /** 保留中の売上: 直近 EARNINGS_HOLD_DAYS 日に計上した売上 */
-async function recentEarningsMicros(env: CloudflareEnv, organizationId: string) {
+async function recentEarningsMicros(env: AppEnv, organizationId: string) {
   const days = earningsHoldDays(env);
   if (days <= 0) return 0;
   const since = new Date(Date.now() - days * DAY_MS);
@@ -257,7 +257,7 @@ billing.get("/:organizationId/usage", async (c) => {
 });
 
 async function dailySeries(
-  env: CloudflareEnv,
+  env: AppEnv,
   side: "consumer" | "publisher",
   organizationId: string,
 ) {

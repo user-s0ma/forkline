@@ -7,7 +7,7 @@ import { applyLedgerEntry, getWallet, updateWallet } from "./wallet";
 
 export const TOPUP_METADATA_KIND = "credit_topup";
 
-export function getStripe(env: CloudflareEnv) {
+export function getStripe(env: AppEnv) {
   return new Stripe(env.STRIPE_SECRET_KEY, {
     httpClient: Stripe.createFetchHttpClient(),
   });
@@ -15,7 +15,7 @@ export function getStripe(env: CloudflareEnv) {
 
 /** 組織の Stripe の顧客。クレジットの購入は組織単位で記録する */
 export async function ensureStripeCustomer(
-  env: CloudflareEnv,
+  env: AppEnv,
   stripe: Stripe,
   organizationId: string,
   email: string,
@@ -62,7 +62,7 @@ export function isPayoutReady(account: Stripe.Account) {
 
 /** 決済完了したチェックアウトを組織のクレジットに反映する。セッションIDで冪等。 */
 export async function fulfillTopup(
-  env: CloudflareEnv,
+  env: AppEnv,
   session: Stripe.Checkout.Session,
 ) {
   if (session.metadata?.kind !== TOPUP_METADATA_KIND) return "ignored" as const;
@@ -81,7 +81,7 @@ export async function fulfillTopup(
 }
 
 export async function syncConnectAccount(
-  env: CloudflareEnv,
+  env: AppEnv,
   account: Stripe.Account,
 ) {
   const organizationId = account.metadata?.organizationId;
@@ -117,7 +117,7 @@ async function topupOrganizationOf(
  * マイナスの間は呼び出しも学習もできない)。返金ごとに refund の ID で一度だけ
  */
 export async function applyChargeRefunds(
-  env: CloudflareEnv,
+  env: AppEnv,
   stripe: Pick<Stripe, "paymentIntents" | "refunds">,
   charge: Stripe.Charge,
   apply: LedgerApply = applyLedgerEntry,
@@ -144,7 +144,7 @@ export async function applyChargeRefunds(
 
 /** チャージバック (異議申し立て) が起きたら、その額をクレジットから引く。勝ったら戻す */
 export async function applyDispute(
-  env: CloudflareEnv,
+  env: AppEnv,
   stripe: Pick<Stripe, "paymentIntents">,
   dispute: Stripe.Dispute,
   outcome: "created" | "won",

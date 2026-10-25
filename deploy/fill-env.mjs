@@ -1,7 +1,7 @@
-// deploy/prod.env の空の項目を、手元の .dev.vars と deploy/relay-secret.env から埋める。値は画面に出さない。
+// deploy/prod.env の空の項目を、手元の .env から埋める。値は画面に出さない。
 //   node deploy/fill-env.mjs
 // 手元の開発と本番は同じ DB と Nebius を使うので、多くはそのまま使える。最後に、まだ空の項目の名前だけを出す
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const PROD = "deploy/prod.env";
 const parse = (file) =>
@@ -12,13 +12,9 @@ const parse = (file) =>
       .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace(/^"|"$/g, "")]),
   );
 
-const dev = parse(".dev.vars");
+const dev = parse(".env");
 // 手元の値のうち、本番では使わないもの
 delete dev.VITE_PUBLIC_APP_URL;
-const extra = {
-  MAIL_RELAY_URL: "https://forkline-mail-relay.magnificentrue.workers.dev",
-  MAIL_RELAY_SECRET: existsSync("deploy/relay-secret.env") ? readFileSync("deploy/relay-secret.env", "utf8").trim() : "",
-};
 
 const filled = [];
 const lines = readFileSync(PROD, "utf8")
@@ -26,7 +22,7 @@ const lines = readFileSync(PROD, "utf8")
   .map((line) => {
     const m = line.match(/^([A-Z0-9_]+)=$/);
     if (!m) return line;
-    const value = extra[m[1]] || dev[m[1]] || "";
+    const value = dev[m[1]] || "";
     if (!value) return line;
     filled.push(m[1]);
     // systemd の EnvironmentFile は1行1項目なので、改行は \n と書く。

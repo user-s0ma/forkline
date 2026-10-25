@@ -227,5 +227,6 @@ export function createUsageTapStream(
     async cancel() {
       await finish(true);
     },
-  });
+    // 呼び出し側が途中で切ったときの cancel は Node の TransformStream が呼ぶが、TypeScript の型にはまだない
+  } as Transformer<Uint8Array, Uint8Array> & { cancel(): Promise<void> });
 }

@@ -1,62 +1,37 @@
-// Forkline を Node のサーバーとして動かす (本番は Nebius の VM の上)。
-//   npm run build:node && node server.mjs
-// Cloudflare Workers のバインディングの代わりをここで用意する:
-//   EMAIL                 メール送信の中継 Worker (deploy/mail-relay) に送る
-//   GATEWAY_RATE_LIMITER  API キーごとの回数制限をこのプロセスの中で数える
-//   triggers.crons        1分ごとの見回りをこのプロセスの中で回す
+// Forkline のサーバー。本番は Nebius の VM の上で、前段の Caddy から受ける。
+//   本番: npm run build && npm start   (NODE_ENV=production)
+//   開発: npm run dev                   (Vite を中に入れて、変更をその場で反映する)
 // 設定は環境変数から読む (deploy/forkline.env.example)。
-import { serve } from "@hono/node-server";
+// 1分ごとの見回り (学習の状態、エンドポイントの GPU 代の請求、使われていないものの停止) もこのプロセスで回す。
+import { createServer } from "node:http";
+import { getRequestListener } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
-import { handle, runScheduled } from "./build-node/server/index.js";
 
-const PORT = Number(process.env.PORT ?? 3000);
-const CLIENT_DIR = "./build-node/client";
+for (const key of ["PORT", "HOST"]) {
+  if (!process.env[key]) throw new Error(`${key} を設定してください`);
+}
+const PORT = Number(process.env.PORT);
+const HOST = process.env.HOST;
+const DEV = process.env.NODE_ENV !== "production";
+const CLIENT_DIR = "./build/client";
 
-/** env.EMAIL.send と同じ形で受け取り、中継の Worker に渡す */
-function mailRelay() {
-  return {
-    async send(message) {
-      const url = process.env.MAIL_RELAY_URL;
-      const secret = process.env.MAIL_RELAY_SECRET;
-      if (!url || !secret) throw new Error("MAIL_RELAY_URL と MAIL_RELAY_SECRET を設定してください");
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
-        body: JSON.stringify(message),
-        signal: AbortSignal.timeout(15_000),
-      });
-      if (!res.ok) throw new Error(`メールを送れませんでした (${res.status} ${(await res.text()).slice(0, 200)})`);
-    },
+let vite;
+let app;
+if (DEV) {
+  const { createServer: createViteServer } = await import("vite");
+  vite = await createViteServer({ server: { middlewareMode: true }, appType: "custom" });
+  // 呼ばれるたびに読み直す (Vite が変更を反映する)
+  const load = () => vite.ssrLoadModule("./src/server/app.ts");
+  app = {
+    handle: async (...args) => (await load()).handle(...args),
+    runScheduled: async (...args) => (await load()).runScheduled(...args),
   };
+} else {
+  app = await import("./build/server/index.js");
 }
 
-/** wrangler.jsonc の ratelimits と同じ (60秒に600回)。プロセスが1つなので、メモリーで数える */
-function rateLimiter(limit, periodSeconds) {
-  const windows = new Map();
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, w] of windows) if (now - w.start >= periodSeconds * 1000) windows.delete(key);
-  }, periodSeconds * 1000).unref();
-  return {
-    async limit({ key }) {
-      const now = Date.now();
-      let w = windows.get(key);
-      if (!w || now - w.start >= periodSeconds * 1000) {
-        w = { start: now, count: 0 };
-        windows.set(key, w);
-      }
-      w.count += 1;
-      return { success: w.count <= limit };
-    },
-  };
-}
-
-const env = {
-  ...process.env,
-  EMAIL: mailRelay(),
-  GATEWAY_RATE_LIMITER: rateLimiter(600, 60),
-};
+const env = process.env;
 
 /** waitUntil に渡された処理は、応答を返したあともそのまま走らせる */
 const ctx = {
@@ -69,7 +44,7 @@ const ctx = {
 
 /**
  * 前段の Caddy が付けた X-Forwarded-Proto / X-Forwarded-For から、元の URL と接続元の IP を戻す。
- * 接続元の IP は better-auth が cf-connecting-ip から読むので、利用者が送ってきた値は捨てて付け直す
+ * 接続元の IP は better-auth が x-real-ip から読むので、利用者が送ってきた値は捨てて付け直す
  */
 function toAppRequest(raw, incoming) {
   const url = new URL(raw.url);
@@ -78,8 +53,8 @@ function toAppRequest(raw, incoming) {
   const headers = new Headers(raw.headers);
   const forwarded = raw.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const ip = forwarded || incoming?.socket?.remoteAddress;
-  headers.delete("cf-connecting-ip");
-  if (ip) headers.set("cf-connecting-ip", ip);
+  headers.delete("x-real-ip");
+  if (ip) headers.set("x-real-ip", ip);
   const hasBody = raw.method !== "GET" && raw.method !== "HEAD";
   return new Request(url, {
     method: raw.method,
@@ -90,22 +65,27 @@ function toAppRequest(raw, incoming) {
   });
 }
 
-const app = new Hono();
+const server = new Hono();
 
-// ビルドした静的ファイル。名前に版が入っているので長く覚えさせる
-// (serveStatic の onFound は応答を作ったあとに呼ばれ、ヘッダーが付かないので、後から付ける)
-app.use("/assets/*", async (c, next) => {
-  await next();
-  if (c.res.status === 200) c.res.headers.set("Cache-Control", "public, max-age=31536000, immutable");
-});
-app.use("*", serveStatic({ root: CLIENT_DIR }));
+if (!DEV) {
+  // ビルドした静的ファイル。名前に版が入っているので長く覚えさせる
+  // (serveStatic の onFound は応答を作ったあとに呼ばれ、ヘッダーが付かないので、後から付ける)
+  server.use("/assets/*", async (c, next) => {
+    await next();
+    if (c.res.status === 200) c.res.headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  });
+  server.use("*", serveStatic({ root: CLIENT_DIR }));
+}
 
-app.all("*", (c) => handle(toAppRequest(c.req.raw, c.env?.incoming), env, ctx));
+server.all("*", (c) => app.handle(toAppRequest(c.req.raw, c.env?.incoming), env, ctx));
 
 // 全体の Response を差し替えない (差し替えると fetch の応答が instanceof Response にならず、OG 画像の作成が失敗する)
-const server = serve({ fetch: app.fetch, port: PORT, hostname: process.env.HOST ?? "127.0.0.1", overrideGlobalObjects: false }, (info) => {
-  console.log(`forkline: http://${info.address}:${info.port}`);
+const listener = getRequestListener(server.fetch, { overrideGlobalObjects: false });
+const http = createServer((req, res) => {
+  if (vite) vite.middlewares(req, res, () => listener(req, res));
+  else listener(req, res);
 });
+http.listen(PORT, HOST, () => console.log(`forkline: http://${HOST}:${PORT}${DEV ? " (dev)" : ""}`));
 
 // 1分ごとの見回り。前の回が終わっていなければ飛ばす
 let sweeping = false;
@@ -113,14 +93,15 @@ async function sweep() {
   if (sweeping) return;
   sweeping = true;
   try {
-    await runScheduled(env);
+    await app.runScheduled(env);
   } catch (error) {
     console.error("見回りに失敗しました:", error);
   } finally {
     sweeping = false;
   }
 }
-if (process.env.DISABLE_CRON !== "1") {
+// 手元の開発は本番と同じ DB を使うので、見回りは本番だけで回す (開発で回すときは RUN_CRON=1)
+if (!DEV || process.env.RUN_CRON === "1") {
   setTimeout(() => {
     sweep();
     setInterval(sweep, 60_000);
@@ -129,7 +110,8 @@ if (process.env.DISABLE_CRON !== "1") {
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.on(signal, () => {
-    server.close(() => process.exit(0));
+    http.close(() => process.exit(0));
+    vite?.close();
     setTimeout(() => process.exit(0), 10_000).unref();
   });
 }

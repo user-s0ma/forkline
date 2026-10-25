@@ -15,13 +15,13 @@ import {
   createUsageTapStream,
   readUsage,
   splitCompletionThinking,
-} from "../src/workers/gateway/sse";
+} from "../src/server/gateway/sse";
 import {
   capTokens,
   chatRequestSchema,
   errorResponse,
   GatewayError,
-} from "../src/workers/gateway/runtime";
+} from "../src/server/gateway/runtime";
 
 test("APIキーは形式チェックを通り、ハッシュは決定的", async () => {
   const { key, prefix, keyHash } = await generateApiKey();

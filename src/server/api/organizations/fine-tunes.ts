@@ -196,7 +196,7 @@ fineTunes.post("/:organizationId/models/:modelId/fine-tunes", async (c) => {
   return c.json(toFineTuneDto(result.row), 201);
 });
 
-async function loadFineTune(env: CloudflareEnv, organizationId: string, id: string) {
+async function loadFineTune(env: AppEnv, organizationId: string, id: string) {
   const [row] = await getDb(env)
     .select()
     .from(fineTune)

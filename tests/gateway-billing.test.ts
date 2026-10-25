@@ -22,8 +22,8 @@ import {
   upstreamBody,
   type ChatRequest,
   type Invocation,
-} from "../src/workers/gateway/runtime";
-import { forEachPage } from "../src/workers/scheduled";
+} from "../src/server/gateway/runtime";
+import { forEachPage } from "../src/server/scheduled";
 import type { ModelRow, NebiusClient } from "../src/lib/compute/types";
 import {
   fakeClock,
@@ -71,7 +71,7 @@ function harness(model: ModelRow, consumerBalance: number, nebiusOverrides = {})
   const settled: SettleInput[] = [];
   const pending: Promise<unknown>[] = [];
   const invocation = (overrides: Partial<Invocation> = {}): Invocation => ({
-    env: {} as CloudflareEnv,
+    env: {} as AppEnv,
     waitUntil: (promise) => pending.push(promise),
     model,
     config: parseModelConfig(model.config)!,
@@ -386,7 +386,7 @@ type Applied = Parameters<typeof import("../src/lib/billing/wallet").applyLedger
 
 function fakeLedger() {
   const entries: Applied[] = [];
-  const apply = async (_env: CloudflareEnv, entry: Applied) => {
+  const apply = async (_env: AppEnv, entry: Applied) => {
     if (entries.some((other) => other.kind === entry.kind && other.referenceId === entry.referenceId)) {
       return "duplicate" as const;
     }
@@ -413,8 +413,8 @@ const fakeStripe = {
 test("M4: 返金は返金ごとに一度だけ、クレジットから引く (マイナスになってもよい)", async () => {
   const { entries, apply } = fakeLedger();
   const charge = { id: "ch_1", metadata: {}, payment_intent: "pi_1" } as unknown as Stripe.Charge;
-  assert.equal(await applyChargeRefunds({} as CloudflareEnv, fakeStripe, charge, apply), 2);
-  assert.equal(await applyChargeRefunds({} as CloudflareEnv, fakeStripe, charge, apply), 0);
+  assert.equal(await applyChargeRefunds({} as AppEnv, fakeStripe, charge, apply), 2);
+  assert.equal(await applyChargeRefunds({} as AppEnv, fakeStripe, charge, apply), 0);
   assert.deepEqual(
     entries.map((entry) => [entry.organizationId, entry.kind, entry.amountMicros, entry.referenceId, entry.allowNegative]),
     [
@@ -427,14 +427,14 @@ test("M4: 返金は返金ごとに一度だけ、クレジットから引く (�
 test("M4: チャージバックは起きたら引き、勝ったら戻す。チャージ以外の支払いは無視する", async () => {
   const { entries, apply } = fakeLedger();
   const dispute = { id: "dp_1", amount: 3_000, metadata: {}, payment_intent: "pi_1" } as unknown as Stripe.Dispute;
-  assert.equal(await applyDispute({} as CloudflareEnv, fakeStripe, dispute, "created", apply), "applied");
-  assert.equal(await applyDispute({} as CloudflareEnv, fakeStripe, dispute, "created", apply), "duplicate");
-  assert.equal(await applyDispute({} as CloudflareEnv, fakeStripe, dispute, "won", apply), "applied");
+  assert.equal(await applyDispute({} as AppEnv, fakeStripe, dispute, "created", apply), "applied");
+  assert.equal(await applyDispute({} as AppEnv, fakeStripe, dispute, "created", apply), "duplicate");
+  assert.equal(await applyDispute({} as AppEnv, fakeStripe, dispute, "won", apply), "applied");
   assert.deepEqual(entries.map((entry) => entry.amountMicros), [-3_000_000_000, 3_000_000_000]);
   const other = {
     paymentIntents: { retrieve: async () => ({ metadata: {} }) },
   } as unknown as Stripe;
-  assert.equal(await applyDispute({} as CloudflareEnv, other, dispute, "created", apply), "ignored");
+  assert.equal(await applyDispute({} as AppEnv, other, dispute, "created", apply), "ignored");
 });
 
 test("M4: 直近の売上は保留にし、出金できる分から除く", () => {

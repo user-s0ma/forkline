@@ -6,7 +6,7 @@ export type OrganizationAuthorization = {
 };
 
 export type ApiEnv = {
-  Bindings: CloudflareEnv;
+  Bindings: AppEnv;
   Variables: {
     authorization: OrganizationAuthorization;
   };

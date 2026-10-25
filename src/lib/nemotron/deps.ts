@@ -9,7 +9,7 @@ import { readSummary } from "./evaluation";
 import { EVAL_CLAIM_TIMEOUT_MS, type EvalItemRow, type EvalStore } from "./run-evaluation";
 
 /** 本番の Token Factory と残高をつないだ NemotronDeps */
-export function nemotronDeps(env: CloudflareEnv): NemotronDeps {
+export function nemotronDeps(env: AppEnv): NemotronDeps {
   return {
     env,
     chat: tokenFactoryChat,
@@ -19,7 +19,7 @@ export function nemotronDeps(env: CloudflareEnv): NemotronDeps {
 }
 
 /** 評価の問題を DB に置く EvalStore */
-export function evalStore(env: CloudflareEnv): EvalStore {
+export function evalStore(env: AppEnv): EvalStore {
   const db = getDb(env);
   return {
     async claim(runId, limit, now) {
@@ -95,7 +95,7 @@ export function evalStore(env: CloudflareEnv): EvalStore {
 }
 
 /** その LoRA (学習) の、いちばん新しい成功した評価。ストアとモデルカードの下書きで使う */
-export async function latestEvaluationFor(env: CloudflareEnv, modelId: string, fineTuneId: string) {
+export async function latestEvaluationFor(env: AppEnv, modelId: string, fineTuneId: string) {
   const [row] = await getDb(env)
     .select()
     .from(evalRun)
