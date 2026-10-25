@@ -19,3 +19,4 @@ worker-configuration.d.ts
 
 # scripts/nebius-e2e.ts の途中の状態
 .e2e-state.json
+/deploy/*.env
