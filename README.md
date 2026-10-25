@@ -85,6 +85,14 @@ Requirements: Node.js 22, a Cloudflare account, a TiDB Serverless database, a St
    ```
    `wrangler.jsonc` defines the R2 bucket, the email binding and a cron trigger that runs every minute (training status, endpoint billing and idle stop).
 
+### Running on a Nebius VM (production)
+
+The Nebius control-plane API (`auth.eu.nebius.com`, `api.nebius.cloud`) is served from addresses routed through Cloudflare, and Cloudflare Workers cannot open connections to them (requests end in `522`). Token Factory and endpoint URLs are reachable, but starting jobs and endpoints is not. So production runs the same code as a Node server on a Nebius CPU VM:
+
+- `npm run build:node` builds into `build-node/` with `vite.node.config.ts` (server entry `src/server/app.ts`).
+- `server.mjs` serves it and replaces the Workers bindings: the cron runs in-process every minute, the gateway rate limit is counted in memory, and email goes through a small relay Worker (`deploy/mail-relay`) that keeps using Cloudflare `send_email`.
+- `deploy/setup.sh` installs Node 22, Caddy (HTTPS) and the app on Ubuntu 24.04; `deploy/forkline.env.example` lists the settings; `deploy/update.sh` pulls `main`, rebuilds and restarts.
+
 ## Development
 
 ```bash

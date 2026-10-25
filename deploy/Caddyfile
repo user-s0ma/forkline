@@ -1,0 +1,13 @@
+# Forkline の前段。HTTPS の証明書を Let's Encrypt から取り、Node (127.0.0.1:3000) に渡す。
+# SITE_ADDRESS は /etc/default/caddy で決める (例: "forkline.ai, 195-242-10-1.sslip.io")
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3000 {
+		# 呼び出し側が送ってきた転送ヘッダーは信用せず、Caddy が付け直す
+		header_up -Cf-Connecting-Ip
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+}

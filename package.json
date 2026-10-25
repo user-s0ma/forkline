@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "dotenv -e .dev.vars -- vite dev",
     "build": "vite build",
+    "build:node": "dotenv -v FORKLINE_TARGET=node -- vite build --config vite.node.config.ts",
     "start": "vite preview",
+    "start:node": "node server.mjs",
     "lint": "eslint src/ tests/",
     "test": "tsx --test tests/*.test.ts",
     "preview": "dotenv -e .dev.vars -- npm run build && wrangler dev",
@@ -21,6 +23,7 @@
     "@cf-wasm/og": "^0.5.0",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/noto-sans-jp": "^5.2.10",
+    "@hono/node-server": "^1.19.17",
     "@marsidev/react-turnstile": "^1.5.3",
     "@tanstack/react-query": "^5.101.2",
     "@tidbcloud/serverless": "^0.3.0",

@@ -1,0 +1,23 @@
+[Unit]
+Description=Forkline
+After=network-online.target
+Wants=network-online.target
+# 秘密の設定を入れるまでは起動しない
+ConditionFileNotEmpty=/etc/forkline/forkline.env
+
+[Service]
+User=forkline
+Group=forkline
+WorkingDirectory=/opt/forkline
+EnvironmentFile=/etc/forkline/forkline.env
+Environment=NODE_ENV=production PORT=3000 HOST=127.0.0.1
+ExecStart=/usr/bin/node server.mjs
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

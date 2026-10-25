@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { cache, GoogleFont, ImageResponse } from "@cf-wasm/og/workerd";
+import { cache, GoogleFont, ImageResponse } from "@cf-wasm/og";
 import { OG_LOCALE, translate } from "@/lib/i18n";
 import { findPublicModel } from "./store";
 import type { ApiEnv } from "./types";
