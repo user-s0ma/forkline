@@ -375,7 +375,16 @@ function Faq({ idleMinutes }: { idleMinutes: number }) {
 }
 
 /** 審査員向けの帯: デモのモデルの評価と入口 */
-/** デモのモデルの評価 (学習に使わなかった26問を、ベースの Nemotron と比べて Nemotron が採点) */
+/**
+ * デモのモデルの評価 (学習に使わなかった26問を、ベースの Nemotron と比べて Nemotron が採点)。
+ * 右は、その評価で実際に出た1問と、両方の答えと点数 (2026-10-25 の評価の記録から)
+ */
+const SAMPLE_QUESTION = {
+  question: "Wednesday open?",
+  base: { answer: "We are open Wednesday, from 11 AM to 3 PM!", score: 1 },
+  fineTuned: { answer: "No, the bakery is closed every Wednesday, including public holidays.", score: 5 },
+};
+
 function DemoModelScores() {
   const { t } = useTranslation();
   const stats = [
@@ -383,10 +392,14 @@ function DemoModelScores() {
     ["2.19", "base"],
     ["24 / 26", "wins"],
   ] as const;
+  const answers = [
+    ["base", SAMPLE_QUESTION.base],
+    ["fineTuned", SAMPLE_QUESTION.fineTuned],
+  ] as const;
   return (
     <section className="border-t border-line">
-      <div className="ui-container py-12 lg:py-16">
-        <dl className="grid max-w-xl grid-cols-3 gap-4">
+      <div className="ui-container grid gap-12 py-12 lg:grid-cols-2 lg:items-center lg:py-16">
+        <dl className="grid grid-cols-3 gap-4">
           {stats.map(([value, key]) => (
             <div key={key}>
               <dd className="text-3xl font-semibold tracking-tight tabular-nums">{value}</dd>
@@ -394,6 +407,23 @@ function DemoModelScores() {
             </div>
           ))}
         </dl>
+        <div className="space-y-3 text-sm">
+          <p className="ml-auto w-fit rounded-xl bg-brand-tint px-3 py-2 text-ink">{SAMPLE_QUESTION.question}</p>
+          {answers.map(([key, item]) => (
+            <div key={key}>
+              <p className="text-xs text-ink-mute">
+                {t(`landing.judges.stats.${key}`)} · {item.score} / 5
+              </p>
+              <p
+                className={`mt-1 w-fit max-w-[90%] rounded-xl border px-3 py-2 leading-6 ${
+                  key === "fineTuned" ? "border-brand-ink text-ink" : "border-line text-ink-soft"
+                }`}
+              >
+                {item.answer}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
