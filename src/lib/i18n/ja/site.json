@@ -205,11 +205,11 @@
       },
       "evalTitle": "デモのモデル：Midori Bakery FAQ（Nemotron 3 Nano 4B + LoRA）",
       "stats": {
-        "fineTuned": "微調整したモデルの平均点（1〜5）",
-        "base": "ベースの Nemotron の平均点",
-        "wins": "勝った問題（引き分け2、負け0）"
+        "fineTuned": "微調整したモデル",
+        "base": "ベースの Nemotron",
+        "wins": "勝った問題"
       },
-      "evalNote": "学習に使わずに取っておいた26問を両方のモデルに解かせ、Nemotron が模範解答と比べて採点しました。",
+      "evalNote": "1〜5点の平均です。学習に使わずに取っておいた26問を両方のモデルに解かせ、Nemotron が模範解答と比べて採点しました。引き分け2、負け0。",
       "devpost": "Devpost と動画 →",
       "github": "GitHub のソース →"
     }

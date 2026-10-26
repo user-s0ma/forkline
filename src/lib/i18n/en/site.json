@@ -205,11 +205,11 @@
       },
       "evalTitle": "Demo model: Midori Bakery FAQ (Nemotron 3 Nano 4B + LoRA)",
       "stats": {
-        "fineTuned": "Fine-tuned model, average score (1–5)",
-        "base": "Base Nemotron, average score",
-        "wins": "Questions won (2 ties, 0 losses)"
+        "fineTuned": "Fine-tuned model",
+        "base": "Base Nemotron",
+        "wins": "Questions won"
       },
-      "evalNote": "26 held-out questions, answered by both models and graded by Nemotron against the reference answers.",
+      "evalNote": "Average scores from 1 to 5 on 26 held-out questions, answered by both models and graded by Nemotron against the reference answers. 2 ties, 0 losses.",
       "devpost": "Devpost and video →",
       "github": "Source on GitHub →"
     }

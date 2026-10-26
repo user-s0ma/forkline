@@ -412,8 +412,10 @@ function ForJudges() {
             ))}
           </dl>
           <p className="mt-4 text-xs leading-5 text-ink-mute">{t("landing.judges.evalNote")}</p>
-          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div className="mt-8">
             <DemoButton />
+          </div>
+          <div className="mt-4 flex gap-5">
             <a href="https://devpost.com/software/forkline-w6jgys" className="text-sm font-semibold text-brand-ink hover:underline">
               {t("landing.judges.devpost")}
             </a>
