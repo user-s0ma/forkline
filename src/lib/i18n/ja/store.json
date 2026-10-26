@@ -50,7 +50,7 @@
       "requests": "{{n}} 回利用",
       "publishedAt": "{{date}} 公開",
       "baseModel": "ベース: {{model}}",
-      "about": "このモデルについて",
+      "about": "概要",
       "noDescription": "説明はまだありません。",
       "notFoundTitle": "モデルが見つかりません",
       "notFoundDescription": "非公開になったか、URLが間違っています。",
@@ -60,11 +60,11 @@
       "coldStart": "いまは停止中です。最初の呼び出しで起動し、数分間は 503 (Retry-After 付き) が返ります。"
     },
     "api": {
-      "title": "API で使う",
+      "title": "API",
       "copy": "コピー",
       "copied": "コピーしました",
       "copyFailed": "コピーできませんでした",
-      "createKey": "コンソールで API キーを発行する"
+      "createKey": "API キーを発行"
     },
     "playground": {
       "title": "プレイグラウンド",
@@ -72,7 +72,7 @@
       "messagePlaceholder": "メッセージを入力",
       "send": "送信",
       "sending": "生成中...",
-      "clear": "会話をクリア",
+      "clear": "クリア",
       "emptyChat": "メッセージを送ってモデルを試してみましょう。",
       "you": "あなた",
       "assistant": "モデル",
@@ -85,10 +85,9 @@
       "thought": "思考"
     },
     "evaluation": {
-      "title": "Nemotron による評価",
+      "title": "評価",
       "fineTuned": "このモデル",
       "base": "ベースの Nemotron",
-      "winRate": "勝率",
       "verdicts": {
         "better": "作者が取っておいた評価用の質問で、ベースモデルより高い点でした (符号検定 p = {{p}})。",
         "worse": "作者が取っておいた評価用の質問で、ベースモデルより低い点でした (符号検定 p = {{p}})。",

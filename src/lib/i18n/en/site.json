@@ -48,7 +48,7 @@
       "earn": "Earnings per token"
     },
     "steps": {
-      "title": "Five steps from data to earnings",
+      "title": "Five steps",
       "s1": {
         "title": "Train",
         "body": "Upload a chat-format JSONL, pick a Nemotron base model and start training. You pay for the GPU time the run actually used.",
@@ -87,10 +87,10 @@
         "body": "Users change the base_url in any OpenAI SDK and call your model. Streaming is supported."
       },
       "payout": {
-        "title": "Paid out through Stripe Connect",
+        "title": "Stripe Connect payouts",
         "body": "Earnings add up and can be paid out through Stripe Connect from ¥{{min}}."
       },
-      "splitTitle": "Where the user's payment goes",
+      "splitTitle": "Payment split",
       "splitCreator": "You",
       "splitFee": "Forkline fee"
     },
@@ -128,8 +128,7 @@
     },
     "models": {
       "title": "Published models",
-      "lead": "Pay from prepaid credits for what you call.",
-      "viewAll": "See all models",
+      "viewAll": "All models",
       "empty": "No models have been published yet.",
       "emptyCta": "Publish the first model",
       "free": "Free",
@@ -147,7 +146,7 @@
       "lead": "Point base_url at Forkline and set model to the model ID shown in the store.",
       "requestLabel": "Request",
       "responseLabel": "Response",
-      "docs": "Read the API docs",
+      "docs": "API docs",
       "prompt": "How do I return an item?"
     },
     "faq": {
@@ -171,14 +170,14 @@
     },
     "judges": {
       "title": "For hackathon judges",
-      "evalTitle": "Demo model: Midori Bakery FAQ (Nemotron 3 Nano 4B + LoRA)",
+      "evalTitle": "Demo model",
       "stats": {
         "fineTuned": "Fine-tuned model",
         "base": "Base Nemotron",
         "wins": "Questions won"
       },
-      "devpost": "Devpost and video →",
-      "github": "Source on GitHub →"
+      "devpost": "Devpost",
+      "github": "GitHub"
     }
   },
   "catalog": {

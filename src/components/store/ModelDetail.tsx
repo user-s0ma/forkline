@@ -139,11 +139,6 @@ function EvaluationSection({ evaluation }: { evaluation: PublicEvaluation }) {
       strong: true,
     },
     { label: t("store.evaluation.base"), value: `${evaluation.baseMean.toFixed(2)}`, strong: false },
-    {
-      label: t("store.evaluation.winRate"),
-      value: `${Math.round(evaluation.winRate * 100)}%`,
-      strong: false,
-    },
   ];
   return (
     <section>
@@ -152,7 +147,7 @@ function EvaluationSection({ evaluation }: { evaluation: PublicEvaluation }) {
         {t("store.evaluation.title")}
       </h2>
       <div className="glass glow-card mt-4 rounded-3xl p-5">
-        <dl className="grid grid-cols-3 gap-4">
+        <dl className="grid grid-cols-2 gap-4">
           {stats.map((stat) => (
             <div key={stat.label}>
               <dt className="text-xs text-ink-mute">{stat.label}</dt>

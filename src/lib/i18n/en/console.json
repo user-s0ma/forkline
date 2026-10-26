@@ -196,13 +196,13 @@
       "loadError": "Could not load the model",
       "notFoundTitle": "Model not found",
       "notFoundDescription": "It was deleted or belongs to someone else.",
-      "viewPublic": "View public page",
+      "viewPublic": "Public page",
       "tabsAria": "Model sections",
       "tabs": {
         "overview": "Overview",
         "training": "Train and deploy",
         "test": "Test",
-        "settings": "Settings and pricing",
+        "settings": "Settings",
         "evaluation": "Evaluate"
       },
       "unsaved": "You have unsaved changes",
@@ -234,7 +234,7 @@
     },
     "runtimeForm": {
       "title": "Runtime",
-      "maxOutputTokens": "Max output tokens per response",
+      "maxOutputTokens": "Max output tokens",
       "maxOutputTokensHint": "Larger max_tokens values from callers are capped to this. It also sets the maximum charge per call"
     },
     "pricing": {
@@ -266,7 +266,7 @@
       "barTitle": "{{day}}: {{requests}} requests / {{revenue}}"
     },
     "snippet": {
-      "title": "Call it with the API"
+      "title": "API"
     },
     "test": {
       "title": "Test",
@@ -470,7 +470,7 @@
       "truncated": "The file was cut to the maximum length"
     },
     "evaluation": {
-      "title": "Evaluate with Nemotron",
+      "title": "Evaluation",
       "description": "Sends each held-out question to your deployed model and to the base Nemotron on Nebius Token Factory, then Nemotron grades both answers against the reference answer (1–5). Your endpoint runs while this is in progress, and Token Factory usage is charged to your credits.",
       "run": "Run evaluation",
       "rerun": "Run again",
@@ -491,8 +491,8 @@
       "resume": "Resume",
       "stepFailed": "The evaluation could not continue",
       "startFailed": "Could not start the evaluation",
-      "fineTunedMean": "Your model (avg)",
-      "baseMean": "Base model (avg)",
+      "fineTunedMean": "Your model",
+      "baseMean": "Base model",
       "record": "Won / tied / lost",
       "recordValue": "{{wins}} / {{ties}} / {{losses}}",
       "verdicts": {
@@ -518,7 +518,7 @@
     "card": {
       "title": "Model card",
       "description": "Nemotron drafts the tagline, description and tags from your training data and the evaluation. Edit the draft, then move it to Settings and save.",
-      "draft": "Draft with Nemotron",
+      "draft": "Draft",
       "redraft": "Draft again",
       "drafting": "Drafting…",
       "needsDeploy": "Train and deploy the model first.",
@@ -528,9 +528,9 @@
       "applied": "Moved to Settings. Check it and save."
     },
     "demoGuide": {
-      "body": "Midori Bakery FAQ is Nemotron 3 Nano 4B fine-tuned with LoRA on a Nebius Serverless AI Job, using 231 chat examples that Nemotron on Token Factory wrote from a bakery FAQ. 26 questions were held out for evaluation. Below is a conversation with this model on its Nebius endpoint, recorded on {{date}}.",
-      "toEvaluation": "See the evaluation against base Nemotron →",
-      "toDeploy": "Deploy it and chat yourself →"
+      "body": "A conversation with this model, recorded on {{date}}.",
+      "toEvaluation": "Evaluation",
+      "toDeploy": "Deploy"
     }
   },
   "server": {

@@ -83,7 +83,7 @@
       "passwordLabel": "パスワード",
       "passwordPlaceholder": "8文字以上",
       "resendError": "確認メールを再送できませんでした",
-      "resendVerification": "確認メールを再送",
+      "resendVerification": "再送",
       "resending": "再送中…",
       "signupError": "アカウントを作成できませんでした",
       "signupTab": "新規登録",
@@ -95,7 +95,7 @@
       "demoError": "お試しを開けませんでした",
       "tryDemo": "デモアカウントで試す",
       "demoOpening": "デモアカウントを開いています...",
-      "orSignIn": "自分のアカウントで使う"
+      "orSignIn": "自分のアカウント"
     },
     "processing": "処理中…",
     "resetPassword": {

@@ -83,7 +83,7 @@
       "passwordLabel": "Password",
       "passwordPlaceholder": "At least 8 characters",
       "resendError": "Could not resend the verification email",
-      "resendVerification": "Resend verification email",
+      "resendVerification": "Resend",
       "resending": "Resending...",
       "signupError": "Could not create your account",
       "signupTab": "Sign up",
@@ -95,7 +95,7 @@
       "demoError": "Could not open the demo",
       "tryDemo": "Open the demo account",
       "demoOpening": "Opening the demo account...",
-      "orSignIn": "Or use your own account"
+      "orSignIn": "Your own account"
     },
     "processing": "Processing...",
     "resetPassword": {

@@ -50,7 +50,7 @@
       "requests": "{{n}} requests",
       "publishedAt": "Published {{date}}",
       "baseModel": "Base: {{model}}",
-      "about": "About this model",
+      "about": "About",
       "noDescription": "No description yet.",
       "notFoundTitle": "Model not found",
       "notFoundDescription": "It may have been unpublished, or the URL is wrong.",
@@ -60,11 +60,11 @@
       "coldStart": "The model is stopped right now. The first call starts it, and calls return 503 with Retry-After for a few minutes."
     },
     "api": {
-      "title": "Use it with the API",
+      "title": "API",
       "copy": "Copy",
       "copied": "Copied",
       "copyFailed": "Could not copy",
-      "createKey": "Create an API key in the console"
+      "createKey": "Create API key"
     },
     "playground": {
       "title": "Playground",
@@ -72,7 +72,7 @@
       "messagePlaceholder": "Type a message",
       "send": "Send",
       "sending": "Generating...",
-      "clear": "Clear conversation",
+      "clear": "Clear",
       "emptyChat": "Send a message to try the model.",
       "you": "You",
       "assistant": "Model",
@@ -85,10 +85,9 @@
       "thought": "Reasoning"
     },
     "evaluation": {
-      "title": "Evaluated by Nemotron",
+      "title": "Evaluation",
       "fineTuned": "This model",
       "base": "Base Nemotron",
-      "winRate": "Win rate",
       "verdicts": {
         "better": "Scored higher than the base model on the creator's held-out questions (sign test p = {{p}}).",
         "worse": "Scored lower than the base model on the creator's held-out questions (sign test p = {{p}}).",

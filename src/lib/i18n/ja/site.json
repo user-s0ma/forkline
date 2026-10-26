@@ -48,7 +48,7 @@
       "earn": "トークンごとに売上"
     },
     "steps": {
-      "title": "データから売上までの5つの手順",
+      "title": "5つの手順",
       "s1": {
         "title": "学習する",
         "body": "chat形式のJSONLを上げ、Nemotronを選んで学習を始めます。終わったら、実際に使ったGPU時間で精算します。",
@@ -87,10 +87,10 @@
         "body": "利用者はOpenAIのSDKの base_url を変えるだけで呼び出せます。ストリーミングにも対応しています。"
       },
       "payout": {
-        "title": "売上はStripe Connectで受け取る",
+        "title": "Stripe Connectで出金",
         "body": "売上はたまっていき、¥{{min}}からStripe Connectで出金できます。"
       },
-      "splitTitle": "利用者が払う価格の行き先",
+      "splitTitle": "価格の内訳",
       "splitCreator": "あなた",
       "splitFee": "Forklineの手数料"
     },
@@ -128,8 +128,7 @@
     },
     "models": {
       "title": "公開中のモデル",
-      "lead": "呼び出した分だけ、前払いのクレジットから払います。",
-      "viewAll": "すべてのモデルを見る",
+      "viewAll": "すべてのモデル",
       "empty": "まだ公開されたモデルはありません。",
       "emptyCta": "最初のモデルを公開する",
       "free": "無料",
@@ -147,7 +146,7 @@
       "lead": "base_url を Forkline に、model をストアに表示されるモデルIDにします。",
       "requestLabel": "リクエスト",
       "responseLabel": "レスポンス",
-      "docs": "APIドキュメントを読む",
+      "docs": "APIドキュメント",
       "prompt": "返品の手順を教えてください"
     },
     "faq": {
@@ -171,14 +170,14 @@
     },
     "judges": {
       "title": "ハッカソンの審査員の方へ",
-      "evalTitle": "デモのモデル：Midori Bakery FAQ（Nemotron 3 Nano 4B + LoRA）",
+      "evalTitle": "デモのモデル",
       "stats": {
         "fineTuned": "微調整したモデル",
         "base": "ベースの Nemotron",
         "wins": "勝った問題"
       },
-      "devpost": "Devpost と動画 →",
-      "github": "GitHub のソース →"
+      "devpost": "Devpost",
+      "github": "GitHub"
     }
   },
   "catalog": {

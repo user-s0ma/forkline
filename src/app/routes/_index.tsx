@@ -499,7 +499,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         <section className="border-t border-line">
           <div className="ui-container grid grid-cols-1 gap-10 py-16 lg:grid-cols-12 lg:gap-12 lg:py-24">
             <div className="lg:col-span-4">
-              <SectionTitle title={t("landing.models.title")} lead={t("landing.models.lead")} />
+              <SectionTitle title={t("landing.models.title")} />
             </div>
             <div className="lg:col-span-8">
               <LiveModels />

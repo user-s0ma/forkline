@@ -196,13 +196,13 @@
       "loadError": "モデルを読み込めませんでした",
       "notFoundTitle": "モデルが見つかりません",
       "notFoundDescription": "削除されたか、あなたのモデルではありません。",
-      "viewPublic": "公開ページを見る",
+      "viewPublic": "公開ページ",
       "tabsAria": "モデルの画面",
       "tabs": {
         "overview": "概要",
         "training": "学習とデプロイ",
         "test": "テスト",
-        "settings": "設定と料金",
+        "settings": "設定",
         "evaluation": "評価"
       },
       "unsaved": "保存していない変更があります",
@@ -234,7 +234,7 @@
     },
     "runtimeForm": {
       "title": "実行環境",
-      "maxOutputTokens": "1回の返答の上限 (トークン)",
+      "maxOutputTokens": "出力トークンの上限",
       "maxOutputTokensHint": "呼び出し側がこれより大きな max_tokens を指定しても、ここで抑えます。1回の料金の上限もこの長さで決まります"
     },
     "pricing": {
@@ -266,7 +266,7 @@
       "barTitle": "{{day}}: {{requests}} 回 / {{revenue}}"
     },
     "snippet": {
-      "title": "API で呼び出す"
+      "title": "API"
     },
     "test": {
       "title": "テスト",
@@ -470,7 +470,7 @@
       "truncated": "ファイルが長いので、上限までで切りました"
     },
     "evaluation": {
-      "title": "Nemotron で評価する",
+      "title": "評価",
       "description": "取っておいた評価用の質問を、デプロイしたモデルと Nebius Token Factory のベースの Nemotron の両方に解かせ、Nemotron が基準の答えと比べて 1〜5 で採点します。評価のあいだエンドポイントが動き、Token Factory の料金はあなたのクレジットから引かれます。",
       "run": "評価する",
       "rerun": "もう一度評価する",
@@ -491,8 +491,8 @@
       "resume": "続ける",
       "stepFailed": "評価を進められませんでした",
       "startFailed": "評価を始められませんでした",
-      "fineTunedMean": "このモデル (平均)",
-      "baseMean": "ベース (平均)",
+      "fineTunedMean": "このモデル",
+      "baseMean": "ベース",
       "record": "勝ち / 引き分け / 負け",
       "recordValue": "{{wins}} / {{ties}} / {{losses}}",
       "verdicts": {
@@ -518,7 +518,7 @@
     "card": {
       "title": "モデルカード",
       "description": "学習データと評価の結果から、Nemotron がキャッチコピー・説明・タグを下書きします。下書きを直してから設定に移し、保存してください。",
-      "draft": "Nemotron で下書きする",
+      "draft": "下書きする",
       "redraft": "下書きし直す",
       "drafting": "下書き中…",
       "needsDeploy": "先にモデルを学習してデプロイしてください。",
@@ -528,9 +528,9 @@
       "applied": "設定に移しました。確かめてから保存してください。"
     },
     "demoGuide": {
-      "body": "Midori Bakery FAQ は、Nemotron 3 Nano 4B を Nebius の Serverless AI Job で LoRA 微調整したモデルです。学習データは、パン屋の FAQ から Token Factory の Nemotron が書いた231件の会話です。26問は評価用に取っておきました。下は、{{date}} にこのモデルの Nebius のエンドポイントと話した記録です。",
-      "toEvaluation": "ベースの Nemotron との比較を見る →",
-      "toDeploy": "デプロイして自分で話す →"
+      "body": "{{date}} にこのモデルと話した記録です。",
+      "toEvaluation": "評価",
+      "toDeploy": "デプロイ"
     }
   },
   "server": {
