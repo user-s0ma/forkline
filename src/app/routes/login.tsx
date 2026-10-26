@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth/use-auth-turnstile";
 import { appContext } from "@/lib/util/app-context";
 import { LogoMark } from "@/components/ui/LogoMark";
+import { DemoButton } from "@/components/account/DemoButton";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { env } = context.get(appContext);
@@ -249,6 +250,12 @@ export default function Login() {
             </p>
           </section>
           <section className="ui-card p-2">
+            <div className="mb-2 grid gap-2 rounded-xl bg-paper p-6">
+              <p className="text-lg font-semibold text-ink">{t("auth.login.demoTitle")}</p>
+              <p className="text-sm leading-6 text-ink-soft">{t("auth.login.tryDemoNote")}</p>
+              <DemoButton className="ui-button-primary mt-2 w-full" />
+            </div>
+            <p className="px-4 pt-3 pb-2 text-xs font-medium text-ink-mute">{t("auth.login.orSignIn")}</p>
             <div className="ui-tabs">
               <button
                 className="ui-tab"
@@ -328,7 +335,7 @@ export default function Login() {
                 />
 
                 <button
-                  className="ui-button-primary mt-1 w-full"
+                  className="ui-button-secondary mt-1 w-full"
                   type="submit"
                   disabled={isLoading}
                 >

@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { detectLocale, translate } from "@/lib/i18n";
+import { auth } from "@/lib/auth/server";
+import { demoMayWrite, isDemoUser } from "@/lib/auth/demo";
 import { loggableError } from "@/lib/billing/stripe";
 import authApi from "./auth";
 import og from "./og";
@@ -44,6 +46,19 @@ api.route("/api/auth", authApi);
 api.route("/api/store", store);
 api.route("/api/og", og);
 api.route("/api/stripe", stripeWebhook);
+// お試しのアカウントは、見ること・載せること・プレイグラウンドで試すことだけができる
+api.use("/api/*", async (c, next) => {
+  if (c.req.method === "GET" || c.req.method === "OPTIONS") return next();
+  const path = new URL(c.req.url).pathname;
+  if (path.startsWith("/api/auth/") || path.startsWith("/api/stripe/")) return next();
+  if (demoMayWrite(c.req.method, path)) return next();
+  const session = await auth(c.env, new URL(c.req.url).origin).api.getSession({ headers: c.req.raw.headers });
+  if (session && isDemoUser(session.user)) {
+    return c.json({ message: translate(detectLocale(c.req.raw), "server.common.demoReadOnly") }, 403);
+  }
+  return next();
+});
+
 // ログインした人の API (モデル・学習・残高・キー)。それぞれの中で requireUser を通す
 api.route("/api", models);
 api.route("/api", fineTunes);

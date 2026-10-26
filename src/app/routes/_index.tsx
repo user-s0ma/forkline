@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { Route } from "./+types/_index";
 import { FlowDiagram } from "@/components/landing/FlowDiagram";
+import { DemoButton } from "@/components/account/DemoButton";
 import { SiteFooter, SiteHeader } from "@/components/landing/SiteChrome";
 import { listStoreModels, type StoreListing } from "@/lib/api-client";
 import { localeTag, localizeHref, useLocale } from "@/lib/i18n";
@@ -407,13 +408,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               {t("landing.hero.subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href="/app" className="ui-button-primary">
+              <DemoButton />
+              <a href="/app" className="ui-button-secondary">
                 {t("landing.hero.ctaPrimary")}
               </a>
-              <a href={localizeHref("/models", locale)} className="ui-button-secondary">
-                {t("landing.hero.ctaSecondary")}
-              </a>
             </div>
+            <p className="mt-3 max-w-md text-xs leading-5 text-ink-mute">{t("landing.hero.demoNote")}</p>
             <a
               href={localizeHref("/docs", locale)}
               className="mt-5 inline-flex text-sm font-semibold text-brand-ink hover:underline"

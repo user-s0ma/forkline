@@ -92,7 +92,13 @@
       "verificationEmailSent": "Verification email sent",
       "heroTitleLine1": "Many AI models,",
       "heroTitleLine2": "one API.",
-      "heroDescription": "From open models to ones published by individuals. One API key; switch models by changing model."
+      "heroDescription": "From open models to ones published by individuals. One API key; switch models by changing model.",
+      "demoError": "Could not open the demo",
+      "tryDemo": "Hackathon judges: open the demo account",
+      "tryDemoNote": "A shared demo account with a trained and evaluated model. No sign-up. Deploy the model and chat with it in the playground; training, payments and settings are turned off.",
+      "demoOpening": "Opening the demo account...",
+      "demoTitle": "For hackathon judges",
+      "orSignIn": "Or use your own account"
     },
     "processing": "Processing...",
     "resetPassword": {
@@ -135,6 +141,7 @@
   "server": {
     "common": {
       "internalError": "An error occurred while processing the API request.",
+      "demoReadOnly": "This is not available in the demo account.",
       "loginRequired": "Please sign in.",
       "notFound": "API not found."
     }

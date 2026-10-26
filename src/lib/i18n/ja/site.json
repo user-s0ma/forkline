@@ -36,7 +36,8 @@
       "subtitle": "自分のデータでNemotronをLoRA微調整し、OpenAI互換のAPIとしてストアに公開できます。GPUの用意は要りません。誰かがモデルを呼ぶたびに、使われたトークンの分が売上になります。",
       "ctaPrimary": "モデルを作る",
       "ctaSecondary": "公開中のモデルを見る",
-      "ctaTertiary": "APIドキュメントを読む"
+      "ctaTertiary": "APIドキュメントを読む",
+      "demoNote": "ハッカソンの審査員の方へ：学習と評価が済んだモデルを持つ、共有のデモアカウントです。登録は要りません。"
     },
     "flow": {
       "aria": "図: ベースモデルのNemotronから、あなたのデータで学習したLoRAが分岐し、Nebiusのエンドポイントに載り、APIの呼び出しが売上になる流れ",

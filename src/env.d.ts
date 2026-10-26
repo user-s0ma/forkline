@@ -12,6 +12,10 @@ interface AppEnv {
   CLOUDFLARE_ACCOUNT_ID: string;
   CLOUDFLARE_EMAIL_API_TOKEN: string;
   ENDPOINT_IDLE_MINUTES: string;
+  /** お試しのアカウントに写す、学習と評価が済んだモデルの ID */
+  DEMO_SOURCE_MODEL_ID: string;
+  /** お試しのアカウントに一度だけ入れるクレジット (円)。GPU を動かした分はここから引かれる */
+  DEMO_CREDIT_YEN: string;
   EARNINGS_HOLD_DAYS: string;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;

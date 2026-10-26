@@ -1,11 +1,14 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError, createAuthEndpoint, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
+import { setSessionCookie } from "better-auth/cookies";
 import { captcha } from "better-auth/plugins";
 import { getDb } from "../db/client";
 import { detectLocale, translate } from "../i18n";
 import { retireUserModels } from "../compute/retire";
 import { sendEmail } from "../email/send";
 import * as schema from "../db/schema";
+import { DEMO_EMAIL, DEMO_NAME, prepareDemoAccount } from "./demo";
 
 function escapeHtml(value: string) {
   return value
@@ -69,6 +72,45 @@ export function turnstileDisabled(env: Pick<AppEnv, "TURNSTILE_SECRET_KEY">, bas
     throw new Error("TURNSTILE_SECRET_KEY が設定されていません");
   }
   return true;
+}
+
+/** お試しの共有アカウントでも使える認証の経路。ほかの経路 (パスワードやメールの変更、退会、セッションの一覧・取り消し) は止める */
+const DEMO_ALLOWED_PATHS = new Set(["/get-session", "/sign-out", "/sign-in/demo"]);
+
+/**
+ * お試しの共有アカウントに入る経路。共有アカウントはパスワードを持たないので、ほかの経路からは入れない。
+ * 初めて使われたときにアカウントを作り、モデルの写しとクレジットを用意する
+ */
+function demoSignIn(env: AppEnv) {
+  return {
+    id: "demo",
+    endpoints: {
+      signInDemo: createAuthEndpoint("/sign-in/demo", { method: "POST" }, async (ctx) => {
+        const adapter = ctx.context.internalAdapter;
+        const found = await adapter.findUserByEmail(DEMO_EMAIL);
+        const demoUser =
+          found?.user ??
+          (await adapter.createUser({ email: DEMO_EMAIL, name: DEMO_NAME, emailVerified: true, createdAt: new Date(), updatedAt: new Date() }));
+        await prepareDemoAccount(env, demoUser.id);
+        const session = await adapter.createSession(demoUser.id);
+        await setSessionCookie(ctx, { session, user: demoUser });
+        return ctx.json({ ok: true });
+      }),
+    },
+    hooks: {
+      before: [
+        {
+          matcher: (ctx: { path?: string }) => !DEMO_ALLOWED_PATHS.has(ctx.path ?? ""),
+          handler: createAuthMiddleware(async (ctx) => {
+            const current = await getSessionFromCtx(ctx, { disableRefresh: true });
+            if (current?.user.email === DEMO_EMAIL) {
+              throw new APIError("FORBIDDEN", { message: "The demo account cannot change account settings." });
+            }
+          }),
+        },
+      ],
+    },
+  };
 }
 
 function createAuth(env: AppEnv, requestOrigin?: string) {
@@ -171,6 +213,7 @@ function createAuth(env: AppEnv, requestOrigin?: string) {
       },
     },
     plugins: [
+      demoSignIn(env),
       // 手元の開発 (http://) では TURNSTILE_SECRET_KEY を空にすれば外せる。公開先 (https://) では必ず使う
       captcha({
         provider: "cloudflare-turnstile",
@@ -179,7 +222,11 @@ function createAuth(env: AppEnv, requestOrigin?: string) {
         ...(turnstileDisabled(env, baseURL)
           ? // 空の配列は既定の経路に戻されるので、どこにも当たらない経路だけを指定する
             { secretKey: "disabled-in-local-development", endpoints: ["/__captcha-disabled-in-local-development"] }
-          : { secretKey: env.TURNSTILE_SECRET_KEY }),
+          : {
+              secretKey: env.TURNSTILE_SECRET_KEY,
+              // 既定の経路 (登録・ログイン・パスワードの再設定) に、お試しの入口を足す
+              endpoints: ["/sign-up/email", "/sign-in/email", "/request-password-reset", "/sign-in/demo"],
+            }),
       }),
     ],
   });

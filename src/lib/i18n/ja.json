@@ -92,7 +92,13 @@
       "verificationEmailSent": "確認メールを送信しました",
       "heroTitleLine1": "いろいろなAIモデルを、",
       "heroTitleLine2": "ひとつのAPIで。",
-      "heroDescription": "オープンモデルから個人が公開したモデルまで。APIキー1つで、model を変えるだけで呼び分けられます。"
+      "heroDescription": "オープンモデルから個人が公開したモデルまで。APIキー1つで、model を変えるだけで呼び分けられます。",
+      "demoError": "お試しを開けませんでした",
+      "tryDemo": "審査員の方はこちら（デモアカウント）",
+      "tryDemoNote": "学習と評価が済んだモデルを持つ、共有のデモアカウントです。登録は要りません。モデルをデプロイして、プレイグラウンドで話しかけられます。学習・支払い・設定の変更はできません。",
+      "demoOpening": "デモアカウントを開いています...",
+      "demoTitle": "ハッカソンの審査員の方へ",
+      "orSignIn": "自分のアカウントで使う"
     },
     "processing": "処理中…",
     "resetPassword": {
@@ -135,6 +141,7 @@
   "server": {
     "common": {
       "internalError": "API処理でエラーが発生しました",
+      "demoReadOnly": "お試しのアカウントでは使えません",
       "loginRequired": "ログインが必要です",
       "notFound": "APIが見つかりません"
     }

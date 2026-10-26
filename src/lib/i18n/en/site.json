@@ -36,7 +36,8 @@
       "subtitle": "Fine-tune Nemotron with LoRA on your own data and publish it to the store as an OpenAI-compatible API. No GPUs to set up. Each time someone calls your model, the tokens it serves become your earnings.",
       "ctaPrimary": "Build a model",
       "ctaSecondary": "Browse published models",
-      "ctaTertiary": "Read the API docs"
+      "ctaTertiary": "Read the API docs",
+      "demoNote": "For hackathon judges: a shared demo account with a trained and evaluated model. No sign-up."
     },
     "flow": {
       "aria": "Diagram: your data forks a LoRA off the Nemotron base model, it is deployed to a Nebius endpoint, and API calls to it become earnings",
