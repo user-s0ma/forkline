@@ -529,8 +529,7 @@
     },
     "demoGuide": {
       "body": "A conversation with this model, recorded on {{date}}.",
-      "toEvaluation": "Evaluation",
-      "toDeploy": "Deploy"
+      "toEvaluation": "Evaluation"
     }
   },
   "server": {

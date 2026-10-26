@@ -529,8 +529,7 @@
     },
     "demoGuide": {
       "body": "{{date}} にこのモデルと話した記録です。",
-      "toEvaluation": "評価",
-      "toDeploy": "デプロイ"
+      "toEvaluation": "評価"
     }
   },
   "server": {

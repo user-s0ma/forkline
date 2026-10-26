@@ -5,7 +5,7 @@ import recording from "./demo-conversation.json";
  * 審査員向けのデモアカウントで、モデルの画面の上に出す案内。
  * GPU を起こさなくても中身が分かるよう、このモデルと実際に話した会話 (記録したもの) を見せる
  */
-export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "training" | "evaluation") => void }) {
+export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "evaluation") => void }) {
   const { t } = useTranslation();
   return (
     <section className="console-panel space-y-4 p-5 sm:p-6">
@@ -22,14 +22,9 @@ export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "training" | "evalua
         ))}
       </ol>
 
-      <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-        <button type="button" className="font-semibold text-brand-ink hover:underline" onClick={() => onOpenTab("evaluation")}>
-          {t("models.demoGuide.toEvaluation")}
-        </button>
-        <button type="button" className="font-semibold text-brand-ink hover:underline" onClick={() => onOpenTab("training")}>
-          {t("models.demoGuide.toDeploy")}
-        </button>
-      </div>
+      <button type="button" className="text-sm font-semibold text-brand-ink hover:underline" onClick={() => onOpenTab("evaluation")}>
+        {t("models.demoGuide.toEvaluation")}
+      </button>
     </section>
   );
 }
