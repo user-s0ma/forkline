@@ -269,7 +269,7 @@ function ModelEditor({
         >
           {tab === "overview" && (
             <>
-              {isDemoUser(user) && <DemoGuide modelName={model.name} onOpenTab={onTabChange} />}
+              {isDemoUser(user) && <DemoGuide onOpenTab={onTabChange} />}
               <LaunchPanel
                 model={model}
                 isDirty={isDirty}

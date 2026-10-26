@@ -5,20 +5,11 @@ import recording from "./demo-conversation.json";
  * 審査員向けのデモアカウントで、モデルの画面の上に出す案内。
  * GPU を起こさなくても中身が分かるよう、このモデルと実際に話した会話 (記録したもの) を見せる
  */
-export function DemoGuide({
-  modelName,
-  onOpenTab,
-}: {
-  modelName: string;
-  onOpenTab: (tab: "training" | "evaluation") => void;
-}) {
+export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "training" | "evaluation") => void }) {
   const { t } = useTranslation();
   return (
     <section className="console-panel space-y-4 p-5 sm:p-6">
-      <div>
-        <h2 className="text-lg font-semibold">{modelName}</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft">{t("models.demoGuide.body", { date: recording.recordedOn })}</p>
-      </div>
+      <p className="text-sm text-ink-soft">{t("models.demoGuide.body", { date: recording.recordedOn })}</p>
 
       <ol className="space-y-3 text-sm">
         {recording.turns.map((turn, index) => (
