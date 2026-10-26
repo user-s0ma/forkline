@@ -110,7 +110,6 @@ function Why({ idleMinutes }: { idleMinutes: number }) {
             <span>{t("landing.why.splitCreator")}</span>
             <span className="text-right">{t("landing.why.splitFee")}</span>
           </div>
-          <p className="mt-4 text-sm leading-6 text-ink-mute">{t("landing.why.splitNote")}</p>
         </figure>
       </div>
       <dl className="grid gap-x-10 sm:grid-cols-2 lg:col-span-7">
@@ -397,7 +396,6 @@ function ForJudges() {
               </div>
             ))}
           </dl>
-          <p className="mt-4 text-xs leading-5 text-ink-mute">{t("landing.judges.evalNote")}</p>
           <div className="mt-8">
             <DemoButton />
           </div>
@@ -449,7 +447,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 {t("landing.hero.ctaPrimary")}
               </a>
             </div>
-            <p className="mt-3 max-w-md text-xs leading-5 text-ink-mute">{t("landing.hero.demoNote")}</p>
           </div>
           <FlowDiagram />
         </section>
@@ -485,7 +482,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <div className="ui-container grid grid-cols-1 gap-10 py-16 lg:grid-cols-12 lg:gap-12 lg:py-24">
             <div className="lg:col-span-4">
               <SectionTitle title={t("landing.api.title")} lead={t("landing.api.lead")} />
-              <p className="mt-6 max-w-md text-sm leading-6 text-ink-mute">{t("landing.api.warm")}</p>
               <a
                 href={localizeHref("/docs", locale)}
                 className="mt-6 inline-flex text-sm font-semibold text-brand-ink hover:underline"

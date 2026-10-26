@@ -129,9 +129,6 @@ export default function AccountPage() {
                   maxLength={191}
                   onChange={(event) => setName(event.target.value)}
                 />
-                <span className="mt-1.5 block text-xs leading-5 text-ink-mute">
-                  {t("account.nameHint")}
-                </span>
               </label>
               <label className="block">
                 <span className="mb-1 block text-xs text-ink">
@@ -142,9 +139,6 @@ export default function AccountPage() {
                   value={user.email}
                   disabled
                 />
-                <span className="mt-1.5 block text-xs leading-5 text-ink-mute">
-                  {t("appShell.profileModal.emailHint")}
-                </span>
               </label>
               <div>
                 <span className="mb-1 block text-xs text-ink">

@@ -83,7 +83,6 @@
     "loadFailed": "クレジット情報を読み込めませんでした",
     "balance": "クレジット残高",
     "held": "ほかに学習とエンドポイントのため {{amount}} を押さえています",
-    "balanceHint": "学習やエンドポイントの起動では、見積もり分を先に押さえ、終わったときに実際の額で精算します。",
     "topupTitle": "クレジットをチャージ",
     "customAmount": "チャージ金額",
     "amountRange": "{{min}}〜{{max}}の範囲でチャージできます",
@@ -165,12 +164,6 @@
       "vision": "画像認識",
       "other": "その他"
     },
-    "categoryHints": {
-      "text": "チャット・要約・翻訳など、文章を返すモデル",
-      "code": "コードの生成や説明が得意なモデル",
-      "vision": "画像を読み取って答えるモデル",
-      "other": "上のどれにも当てはまらないモデル"
-    },
     "status": {
       "draft": "下書き",
       "published": "公開中",
@@ -230,10 +223,8 @@
       "title": "基本情報",
       "intro": "ストアと API で表示される情報です。",
       "slug": "モデルID",
-      "slugHint": "API の model に指定する名前です",
       "slugInvalid": "英小文字・数字・ハイフンの3〜64文字で入力してください",
       "tagline": "概要",
-      "taglineHint": "ストアの一覧に出ます。ストアに公開するには必要です",
       "taglinePlaceholder": "例: 社内規程に沿って答えるサポート用モデル",
       "description": "説明",
       "category": "カテゴリ",
@@ -249,11 +240,8 @@
     "pricing": {
       "title": "料金",
       "input": "入力 (100万トークンあたり)",
-      "inputHint": "送られてきた文章の量に対する料金",
       "output": "出力 (100万トークンあたり)",
-      "outputHint": "モデルが返した文章の量に対する料金",
       "perRequest": "1リクエストあたり",
-      "perRequestHint": "トークン数にかかわらず1回ごとに掛かる料金",
       "computeNote": "エンドポイントの GPU 代 ({{perHour}}/時) は、動いている間だけあなたのクレジットから引かれます。料金は GPU 代を見込んで決めてください。",
       "simulationTitleTokens": "売上の目安",
       "tokensLabel": "呼ばれるトークン数",
@@ -334,7 +322,6 @@
       "title": "LoRA で学習する",
       "description": "chat 形式の JSONL で NVIDIA Nemotron を微調整します。学習は Nebius の GPU で動き、料金はあなたのクレジットから引かれます。",
       "baseModel": "ベースモデル",
-      "baseModelHint": "小さいモデルほど安く、速く学習できます",
       "trainRate": "学習の GPU",
       "serveRate": "推論の GPU",
       "perHour": "{{amount}}/時",
@@ -356,7 +343,6 @@
       },
       "hyperparameters": "学習の設定",
       "epochs": "エポック数",
-      "epochsHint": "データを何周学習するか",
       "learningRate": "学習率",
       "loraRank": "LoRA のランク",
       "loraAlpha": "LoRA の alpha",
@@ -401,7 +387,6 @@
       "builtSummary": "学習 {{train}} 件 · 評価用 {{eval}} 件",
       "holdOut": "{{percent}}% を評価用に取っておく",
       "holdOutCount": "({{count}} 件)",
-      "holdOutHint": "取っておいた例は学習に使いません。デプロイしたあと、この例でベースモデルと比べます。",
       "evalExamples": "評価用 {{count}} 件",
       "fromBuilder": "Nemotron で作成"
     },
@@ -455,7 +440,6 @@
     "builder": {
       "intro": "FAQ・マニュアル・規約・問答の例を貼ると、Nebius Token Factory の Nemotron が会話の例に直します。学習の前に中身を確かめて直してください。Token Factory の料金はあなたのクレジットから引かれます。",
       "role": "アシスタントの役割",
-      "roleHint": "誰として、誰に、どんな口調で答えるか。例を作るときだけに使います。",
       "rolePlaceholder": "靴の通販サイトの問い合わせ窓口。お客様に丁寧に、短く答える。",
       "material": "元になる資料",
       "loadFile": "テキストファイルを読み込む",
@@ -473,7 +457,6 @@
       "failedChunks": "{{count}} 回失敗しました",
       "previewTitle": "作った例を確かめる",
       "split": "学習 {{train}} 件 · 評価用 {{eval}} 件",
-      "previewHint": "事実の誤りを直し、モデルに言わせたくない内容は消してください。事実ごとに言い換えた質問を1つ「評価に使う」にしてあります。評価用の例は学習に使わず、あとでモデルを試すのに使います。",
       "heldOut": "評価に使う",
       "remove": "{{index}} 件目を消す",
       "user": "ユーザー",
@@ -518,7 +501,6 @@
         "inconclusive": "{{n}} 問でははっきりした差は出ませんでした (符号検定 p {{p}})。差を見るには評価用の質問を増やす必要があります。",
         "too_few": "採点できたのは {{n}} 問だけです。結論を出すには少なすぎるので、数字は参考程度に見てください。"
       },
-      "footnote": "採点 {{n}} 問・採点できず {{failed}} 問 · 点差の 95% ブートストラップ区間 {{interval}} · 採点 {{judge}} · Token Factory {{amount}}",
       "itemsTitle": "質問ごとの結果",
       "columns": {
         "question": "質問",
@@ -548,8 +530,7 @@
     "demoGuide": {
       "body": "Midori Bakery FAQ は、Nemotron 3 Nano 4B を Nebius の Serverless AI Job で LoRA 微調整したモデルです。学習データは、パン屋の FAQ から Token Factory の Nemotron が書いた231件の会話です。26問は評価用に取っておきました。下は、{{date}} にこのモデルの Nebius のエンドポイントと話した記録です。",
       "toEvaluation": "ベースの Nemotron との比較を見る →",
-      "toDeploy": "デプロイして自分で話す →",
-      "deployNote": "GPU のエンドポイントの起動には10分ほどかかります。{{idle}}分呼ばれなければ自動で止まります。"
+      "toDeploy": "デプロイして自分で話す →"
     }
   },
   "server": {

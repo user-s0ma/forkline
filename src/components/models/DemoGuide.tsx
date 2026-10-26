@@ -1,7 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { DEFAULT_ENDPOINT_IDLE_MINUTES } from "@/lib/billing/compute";
 import recording from "./demo-conversation.json";
-import { useBaseModels } from "./hooks";
 
 /**
  * 審査員向けのデモアカウントで、モデルの画面の上に出す案内。
@@ -15,8 +13,6 @@ export function DemoGuide({
   onOpenTab: (tab: "training" | "evaluation") => void;
 }) {
   const { t } = useTranslation();
-  // 自動停止までの分数は、エンドポイントの欄と同じくサーバーの設定値を使う
-  const idleMinutes = useBaseModels().data?.idleMinutes ?? DEFAULT_ENDPOINT_IDLE_MINUTES;
   return (
     <section className="console-panel space-y-4 p-5 sm:p-6">
       <div>
@@ -43,7 +39,6 @@ export function DemoGuide({
           {t("models.demoGuide.toDeploy")}
         </button>
       </div>
-      <p className="text-xs leading-5 text-ink-mute">{t("models.demoGuide.deployNote", { idle: idleMinutes })}</p>
     </section>
   );
 }

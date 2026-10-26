@@ -255,8 +255,7 @@ export default function Login() {
           </section>
           <section className="ui-card p-2">
             <div className="mb-2 grid gap-2 p-6">
-              <p className="text-sm leading-6 text-ink-soft">{t("auth.login.tryDemoNote")}</p>
-              <DemoButton className="ui-button-primary mt-2 w-full" />
+              <DemoButton className="ui-button-primary w-full" />
             </div>
             <details
               open={ownAccountOpen || verificationEmail !== null}

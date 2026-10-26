@@ -30,7 +30,6 @@ export function StorePlayground({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-ink-mute">{t("store.playground.billedTo")}</p>
       <Playground slug={slug} />
     </div>
   );

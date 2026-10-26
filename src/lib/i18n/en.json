@@ -49,7 +49,6 @@
     "closeMenu": "Close menu",
     "profile": "Profile",
     "profileModal": {
-      "emailHint": "Email address cannot be changed",
       "language": "Language",
       "updateFailed": "Failed to update profile",
       "signingOut": "Logging out...",
@@ -95,7 +94,6 @@
       "heroDescription": "From open models to ones published by individuals. One API key; switch models by changing model.",
       "demoError": "Could not open the demo",
       "tryDemo": "Open the demo account",
-      "tryDemoNote": "A shared demo account with a trained and evaluated model. No sign-up. Deploy the model and chat with it in the playground; training, payments and settings are turned off.",
       "demoOpening": "Opening the demo account...",
       "orSignIn": "Or use your own account"
     },
@@ -150,7 +148,6 @@
     "saved": "Saved",
     "deleteTitle": "Delete account",
     "deleteNeedsSignIn": "For your security, sign in again before deleting your account",
-    "nameHint": "Shown on your models in the store as the creator's name.",
     "deleteDescription": "Delete your account. Your published models are unpublished and your API keys stop working. You will no longer be able to sign in. This cannot be undone.",
     "deleteConfirmPrompt": "To confirm, type your email address",
     "deleteButton": "Delete account",

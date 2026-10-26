@@ -220,7 +220,7 @@ export function EvaluationPanel({
         )}
 
         {latest?.summary && latest.status === "succeeded" && (
-          <EvalSummaryView run={latest} summary={latest.summary} />
+          <EvalSummaryView summary={latest.summary} />
         )}
       </Section>
 
@@ -235,13 +235,9 @@ export function EvaluationPanel({
   );
 }
 
-/** 平均点・勝ち負け・符号検定・信頼区間と、その読み方 */
-export function EvalSummaryView({ run, summary }: { run: EvalRunRecord; summary: EvalSummary }) {
+/** 平均点・勝ち負け・符号検定と、その読み方 */
+export function EvalSummaryView({ summary }: { summary: EvalSummary }) {
   const { t } = useTranslation();
-  const yen = useYen();
-  const interval = summary.interval
-    ? `${summary.interval[0] >= 0 ? "+" : ""}${summary.interval[0]} 〜 ${summary.interval[1] >= 0 ? "+" : ""}${summary.interval[1]}`
-    : "—";
   const stats = [
     { label: t("models.evaluation.fineTunedMean"), value: `${summary.fineTunedMean.toFixed(2)} / 5` },
     { label: t("models.evaluation.baseMean"), value: `${summary.baseMean.toFixed(2)} / 5` },
@@ -268,15 +264,6 @@ export function EvalSummaryView({ run, summary }: { run: EvalRunRecord; summary:
         {t(`models.evaluation.verdicts.${summary.verdict}`, {
           n: summary.n,
           p: formatPValue(summary.signTestP),
-        })}
-      </p>
-      <p className="num text-xs leading-5 text-ink-mute">
-        {t("models.evaluation.footnote", {
-          n: summary.n,
-          failed: summary.failed,
-          interval,
-          judge: run.judgeModel,
-          amount: yen(run.costMicros),
         })}
       </p>
     </div>

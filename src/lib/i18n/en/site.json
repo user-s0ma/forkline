@@ -34,8 +34,7 @@
       "title2": "Earn every time it's called.",
       "subtitle": "Fine-tune Nemotron with LoRA on your own data and publish it to the store as an OpenAI-compatible API. No GPUs to set up. Each time someone calls your model, the tokens it serves become your earnings.",
       "ctaPrimary": "Build a model",
-      "ctaSecondary": "Browse published models",
-      "demoNote": "A shared demo account with a trained and evaluated model. No sign-up."
+      "ctaSecondary": "Browse published models"
     },
     "flow": {
       "aria": "Diagram: your data forks a LoRA off the Nemotron base model, it is deployed to a Nebius endpoint, and API calls to it become earnings",
@@ -93,8 +92,7 @@
       },
       "splitTitle": "Where the user's payment goes",
       "splitCreator": "You",
-      "splitFee": "Forkline fee",
-      "splitNote": "GPU time is separate: it is deducted from the creator's credits for the time the endpoint runs."
+      "splitFee": "Forkline fee"
     },
     "stack": {
       "title": "Built on Nebius and NVIDIA",
@@ -150,8 +148,7 @@
       "requestLabel": "Request",
       "responseLabel": "Response",
       "docs": "Read the API docs",
-      "prompt": "How do I return an item?",
-      "warm": "A model that hasn't been called for a while takes a few minutes to start. Until then it returns 503 with Retry-After; wait that long and send the request again."
+      "prompt": "How do I return an item?"
     },
     "faq": {
       "title": "FAQ",
@@ -180,7 +177,6 @@
         "base": "Base Nemotron",
         "wins": "Questions won"
       },
-      "evalNote": "Average scores from 1 to 5 on 26 held-out questions, answered by both models and graded by Nemotron against the reference answers. 2 ties, 0 losses.",
       "devpost": "Devpost and video →",
       "github": "Source on GitHub →"
     }

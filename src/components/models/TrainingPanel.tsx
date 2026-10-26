@@ -255,7 +255,7 @@ export function TrainingPanel({
         ) : (
           <>
             <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={t("models.training.baseModel")} hint={t("models.training.baseModelHint")}>
+              <Field label={t("models.training.baseModel")}>
                 <ConsoleSelect
                   value={selected?.id ?? ""}
                   ariaLabel={t("models.training.baseModel")}
@@ -358,7 +358,6 @@ export function TrainingPanel({
                         {t("models.training.holdOutCount", { count: uploadHeldOut })}
                       </span>
                     )}
-                    <span className="console-hint">{t("models.training.holdOutHint")}</span>
                   </span>
                 </label>
               )}
@@ -376,7 +375,7 @@ export function TrainingPanel({
                 {t("models.training.hyperparameters")}
               </summary>
               <div className="mt-4 grid gap-4 sm:grid-cols-4">
-                <Field label={t("models.training.epochs")} hint={t("models.training.epochsHint")}>
+                <Field label={t("models.training.epochs")}>
                   <NumberInput value={epochs} min={1} max={10} step={1} onChange={setEpochs} />
                 </Field>
                 <Field label={t("models.training.learningRate")}>

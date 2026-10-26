@@ -83,7 +83,6 @@
     "loadFailed": "Could not load credits",
     "balance": "Credit balance",
     "held": "{{amount}} more is held for training and endpoints",
-    "balanceHint": "Training and endpoint starts hold an estimate first and settle the actual amount when they finish.",
     "topupTitle": "Top up credits",
     "customAmount": "Amount",
     "amountRange": "You can top up between {{min}} and {{max}}",
@@ -165,12 +164,6 @@
       "vision": "Vision",
       "other": "Other"
     },
-    "categoryHints": {
-      "text": "Chat, summaries, translation and other text output",
-      "code": "Models tuned for writing or explaining code",
-      "vision": "Models that answer about images",
-      "other": "Anything else"
-    },
     "status": {
       "draft": "Draft",
       "published": "Published",
@@ -230,10 +223,8 @@
       "title": "General",
       "intro": "Shown in the store and the API.",
       "slug": "Model ID",
-      "slugHint": "The value callers pass as model",
       "slugInvalid": "Use 3–64 lowercase letters, digits or hyphens",
       "tagline": "Tagline",
-      "taglineHint": "Shown in store listings. Required to publish publicly",
       "taglinePlaceholder": "e.g. A support model that follows our internal policies",
       "description": "Description",
       "category": "Category",
@@ -249,11 +240,8 @@
     "pricing": {
       "title": "Pricing",
       "input": "Input (per 1M tokens)",
-      "inputHint": "Charged for the prompt tokens",
       "output": "Output (per 1M tokens)",
-      "outputHint": "Charged for the generated tokens",
       "perRequest": "Per request",
-      "perRequestHint": "Charged once per call, regardless of tokens",
       "computeNote": "Endpoint GPU time ({{perHour}}/hour) is charged to your credits while it runs. Set prices that cover it.",
       "simulationTitleTokens": "Revenue estimate",
       "tokensLabel": "Tokens served",
@@ -334,7 +322,6 @@
       "title": "Train a LoRA",
       "description": "Fine-tune NVIDIA Nemotron with a chat-format JSONL. Training runs on Nebius GPUs and is charged to your credits.",
       "baseModel": "Base model",
-      "baseModelHint": "Smaller models are cheaper and faster to train",
       "trainRate": "Training GPU",
       "serveRate": "Serving GPU",
       "perHour": "{{amount}}/hour",
@@ -356,7 +343,6 @@
       },
       "hyperparameters": "Hyperparameters",
       "epochs": "Epochs",
-      "epochsHint": "Passes over the dataset",
       "learningRate": "Learning rate",
       "loraRank": "LoRA rank",
       "loraAlpha": "LoRA alpha",
@@ -401,7 +387,6 @@
       "builtSummary": "{{train}} for training · {{eval}} held out for evaluation",
       "holdOut": "Hold out {{percent}}% for evaluation",
       "holdOutCount": "({{count}} examples)",
-      "holdOutHint": "These examples are not used for training. After deploying, Nemotron compares your model with the base model on them.",
       "evalExamples": "{{count}} held out",
       "fromBuilder": "built with Nemotron"
     },
@@ -455,7 +440,6 @@
     "builder": {
       "intro": "Paste your FAQ, manual, policy or example Q&A. Nemotron on Nebius Token Factory turns it into chat examples. Review and edit them before training. Token Factory usage is charged to your credits.",
       "role": "Assistant's role",
-      "roleHint": "Who the assistant is, who it talks to and in what tone. Used only to write the examples.",
       "rolePlaceholder": "Support agent for an online shoe store. Answers customers politely and briefly.",
       "material": "Source material",
       "loadFile": "Load a text file",
@@ -473,7 +457,6 @@
       "failedChunks": "{{count}} requests failed",
       "previewTitle": "Review examples",
       "split": "{{train}} for training · {{eval}} for evaluation",
-      "previewHint": "Fix wrong facts and remove anything you would not want the model to say. For each fact, one reworded question is marked for evaluation. Those examples are kept out of training and used to test the model later.",
       "heldOut": "Use for evaluation",
       "remove": "Remove example {{index}}",
       "user": "User",
@@ -518,7 +501,6 @@
         "inconclusive": "No clear difference on {{n}} questions (sign test p {{p}}). More held-out questions would be needed to tell.",
         "too_few": "Only {{n}} questions were graded. That is too few to conclude anything; treat the numbers as examples."
       },
-      "footnote": "{{n}} graded, {{failed}} not graded · 95% bootstrap interval of the score difference: {{interval}} · grader {{judge}} · Token Factory {{amount}}",
       "itemsTitle": "Questions",
       "columns": {
         "question": "Question",
@@ -548,8 +530,7 @@
     "demoGuide": {
       "body": "Midori Bakery FAQ is Nemotron 3 Nano 4B fine-tuned with LoRA on a Nebius Serverless AI Job, using 231 chat examples that Nemotron on Token Factory wrote from a bakery FAQ. 26 questions were held out for evaluation. Below is a conversation with this model on its Nebius endpoint, recorded on {{date}}.",
       "toEvaluation": "See the evaluation against base Nemotron →",
-      "toDeploy": "Deploy it and chat yourself →",
-      "deployNote": "Starting the GPU endpoint takes about 10 minutes. It stops by itself after {{idle}} minutes without calls."
+      "toDeploy": "Deploy it and chat yourself →"
     }
   },
   "server": {

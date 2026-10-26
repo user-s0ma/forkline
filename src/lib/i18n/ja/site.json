@@ -34,8 +34,7 @@
       "title2": "呼ばれるたびに稼ぐ。",
       "subtitle": "自分のデータでNemotronをLoRA微調整し、OpenAI互換のAPIとしてストアに公開できます。GPUの用意は要りません。誰かがモデルを呼ぶたびに、使われたトークンの分が売上になります。",
       "ctaPrimary": "モデルを作る",
-      "ctaSecondary": "公開中のモデルを見る",
-      "demoNote": "学習と評価が済んだモデルを持つ、共有のデモアカウントです。登録は要りません。"
+      "ctaSecondary": "公開中のモデルを見る"
     },
     "flow": {
       "aria": "図: ベースモデルのNemotronから、あなたのデータで学習したLoRAが分岐し、Nebiusのエンドポイントに載り、APIの呼び出しが売上になる流れ",
@@ -93,8 +92,7 @@
       },
       "splitTitle": "利用者が払う価格の行き先",
       "splitCreator": "あなた",
-      "splitFee": "Forklineの手数料",
-      "splitNote": "GPU代はこれとは別に、モデルを作った人のクレジットから、動いた時間の分だけ引かれます。"
+      "splitFee": "Forklineの手数料"
     },
     "stack": {
       "title": "Nebius と NVIDIA の上で動く",
@@ -150,8 +148,7 @@
       "requestLabel": "リクエスト",
       "responseLabel": "レスポンス",
       "docs": "APIドキュメントを読む",
-      "prompt": "返品の手順を教えてください",
-      "warm": "しばらく呼ばれていないモデルは起動に数分かかります。その間は 503 と Retry-After を返すので、指定の秒数を待って送り直してください。"
+      "prompt": "返品の手順を教えてください"
     },
     "faq": {
       "title": "よくある質問",
@@ -180,7 +177,6 @@
         "base": "ベースの Nemotron",
         "wins": "勝った問題"
       },
-      "evalNote": "1〜5点の平均です。学習に使わずに取っておいた26問を両方のモデルに解かせ、Nemotron が模範解答と比べて採点しました。引き分け2、負け0。",
       "devpost": "Devpost と動画 →",
       "github": "GitHub のソース →"
     }

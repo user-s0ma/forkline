@@ -69,7 +69,6 @@
     "playground": {
       "title": "Playground",
       "login": "Log in",
-      "billedTo": "Charges go to your credits.",
       "messagePlaceholder": "Type a message",
       "send": "Send",
       "sending": "Generating...",

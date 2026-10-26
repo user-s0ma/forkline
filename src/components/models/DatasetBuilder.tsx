@@ -164,7 +164,7 @@ export function DatasetBuilder({
     <div className="space-y-5 rounded-(--radius-control) border border-line bg-paper p-4">
       {confirmDialog}
       <p className="text-sm leading-6 text-ink-soft">{t("models.builder.intro")}</p>
-      <Field label={t("models.builder.role")} hint={t("models.builder.roleHint")}>
+      <Field label={t("models.builder.role")}>
         <textarea
           className="console-input h-auto min-h-20 resize-y py-2 leading-6"
           value={role}
@@ -307,7 +307,6 @@ export function DatasetBuilder({
               {t("models.builder.split", { train: trainCount, eval: evalCount })}
             </span>
           </div>
-          <p className="text-xs leading-5 text-ink-mute">{t("models.builder.previewHint")}</p>
           <ol className="max-h-[36rem] space-y-3 overflow-y-auto pr-1">
             {rows.map((row, index) => (
               <li

@@ -69,7 +69,6 @@
     "playground": {
       "title": "プレイグラウンド",
       "login": "ログイン",
-      "billedTo": "料金はあなたのクレジットから引かれます。",
       "messagePlaceholder": "メッセージを入力",
       "send": "送信",
       "sending": "生成中...",

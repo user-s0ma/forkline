@@ -422,9 +422,7 @@ function GeneralSection({
           <Field
             label={t("models.general.slug")}
             hint={
-              slugValid ? (
-                t("models.general.slugHint")
-              ) : (
+              slugValid ? undefined : (
                 <span className="text-danger">{t("models.general.slugInvalid")}</span>
               )
             }
@@ -438,7 +436,7 @@ function GeneralSection({
             />
           </Field>
         </div>
-        <Field label={t("models.general.tagline")} hint={t("models.general.taglineHint")}>
+        <Field label={t("models.general.tagline")}>
           <input
             className="console-input"
             value={draft.tagline}
@@ -456,7 +454,7 @@ function GeneralSection({
           />
         </Field>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label={t("models.general.category")} hint={t(`models.categoryHints.${draft.category}`)}>
+          <Field label={t("models.general.category")}>
             <ConsoleSelect
               value={draft.category}
               ariaLabel={t("models.general.category")}

@@ -65,7 +65,7 @@ export function PricingPanel({
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               {fields.map(([key, label]) => (
-                  <Field key={key} label={t(label)} hint={t(`${label}Hint`)}>
+                  <Field key={key} label={t(label)}>
                     <div className="relative">
                       <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-ink-mute">
                         ¥

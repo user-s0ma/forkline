@@ -140,7 +140,6 @@ export default function CreditsPage() {
                 {t("credits.held", { amount: yen(wallet.data.heldMicros) })}
               </p>
             )}
-            <p className="mt-auto pt-4 text-xs leading-5 text-ink-mute">{t("credits.balanceHint")}</p>
           </section>
 
           <form className="console-panel" onSubmit={handleTopup}>
