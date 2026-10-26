@@ -14,7 +14,7 @@ export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "training" | "evalua
         <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft">{t("models.demoGuide.body")}</p>
       </div>
 
-      <div className="rounded-(--radius-control) bg-paper p-4">
+      <div>
         <p className="text-xs text-ink-mute">{t("models.demoGuide.recorded", { date: recording.recordedOn })}</p>
         <ol className="mt-3 space-y-3 text-sm">
           {recording.turns.map((turn, index) => (

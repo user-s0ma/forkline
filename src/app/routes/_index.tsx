@@ -388,11 +388,11 @@ function ForJudges() {
     ["24 / 26", "wins"],
   ] as const;
   return (
-    <section className="ui-container pb-16">
-      <div className="ui-card grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.2fr_1fr]">
+    <section className="border-t border-line">
+      <div className="ui-container grid gap-12 py-16 lg:grid-cols-[1.2fr_1fr] lg:py-20">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">{t("landing.judges.title")}</h2>
-          <ul className="mt-5 space-y-3">
+          <ul className="mt-6 space-y-3">
             {uses.map((key) => (
               <li key={key} className="text-sm leading-6">
                 <span className="font-semibold">{t(`landing.judges.uses.${key}.name`)}</span>
@@ -401,20 +401,18 @@ function ForJudges() {
             ))}
           </ul>
         </div>
-        <div className="flex flex-col gap-5">
-          <div className="rounded-xl bg-paper p-5">
-            <p className="text-sm font-semibold">{t("landing.judges.evalTitle")}</p>
-            <dl className="mt-4 grid grid-cols-3 gap-3">
-              {stats.map(([value, key]) => (
-                <div key={key}>
-                  <dd className="text-2xl font-semibold tracking-tight tabular-nums">{value}</dd>
-                  <dt className="mt-1 text-xs leading-5 text-ink-mute">{t(`landing.judges.stats.${key}`)}</dt>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-4 text-xs leading-5 text-ink-mute">{t("landing.judges.evalNote")}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+        <div>
+          <p className="text-sm font-semibold">{t("landing.judges.evalTitle")}</p>
+          <dl className="mt-4 grid grid-cols-3 gap-4">
+            {stats.map(([value, key]) => (
+              <div key={key}>
+                <dd className="text-3xl font-semibold tracking-tight tabular-nums">{value}</dd>
+                <dt className="mt-1 text-xs leading-5 text-ink-mute">{t(`landing.judges.stats.${key}`)}</dt>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-4 text-xs leading-5 text-ink-mute">{t("landing.judges.evalNote")}</p>
+          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
             <DemoButton />
             <a href="https://devpost.com/software/forkline-w6jgys" className="text-sm font-semibold text-brand-ink hover:underline">
               {t("landing.judges.devpost")}
