@@ -56,7 +56,7 @@ import {
   sampleJsonl,
 } from "./compute-fakes";
 
-const ORG = "org-1";
+const OWNER = "user-1";
 
 /* ---------------------------------------------------------------- 偽の Token Factory (src/lib/nebius の tokenFactoryChat の代わり) */
 
@@ -81,7 +81,7 @@ function fakeChat(
 }
 
 function nemotronDeps(chat: NemotronDeps["chat"], balance = 1_000_000_000) {
-  const { credits, balances, ledger } = fakeCredits({ [ORG]: balance });
+  const { credits, balances, ledger } = fakeCredits({ [OWNER]: balance });
   const deps: NemotronDeps = {
     env: {
       NEBIUS_PROJECT_ID: "p",
@@ -235,7 +235,7 @@ test("事実の取り出しは1回ごとにトークン代を請求し、JSON �
   const { chat, calls } = fakeChat(() => ({ content: reply, usage: { inputTokens: 2000, outputTokens: 1000 } }));
   const { deps, balances, ledger } = nemotronDeps(chat);
   const result = await extractFacts(deps, {
-    organizationId: ORG,
+    userId: OWNER,
     referenceId: "dataset:1",
     role: "Support bot",
     material: "Returns within 30 days.",
@@ -249,7 +249,7 @@ test("事実の取り出しは1回ごとにトークン代を請求し、JSON �
   assert.equal(result.unanswerable.length, 1);
   const cost = tokenFactoryCostMicros({ inputTokens: 2000, outputTokens: 1000 });
   assert.equal(result.costMicros, cost);
-  assert.equal(balances.get(ORG), 1_000_000_000 - cost);
+  assert.equal(balances.get(OWNER), 1_000_000_000 - cost);
   assert.deepEqual(
     ledger.map((entry) => [entry.kind, entry.referenceId, entry.actualMicros]),
     [["dataset_build", "dataset:1", cost]],
@@ -262,7 +262,7 @@ test("事実の取り出しは1回ごとにトークン代を請求し、JSON �
   assert.ok(calls[0].messages[1].content.includes("<material>\nReturns within 30 days.\n</material>"));
 
   const none = await extractFacts(deps, {
-    organizationId: ORG,
+    userId: OWNER,
     referenceId: "dataset:2",
     role: "x",
     material: "short",
@@ -283,7 +283,7 @@ test("言い換えは事実の数と1事実の問の数を JSON の形で決め�
     { fact: "Open 7-18.", answer: "We are open from 7 to 18.", questions: ["When are you open?"] },
     { fact: "Closed Wed.", answer: "We are closed on Wednesdays.", questions: ["Closed days?", "Open on Wednesday?"] },
   ];
-  const result = await paraphraseFacts(deps, { organizationId: ORG, referenceId: "dataset:p", role: "Bakery", facts });
+  const result = await paraphraseFacts(deps, { userId: OWNER, referenceId: "dataset:p", role: "Bakery", facts });
   assert.deepEqual(result.questions, [q, r]);
   assert.equal(calls[0].maxTokens, BUILDER_PARAPHRASE_MAX_TOKENS);
   assert.deepEqual(calls[0].jsonSchema, paraphraseJsonSchema(2));
@@ -379,7 +379,7 @@ function paraphraseReply(call: ChatCall, round = "p") {
 /** 画面と同じく、runBuild の1回ずつを extractFacts / paraphraseFacts でつなぐ */
 function builderHooks(deps: NemotronDeps, material: string) {
   let step = 0;
-  const call = { organizationId: ORG, role: "パン屋の窓口" };
+  const call = { userId: OWNER, role: "パン屋の窓口" };
   return {
     extract: async (chunk: number) => {
       const result = await extractFacts(deps, { ...call, referenceId: `dataset:${(step += 1)}`, material, chunk });
@@ -568,7 +568,7 @@ test("呼ぶ前に見込み額を押さえ、実際のトークン数で精算�
   const { deps, balances, ledger } = nemotronDeps(chat);
   const messages: ChatMessage[] = [{ role: "user", content: "hello" }];
   const result = await chargedNemotronChat(deps, {
-    organizationId: ORG,
+    userId: OWNER,
     kind: "evaluation",
     referenceId: "ref-1",
     description: "test",
@@ -577,7 +577,7 @@ test("呼ぶ前に見込み額を押さえ、実際のトークン数で精算�
   });
   const cost = tokenFactoryCostMicros({ inputTokens: 300, outputTokens: 200 });
   assert.equal(result.costMicros, cost);
-  assert.equal(balances.get(ORG), 1_000_000_000 - cost);
+  assert.equal(balances.get(OWNER), 1_000_000_000 - cost);
   assert.equal(ledger.length, 1);
   assert.equal(ledger[0].heldMicros, tokenFactoryHoldMicros({ inputChars: 5, maxTokens: 100 }));
 });
@@ -588,7 +588,7 @@ test("残高が見込み額に足りなければ Token Factory を呼ばない",
   const { deps, balances } = nemotronDeps(chat, hold - 1);
   await assert.rejects(
     chargedNemotronChat(deps, {
-      organizationId: ORG,
+      userId: OWNER,
       kind: "model_card",
       referenceId: "ref",
       description: "x",
@@ -598,7 +598,7 @@ test("残高が見込み額に足りなければ Token Factory を呼ばない",
     (error) => error instanceof InsufficientCreditsError && error.holdMicros === hold,
   );
   assert.equal(calls.length, 0);
-  assert.equal(balances.get(ORG), hold - 1);
+  assert.equal(balances.get(OWNER), hold - 1);
 });
 
 test("Token Factory が失敗したら押さえた額を戻し、請求しない", async () => {
@@ -606,7 +606,7 @@ test("Token Factory が失敗したら押さえた額を戻し、請求しない
   const { deps, balances, ledger } = nemotronDeps(chat);
   await assert.rejects(
     chargedNemotronChat(deps, {
-      organizationId: ORG,
+      userId: OWNER,
       kind: "evaluation",
       referenceId: "ref",
       description: "x",
@@ -614,7 +614,7 @@ test("Token Factory が失敗したら押さえた額を戻し、請求しない
       maxTokens: 100,
     }),
   );
-  assert.equal(balances.get(ORG), 1_000_000_000);
+  assert.equal(balances.get(OWNER), 1_000_000_000);
   assert.equal(ledger.length, 0);
 });
 
@@ -623,7 +623,7 @@ test("同じ referenceId は一度だけ請求し、二度目は押さえた額�
   const { deps, balances, ledger } = nemotronDeps(chat);
   const call = () =>
     chargedNemotronChat(deps, {
-      organizationId: ORG,
+      userId: OWNER,
       kind: "evaluation",
       referenceId: "same",
       description: "x",
@@ -633,14 +633,14 @@ test("同じ referenceId は一度だけ請求し、二度目は押さえた額�
   await call();
   await call();
   assert.equal(ledger.length, 1);
-  assert.equal(balances.get(ORG), 1_000_000_000 - tokenFactoryCostMicros({ inputTokens: 100, outputTokens: 100 }));
+  assert.equal(balances.get(OWNER), 1_000_000_000 - tokenFactoryCostMicros({ inputTokens: 100, outputTokens: 100 }));
 });
 
 test("usage が返らないときは文字数から多めに見積もって請求する", async () => {
   const { chat } = fakeChat(() => ({ content: "x".repeat(400), usage: { inputTokens: 0, outputTokens: 0 } }));
   const { deps } = nemotronDeps(chat);
   const result = await chargedNemotronChat(deps, {
-    organizationId: ORG,
+    userId: OWNER,
     kind: "evaluation",
     referenceId: "r",
     description: "x",
@@ -841,10 +841,9 @@ function evalItemRow(position: number, fineTunedFirst: boolean): EvalItemRow {
 
 const RUN: EvalRunRow = {
   id: "run-1",
-  organizationId: ORG,
+  userId: OWNER,
   modelId: "model-1",
   fineTuneId: "ft-1",
-  createdBy: "user-1",
   status: "running",
   baselineModel: "nvidia/test-nemotron",
   judgeModel: "nvidia/test-nemotron",
@@ -980,13 +979,12 @@ test("モデルカードの下書きを読み、長さとタグを整える", ()
 
 test("学習を始めるとき、評価用の例と学習データの要約を残す", async () => {
   const { nebius } = fakeNebius();
-  const { credits } = fakeCredits({ [ORG]: 100_000_000_000 });
+  const { credits } = fakeCredits({ [OWNER]: 100_000_000_000 });
   const { stores } = fakeStores();
   const deps = makeDeps({ nebius, credits, stores, now: fakeClock().now });
   const base = {
-    organizationId: ORG,
+    userId: OWNER,
     modelId: "model-1",
-    createdBy: "user-1",
     baseModel: BASE_MODEL,
     datasetName: "built.jsonl",
     jsonl: sampleJsonl(12),

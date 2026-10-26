@@ -19,18 +19,14 @@ import { useConfirm } from "@/components/ui/useConfirm";
 const POLL_MS = 10_000;
 
 /**
- * Nebius の推論エンドポイント。動いている間だけ GPU 代が組織のクレジットから引かれ、
+ * Nebius の推論エンドポイント。動いている間だけ GPU 代が自分のクレジットから引かれ、
  * 呼ばれないまま待ち時間が過ぎると止まる。止まっていても、次の呼び出しで起動する。
  */
 export function EndpointPanel({
-  organizationId,
   model,
-  canManage,
   onChanged,
 }: {
-  organizationId: string;
   model: ModelRecord;
-  canManage: boolean;
   onChanged: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
@@ -38,7 +34,7 @@ export function EndpointPanel({
   const yen = useYen();
   const dateFormatter = useDateFormatter();
   const queryClient = useQueryClient();
-  const baseModels = useBaseModels(organizationId);
+  const baseModels = useBaseModels();
   const [busy, setBusy] = useState(false);
   const status = model.endpointStatus;
   const transitioning = status === "deploying" || status === "starting" || status === "stopping";
@@ -49,14 +45,14 @@ export function EndpointPanel({
   useEffect(() => {
     if (!transitioning) return;
     const timer = window.setInterval(() => {
-      void refreshEndpoint(organizationId, model.id)
+      void refreshEndpoint(model.id)
         .then((next) => {
           if (next.endpointStatus !== status) void onChanged();
         })
         .catch((error) => console.error(error));
     }, POLL_MS);
     return () => window.clearInterval(timer);
-  }, [model.id, onChanged, organizationId, status, transitioning]);
+  }, [model.id, onChanged, status, transitioning]);
 
   const run = async (action: () => Promise<unknown>, failure: string) => {
     setBusy(true);
@@ -67,7 +63,7 @@ export function EndpointPanel({
       toast.error(error instanceof Error ? error.message : t(failure));
     } finally {
       setBusy(false);
-      await queryClient.invalidateQueries({ queryKey: ["wallet", organizationId] });
+      await queryClient.invalidateQueries({ queryKey: ["wallet"] });
     }
   };
 
@@ -125,7 +121,7 @@ export function EndpointPanel({
             type="button"
             disabled={busy}
             onClick={() =>
-              void run(() => startEndpoint(organizationId, model.id), "models.endpoint.startFailed")
+              void run(() => startEndpoint(model.id), "models.endpoint.startFailed")
             }
           >
             <Power className="h-4 w-4" />
@@ -138,7 +134,7 @@ export function EndpointPanel({
             type="button"
             disabled={busy}
             onClick={() =>
-              void run(() => stopEndpoint(organizationId, model.id), "models.endpoint.stopFailed")
+              void run(() => stopEndpoint(model.id), "models.endpoint.stopFailed")
             }
           >
             <PowerOff className="h-4 w-4" />
@@ -150,20 +146,20 @@ export function EndpointPanel({
           type="button"
           disabled={busy}
           onClick={() =>
-            void run(() => refreshEndpoint(organizationId, model.id), "models.endpoint.refreshFailed")
+            void run(() => refreshEndpoint(model.id), "models.endpoint.refreshFailed")
           }
         >
           <RefreshCw className="h-4 w-4" />
           {t("models.endpoint.refresh")}
         </button>
-        {canManage && model.endpointId && (
+        {model.endpointId && (
           <button
             className="console-button-danger"
             type="button"
             disabled={busy}
             onClick={async () => {
               if (!(await confirm(t("models.endpoint.removeConfirm"), { danger: true }))) return;
-              void run(() => undeployModel(organizationId, model.id), "models.endpoint.removeFailed");
+              void run(() => undeployModel(model.id), "models.endpoint.removeFailed");
             }}
           >
             <Trash2 className="h-4 w-4" />

@@ -1,7 +1,7 @@
 import { and, desc, eq, like, or, type SQL } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb, containsPattern } from "@/lib/db/client";
-import { aiModel, organization } from "@/lib/db/schema";
+import { aiModel, user } from "@/lib/db/schema";
 import { detectLocale, translate } from "@/lib/i18n";
 import { listNemotronBaseModels } from "@/lib/nebius";
 import { parseTags } from "@/lib/models/config";
@@ -25,7 +25,7 @@ function baseModelLabel(baseModelId: string | null) {
   }
 }
 
-/** 利用者が払う単価 (クリエイター価格)。GPU 代は公開した組織が払うので含めない。設定の中身は出さない */
+/** 利用者が払う単価 (クリエイター価格)。GPU 代は公開した人が払うので含めない。設定の中身は出さない */
 function toListing(row: typeof aiModel.$inferSelect, publisherName: string | null) {
   return {
     slug: row.slug,
@@ -72,9 +72,9 @@ store.get("/models", async (c) => {
   const where = and(...conditions);
   const [rows, total] = await Promise.all([
     db
-      .select({ model: aiModel, publisherName: organization.name })
+      .select({ model: aiModel, publisherName: user.name })
       .from(aiModel)
-      .leftJoin(organization, eq(organization.id, aiModel.organizationId))
+      .leftJoin(user, eq(user.id, aiModel.userId))
       .where(where)
       .orderBy(
         ...(sort === "new"
@@ -99,9 +99,9 @@ store.get("/models", async (c) => {
 /** ストアに公開中のモデルを slug で探す (詳細ページ・OG 画像で共通) */
 export async function findPublicModel(env: AppEnv, slug: string) {
   const [row] = await getDb(env)
-    .select({ model: aiModel, publisherName: organization.name })
+    .select({ model: aiModel, publisherName: user.name })
     .from(aiModel)
-    .leftJoin(organization, eq(organization.id, aiModel.organizationId))
+    .leftJoin(user, eq(user.id, aiModel.userId))
     .where(and(eq(aiModel.slug, slug), listed))
     .limit(1);
   return row ?? null;

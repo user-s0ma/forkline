@@ -4,14 +4,12 @@ import { detectLocale, translate } from "@/lib/i18n";
 import { loggableError } from "@/lib/billing/stripe";
 import authApi from "./auth";
 import og from "./og";
-import access from "./organizations/access";
-import apiKeys from "./organizations/api-keys";
-import auditLogs from "./organizations/audit-logs";
-import billing from "./organizations/billing";
-import fineTunes from "./organizations/fine-tunes";
-import models from "./organizations/models";
-import nemotron from "./organizations/nemotron";
-import playground from "./organizations/playground";
+import apiKeys from "./console/api-keys";
+import billing from "./console/billing";
+import fineTunes from "./console/fine-tunes";
+import models from "./console/models";
+import nemotron from "./console/nemotron";
+import playground from "./console/playground";
 import store from "./store";
 import stripeWebhook from "./stripe-webhook";
 import type { ApiEnv } from "./types";
@@ -43,17 +41,16 @@ api.use("*", async (c, next) => {
 });
 
 api.route("/api/auth", authApi);
-api.route("/api/organizations", access);
-api.route("/api/organizations", auditLogs);
-api.route("/api/organizations", models);
-api.route("/api/organizations", fineTunes);
-api.route("/api/organizations", nemotron);
-api.route("/api/organizations", billing);
-api.route("/api/organizations", apiKeys);
-api.route("/api/organizations", playground);
 api.route("/api/store", store);
 api.route("/api/og", og);
 api.route("/api/stripe", stripeWebhook);
+// ログインした人の API (モデル・学習・残高・キー)。それぞれの中で requireUser を通す
+api.route("/api", models);
+api.route("/api", fineTunes);
+api.route("/api", nemotron);
+api.route("/api", billing);
+api.route("/api", apiKeys);
+api.route("/api", playground);
 
 api.onError((error, c) => {
   console.error(loggableError(error));

@@ -5,7 +5,6 @@ import { getDb } from "@/lib/db/client";
 import { evalItem, evalRun, fineTune } from "@/lib/db/schema";
 import { parseModelConfig } from "@/lib/models/config";
 import { tokenFactoryHoldMicros } from "@/lib/billing/compute";
-import { recordAuditLog } from "@/lib/organization/audit";
 import { computeDeps } from "@/lib/compute/deps";
 import { errorText, type FineTuneRow, type ModelRow } from "@/lib/compute/types";
 import type { ChatMessage } from "@/lib/nebius";
@@ -36,21 +35,21 @@ import {
 } from "@/lib/nemotron/run-evaluation";
 import type { DatasetSummary } from "@/lib/models/dataset";
 import { GatewayError, runChat, type ChatRequest } from "../../gateway/runtime";
-import { organizationAuth } from "./access";
-import { actorOf, loadOrgModel, message } from "./shared";
+import { currentUser, requireUser } from "./session";
+import { loadOwnModel, message } from "./shared";
 import type { ApiEnv } from "../types";
 
 /*
  * Token Factory の Nemotron を使う機能: 学習データ作り・評価・モデルカードの下書き。
- * どれも組織のメンバーなら使える (公開は従来どおり管理者だけ)。トークン代は組織のクレジットから引く。
+ * トークン代は本人のクレジットから引く。
  */
 
 const nemotron = new Hono<ApiEnv>();
 
-nemotron.use("/:organizationId/models/:modelId/dataset-builder", organizationAuth());
-nemotron.use("/:organizationId/models/:modelId/evaluations", organizationAuth());
-nemotron.use("/:organizationId/models/:modelId/model-card/draft", organizationAuth());
-nemotron.use("/:organizationId/evaluations/*", organizationAuth());
+nemotron.use("/models/:modelId/dataset-builder", requireUser());
+nemotron.use("/models/:modelId/evaluations", requireUser());
+nemotron.use("/models/:modelId/model-card/draft", requireUser());
+nemotron.use("/evaluations/*", requireUser());
 
 const yenOf = (micros: number) => Math.ceil(micros / 1_000_000);
 
@@ -89,12 +88,12 @@ const builderSchema = z.discriminatedUnion("stage", [
   }),
 ]);
 
-nemotron.post("/:organizationId/models/:modelId/dataset-builder", async (c) => {
-  const organizationId = c.req.param("organizationId");
+nemotron.post("/models/:modelId/dataset-builder", async (c) => {
+  const userId = currentUser(c).id;
   if (Number(c.req.header("content-length") ?? 0) > BUILDER_MAX_BODY_BYTES) {
     return c.json(message(c, "server.nemotron.materialTooLarge"), 413);
   }
-  const model = await loadOrgModel(c.env, organizationId, c.req.param("modelId"));
+  const model = await loadOwnModel(c.env, userId, c.req.param("modelId"));
   if (!model) return c.json(message(c, "server.models.notFound"), 404);
   const input = builderSchema.safeParse(await c.req.json().catch(() => null));
   if (!input.success) return c.json(message(c, "server.nemotron.invalidInput"), 400);
@@ -105,23 +104,9 @@ nemotron.post("/:organizationId/models/:modelId/dataset-builder", async (c) => {
   try {
     const result =
       data.stage === "facts"
-        ? await extractFacts(deps, { organizationId, referenceId, ...data })
-        : await paraphraseFacts(deps, { organizationId, referenceId, ...data });
+        ? await extractFacts(deps, { userId, referenceId, ...data })
+        : await paraphraseFacts(deps, { userId, referenceId, ...data });
     if (!result) return c.json(message(c, "server.nemotron.invalidInput"), 400);
-    await recordAuditLog(c.env, {
-      organizationId,
-      actor: actorOf(c),
-      action: "dataset.generate",
-      targetId: model.id,
-      targetLabel: model.name,
-      metadata: {
-        stage: data.stage,
-        ...(data.stage === "facts" ? { chunk: data.chunk } : {}),
-        facts: "facts" in result ? result.facts.length : result.questions.length,
-        dropped: result.dropped.length,
-        costMicros: result.costMicros,
-      },
-    });
     return c.json(result);
   } catch (error) {
     if (error instanceof InsufficientCreditsError) return insufficient(c, error.holdMicros);
@@ -186,12 +171,12 @@ function perItemHoldMicros(prompt: { prompt: ChatMessage[]; reference: string })
   );
 }
 
-async function loadFineTuneRow(env: AppEnv, organizationId: string, id: string | null) {
+async function loadFineTuneRow(env: AppEnv, userId: string, id: string | null) {
   if (!id) return null;
   const [row] = await getDb(env)
     .select()
     .from(fineTune)
-    .where(and(eq(fineTune.organizationId, organizationId), eq(fineTune.id, id)))
+    .where(and(eq(fineTune.userId, userId), eq(fineTune.id, id)))
     .limit(1);
   return row ?? null;
 }
@@ -203,15 +188,15 @@ function evaluationBlocker(model: ModelRow, job: FineTuneRow | null) {
   return null;
 }
 
-nemotron.get("/:organizationId/models/:modelId/evaluations", async (c) => {
-  const organizationId = c.req.param("organizationId");
-  const model = await loadOrgModel(c.env, organizationId, c.req.param("modelId"));
+nemotron.get("/models/:modelId/evaluations", async (c) => {
+  const userId = currentUser(c).id;
+  const model = await loadOwnModel(c.env, userId, c.req.param("modelId"));
   if (!model) return c.json(message(c, "server.models.notFound"), 404);
-  const job = await loadFineTuneRow(c.env, organizationId, model.fineTuneId);
+  const job = await loadFineTuneRow(c.env, userId, model.fineTuneId);
   const rows = await getDb(c.env)
     .select()
     .from(evalRun)
-    .where(and(eq(evalRun.organizationId, organizationId), eq(evalRun.modelId, model.id)))
+    .where(and(eq(evalRun.userId, userId), eq(evalRun.modelId, model.id)))
     .orderBy(desc(evalRun.createdAt))
     .limit(10);
   const prompts = job?.evalSet ? evalPromptsFromJsonl(job.evalSet, EVAL_MAX_ITEMS) : [];
@@ -225,11 +210,11 @@ nemotron.get("/:organizationId/models/:modelId/evaluations", async (c) => {
   });
 });
 
-nemotron.post("/:organizationId/models/:modelId/evaluations", async (c) => {
-  const organizationId = c.req.param("organizationId");
-  const model = await loadOrgModel(c.env, organizationId, c.req.param("modelId"));
+nemotron.post("/models/:modelId/evaluations", async (c) => {
+  const userId = currentUser(c).id;
+  const model = await loadOwnModel(c.env, userId, c.req.param("modelId"));
   if (!model) return c.json(message(c, "server.models.notFound"), 404);
-  const job = await loadFineTuneRow(c.env, organizationId, model.fineTuneId);
+  const job = await loadFineTuneRow(c.env, userId, model.fineTuneId);
   const blocker = evaluationBlocker(model, job);
   if (blocker || !job?.evalSet) {
     return c.json(message(c, `server.nemotron.evaluation.${blocker ?? "no_eval_set"}`), 400);
@@ -240,12 +225,11 @@ nemotron.post("/:organizationId/models/:modelId/evaluations", async (c) => {
   // 少なくとも1問分を払えなければ始めない (途中で止まっても、足してから続きを進められる)
   const deps = nemotronDeps(c.env);
   const firstHold = perItemHoldMicros(prompts[0]);
-  if ((await computeDeps(c.env).credits.balance(organizationId)) < firstHold) {
+  if ((await computeDeps(c.env).credits.balance(userId)) < firstHold) {
     return insufficient(c, firstHold);
   }
 
   const db = getDb(c.env);
-  const actor = actorOf(c);
   const now = new Date();
   // 同じモデルで途中の評価があれば打ち切る (新しい評価に置きかえる)
   await db
@@ -254,10 +238,9 @@ nemotron.post("/:organizationId/models/:modelId/evaluations", async (c) => {
     .where(and(eq(evalRun.modelId, model.id), eq(evalRun.status, "running")));
   const run: EvalRunRow = {
     id: crypto.randomUUID(),
-    organizationId,
+    userId,
     modelId: model.id,
     fineTuneId: job.id,
-    createdBy: actor.id,
     status: "running",
     baselineModel: deps.model,
     judgeModel: deps.model,
@@ -284,28 +267,20 @@ nemotron.post("/:organizationId/models/:modelId/evaluations", async (c) => {
       updatedAt: now,
     })),
   );
-  await recordAuditLog(c.env, {
-    organizationId,
-    actor,
-    action: "evaluation.start",
-    targetId: run.id,
-    targetLabel: model.name,
-    metadata: { modelId: model.id, fineTuneId: job.id, items: prompts.length, baselineModel: deps.model },
-  });
   return c.json(toRunDto(run), 201);
 });
 
-async function loadRun(env: AppEnv, organizationId: string, runId: string) {
+async function loadRun(env: AppEnv, userId: string, runId: string) {
   const [row] = await getDb(env)
     .select()
     .from(evalRun)
-    .where(and(eq(evalRun.organizationId, organizationId), eq(evalRun.id, runId)))
+    .where(and(eq(evalRun.userId, userId), eq(evalRun.id, runId)))
     .limit(1);
   return row ?? null;
 }
 
-nemotron.get("/:organizationId/evaluations/:runId", async (c) => {
-  const run = await loadRun(c.env, c.req.param("organizationId"), c.req.param("runId"));
+nemotron.get("/evaluations/:runId", async (c) => {
+  const run = await loadRun(c.env, currentUser(c).id, c.req.param("runId"));
   if (!run) return c.json(message(c, "server.nemotron.evaluation.notFound"), 404);
   const items = await getDb(c.env)
     .select()
@@ -315,10 +290,9 @@ nemotron.get("/:organizationId/evaluations/:runId", async (c) => {
   return c.json({ ...toRunDto(run), items: items.map(toItemDto) });
 });
 
-/** 微調整したモデルに、利用者と同じ経路 (gateway の runChat) で答えさせる。自組織のモデルなので呼び出しごとの料金は無い */
-function fineTunedAnswerer(c: Context<ApiEnv>, model: ModelRow, organizationId: string) {
+/** 微調整したモデルに、利用者と同じ経路 (gateway の runChat) で答えさせる。自分のモデルなので呼び出しごとの料金は無い */
+function fineTunedAnswerer(c: Context<ApiEnv>, model: ModelRow, userId: string) {
   const config = parseModelConfig(model.config);
-  const userId = actorOf(c).id;
   return async (prompt: ChatMessage[]): Promise<FineTunedAnswer> => {
     if (!config) return { ok: false, reason: "error", message: "Model is not configured" };
     try {
@@ -334,9 +308,8 @@ function fineTunedAnswerer(c: Context<ApiEnv>, model: ModelRow, organizationId: 
           waitUntil: (promise) => c.executionCtx.waitUntil(promise),
           model,
           config,
-          consumerOrganizationId: organizationId,
+          consumerUserId: userId,
           apiKeyId: null,
-          userId,
           source: "eval",
         },
         request,
@@ -363,14 +336,14 @@ function fineTunedAnswerer(c: Context<ApiEnv>, model: ModelRow, organizationId: 
   };
 }
 
-nemotron.post("/:organizationId/evaluations/:runId/step", async (c) => {
-  const organizationId = c.req.param("organizationId");
-  const run = await loadRun(c.env, organizationId, c.req.param("runId"));
+nemotron.post("/evaluations/:runId/step", async (c) => {
+  const userId = currentUser(c).id;
+  const run = await loadRun(c.env, userId, c.req.param("runId"));
   if (!run) return c.json(message(c, "server.nemotron.evaluation.notFound"), 404);
   if (run.status !== "running") {
     return c.json({ state: "done", run: toRunDto(run) });
   }
-  const model = await loadOrgModel(c.env, organizationId, run.modelId);
+  const model = await loadOwnModel(c.env, userId, run.modelId);
   const store = evalStore(c.env);
   // 評価の途中で別の LoRA に載せ替えたら、その評価は続けられない
   if (!model || model.fineTuneId !== run.fineTuneId || !model.endpointId) {
@@ -379,19 +352,19 @@ nemotron.post("/:organizationId/evaluations/:runId/step", async (c) => {
       error: "The deployed adapter changed during the evaluation",
       completedAt: new Date(),
     });
-    const failed = await loadRun(c.env, organizationId, run.id);
+    const failed = await loadRun(c.env, userId, run.id);
     return c.json({ state: "done", run: failed ? toRunDto(failed) : null });
   }
   const result = await stepEvaluation(
     {
       nemotron: nemotronDeps(c.env),
       store,
-      answerFineTuned: fineTunedAnswerer(c, model, organizationId),
+      answerFineTuned: fineTunedAnswerer(c, model, userId),
       now: () => new Date(),
     },
     run,
   );
-  const latest = await loadRun(c.env, organizationId, run.id);
+  const latest = await loadRun(c.env, userId, run.id);
   const dto = latest ? toRunDto(latest) : toRunDto(run);
   if (result.state === "insufficient_credits") {
     return c.json(
@@ -424,22 +397,22 @@ function describeDataset(job: FineTuneRow) {
   return lines.join("\n");
 }
 
-nemotron.post("/:organizationId/models/:modelId/model-card/draft", async (c) => {
-  const organizationId = c.req.param("organizationId");
-  const model = await loadOrgModel(c.env, organizationId, c.req.param("modelId"));
+nemotron.post("/models/:modelId/model-card/draft", async (c) => {
+  const userId = currentUser(c).id;
+  const model = await loadOwnModel(c.env, userId, c.req.param("modelId"));
   if (!model) return c.json(message(c, "server.models.notFound"), 404);
   const input = cardSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!input.success) return c.json(message(c, "server.nemotron.invalidInput"), 400);
 
   // 載せている LoRA の学習、無ければ最後に成功した学習
-  let job = await loadFineTuneRow(c.env, organizationId, model.fineTuneId);
+  let job = await loadFineTuneRow(c.env, userId, model.fineTuneId);
   if (!job) {
     const [latest] = await getDb(c.env)
       .select()
       .from(fineTune)
       .where(
         and(
-          eq(fineTune.organizationId, organizationId),
+          eq(fineTune.userId, userId),
           eq(fineTune.modelId, model.id),
           inArray(fineTune.status, ["succeeded"]),
         ),
@@ -453,7 +426,7 @@ nemotron.post("/:organizationId/models/:modelId/model-card/draft", async (c) => 
   const deps = nemotronDeps(c.env);
   try {
     const result = await draftModelCard(deps, {
-      organizationId,
+      userId,
       referenceId: `card:${crypto.randomUUID()}`,
       locale: input.data.locale ?? "en",
       modelName: model.name,
@@ -464,14 +437,6 @@ nemotron.post("/:organizationId/models/:modelId/model-card/draft", async (c) => 
             judge: evaluation.judgeModel,
           })
         : null,
-    });
-    await recordAuditLog(c.env, {
-      organizationId,
-      actor: actorOf(c),
-      action: "model_card.draft",
-      targetId: model.id,
-      targetLabel: model.name,
-      metadata: { fineTuneId: job.id, ok: result.ok, costMicros: result.costMicros },
     });
     if (!result.ok) return c.json(message(c, "server.nemotron.card.invalidOutput"), 502);
     return c.json({ ...result.draft, costMicros: result.costMicros });

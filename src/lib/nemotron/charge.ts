@@ -4,7 +4,7 @@ import { tokenFactoryCostMicros, tokenFactoryHoldMicros } from "../billing/compu
 import type { CreditPort } from "../compute/types";
 
 /*
- * Token Factory の Nemotron を呼び、使ったトークン代を組織のクレジットから引く。
+ * Token Factory の Nemotron を呼び、使ったトークン代を利用者のクレジットから引く。
  *   呼ぶ前: 入力の文字数と max_tokens から見込み額を仮押さえ (足りなければ呼ばない)
  *   呼んだ後: 実際のトークン数で精算する (台帳に1行、referenceId で一度だけ)
  *   失敗したら: 仮押さえを戻す
@@ -39,7 +39,7 @@ function billableUsage(usage: ChatUsage, inputChars: number, outputChars: number
 export async function chargedNemotronChat(
   deps: NemotronDeps,
   input: {
-    organizationId: string;
+    userId: string;
     kind: NemotronKind;
     /** 精算を一度だけにするための ID (呼び出しごとに変える) */
     referenceId: string;
@@ -52,7 +52,7 @@ export async function chargedNemotronChat(
 ): Promise<ChargedChat> {
   const inputChars = input.messages.reduce((sum, message) => sum + message.content.length, 0);
   const hold = tokenFactoryHoldMicros({ inputChars, maxTokens: input.maxTokens });
-  if (!(await deps.credits.reserve(input.organizationId, hold))) {
+  if (!(await deps.credits.reserve(input.userId, hold))) {
     throw new InsufficientCreditsError(hold);
   }
   let result: { content: string; usage: ChatUsage };
@@ -64,14 +64,14 @@ export async function chargedNemotronChat(
       ...(input.jsonSchema ? { jsonSchema: input.jsonSchema } : {}),
     });
   } catch (error) {
-    await deps.credits.release(input.organizationId, hold);
+    await deps.credits.release(input.userId, hold);
     throw error;
   }
   const usage = billableUsage(result.usage, inputChars, result.content.length);
   const costMicros = tokenFactoryCostMicros(usage);
   try {
     const settled = await deps.credits.settle({
-      organizationId: input.organizationId,
+      userId: input.userId,
       kind: input.kind,
       referenceId: input.referenceId,
       heldMicros: hold,
@@ -79,10 +79,10 @@ export async function chargedNemotronChat(
       description: input.description,
     });
     // 同じ referenceId で精算済みなら残高は動いていないので、仮押さえだけ戻す
-    if (settled === "duplicate") await deps.credits.release(input.organizationId, hold);
+    if (settled === "duplicate") await deps.credits.release(input.userId, hold);
   } catch (error) {
     console.error("Token Factory の料金を精算できませんでした:", input.referenceId, error);
-    await deps.credits.release(input.organizationId, hold);
+    await deps.credits.release(input.userId, hold);
   }
   return { content: result.content, usage, costMicros };
 }

@@ -17,18 +17,16 @@ import {
 import { PageBody, PageHeader } from "@/components/ui/PageHeader";
 import { getWallet, listLedger, startTopup } from "@/lib/api-client";
 import { yenToMicros } from "@/lib/billing/pricing";
-import type { Route } from "./+types/billing";
 
 const PRESETS = [1_000, 5_000, 10_000] as const;
 type Choice = (typeof PRESETS)[number] | "custom";
 const POLL_ATTEMPTS = 6;
 const POLL_INTERVAL_MS = 2_000;
 
-export default function CreditsPage({ params }: Route.ComponentProps) {
+export default function CreditsPage() {
   const { t } = useTranslation();
-  const organizationId = params.organizationId;
   const yen = useYen();
-  const { openMobileNavigation, canManageOrganization: canManage } = useAccountPage();
+  const { openMobileNavigation } = useAccountPage();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [choice, setChoice] = useState<Choice>(PRESETS[1]);
@@ -37,13 +35,13 @@ export default function CreditsPage({ params }: Route.ComponentProps) {
   const handledTopup = useRef(false);
 
   const wallet = useQuery({
-    queryKey: ["wallet", organizationId],
-    queryFn: () => getWallet(organizationId),
+    queryKey: ["wallet"],
+    queryFn: () => getWallet(),
   });
   const ledger = useInfiniteQuery({
-    queryKey: ["ledger", organizationId, "credit"],
+    queryKey: ["ledger", "credit"],
     queryFn: ({ pageParam }) =>
-      listLedger(organizationId, { cursor: pageParam, pageSize: 50, balance: "credit" }),
+      listLedger({ cursor: pageParam, pageSize: 50, balance: "credit" }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
@@ -83,11 +81,11 @@ export default function CreditsPage({ params }: Route.ComponentProps) {
           window.clearInterval(timer);
         }
       });
-      void queryClient.invalidateQueries({ queryKey: ["ledger", organizationId] });
+      void queryClient.invalidateQueries({ queryKey: ["ledger"] });
       if (attempts >= POLL_ATTEMPTS) window.clearInterval(timer);
     }, POLL_INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [organizationId, queryClient, setSearchParams, t, topupResult, walletRefetch]);
+  }, [queryClient, setSearchParams, t, topupResult, walletRefetch]);
 
   const limits = wallet.data?.limits ?? {
     topupMinYen: 500,
@@ -106,7 +104,7 @@ export default function CreditsPage({ params }: Route.ComponentProps) {
     if (!amountValid || isStarting) return;
     setIsStarting(true);
     try {
-      const { url } = await startTopup(organizationId, selectedAmount);
+      const { url } = await startTopup(selectedAmount);
       window.location.assign(url);
     } catch (error) {
       console.error(error);
@@ -145,11 +143,6 @@ export default function CreditsPage({ params }: Route.ComponentProps) {
             <p className="mt-auto pt-4 text-xs leading-5 text-ink-mute">{t("credits.balanceHint")}</p>
           </section>
 
-          {!canManage ? (
-            <section className="console-panel p-5 text-sm text-ink-mute">
-              {t("credits.managerOnly")}
-            </section>
-          ) : (
           <form className="console-panel" onSubmit={handleTopup}>
             <PanelHeader
               title={t("credits.topupTitle")}
@@ -221,7 +214,6 @@ export default function CreditsPage({ params }: Route.ComponentProps) {
               </div>
             </div>
           </form>
-          )}
         </div>
 
         <section className="console-panel overflow-hidden">

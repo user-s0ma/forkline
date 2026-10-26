@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { KeyRound, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import type { Route } from "./+types/api-keys";
 import {
   CopyButton,
   PanelHeader,
@@ -28,11 +27,10 @@ import { useConfirm } from "@/components/ui/useConfirm";
 
 const API_BASE = "https://forkline.ai/v1";
 
-export default function ApiKeysPage({ params }: Route.ComponentProps) {
+export default function ApiKeysPage() {
   const { t } = useTranslation();
   const [confirm, confirmDialog] = useConfirm();
-  const organizationId = params.organizationId;
-  const { openMobileNavigation, canManageOrganization: canManage } = useAccountPage();
+  const { openMobileNavigation } = useAccountPage();
   const dateFormatter = useDateFormatter();
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
@@ -41,14 +39,14 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
 
   const { data, error, isPending } = useQuery({
-    queryKey: ["api-keys", organizationId],
-    queryFn: () => listApiKeys(organizationId),
+    queryKey: ["api-keys"],
+    queryFn: () => listApiKeys(),
   });
   useErrorToast(error, t("apiKeys.loadFailed"));
   const keys = data?.items ?? [];
 
   const refresh = () =>
-    queryClient.invalidateQueries({ queryKey: ["api-keys", organizationId] });
+    queryClient.invalidateQueries({ queryKey: ["api-keys"] });
 
   const openCreate = () => {
     setName("");
@@ -60,7 +58,7 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
     if (!name.trim() || isCreating) return;
     setIsCreating(true);
     try {
-      const created = await createApiKey(organizationId, name.trim());
+      const created = await createApiKey(name.trim());
       setCreateOpen(false);
       setCreatedKey(created.key);
       await refresh();
@@ -77,7 +75,7 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
   const handleRevoke = async (key: ApiKeyRecord) => {
     if (!(await confirm(t("apiKeys.revokeConfirm", { name: key.name }), { danger: true }))) return;
     try {
-      await revokeApiKey(organizationId, key.id);
+      await revokeApiKey(key.id);
       await refresh();
     } catch (error) {
       console.error(error);
@@ -102,7 +100,6 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
         description={t("apiKeys.description")}
         onOpenMenu={openMobileNavigation}
         actions={
-          canManage && (
           <button
             className="console-button-primary"
             type="button"
@@ -111,7 +108,6 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
             <Plus className="h-4 w-4" />
             {t("apiKeys.create")}
           </button>
-          )
         }
       />
       <PageBody>
@@ -122,9 +118,7 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
             <EmptyState
               icon={KeyRound}
               title={t("apiKeys.emptyTitle")}
-              description={canManage ? undefined : t("apiKeys.managerOnly")}
               action={
-                canManage && (
                 <button
                   className="console-button-primary"
                   type="button"
@@ -132,7 +126,6 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
                 >
                   {t("apiKeys.createFirst")}
                 </button>
-                )
               }
             />
           ) : (
@@ -181,7 +174,6 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
                       {dateFormatter.format(new Date(key.createdAt))}
                     </td>
                     <td className="text-right">
-                      {canManage && (
                       <button
                         className="rounded-(--radius-control) px-2 py-1 text-sm text-danger hover:bg-danger-tint"
                         type="button"
@@ -190,7 +182,6 @@ export default function ApiKeysPage({ params }: Route.ComponentProps) {
                       >
                         {t("apiKeys.revoke")}
                       </button>
-                      )}
                     </td>
                   </tr>
                 ))}

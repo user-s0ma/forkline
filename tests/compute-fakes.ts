@@ -56,14 +56,14 @@ export function fakeCredits(initial: Record<string, number>) {
   const balances = new Map(Object.entries(initial));
   const ledger: HoldSettlement[] = [];
   const credits: ComputeDeps["credits"] = {
-    async reserve(organizationId, micros) {
-      const current = balances.get(organizationId) ?? 0;
+    async reserve(userId, micros) {
+      const current = balances.get(userId) ?? 0;
       if (current < micros) return false;
-      balances.set(organizationId, current - micros);
+      balances.set(userId, current - micros);
       return true;
     },
-    async release(organizationId, micros) {
-      balances.set(organizationId, (balances.get(organizationId) ?? 0) + micros);
+    async release(userId, micros) {
+      balances.set(userId, (balances.get(userId) ?? 0) + micros);
     },
     async settle(input) {
       if (ledger.some((entry) => entry.kind === input.kind && entry.referenceId === input.referenceId)) {
@@ -71,11 +71,11 @@ export function fakeCredits(initial: Record<string, number>) {
       }
       ledger.push(input);
       const delta = holdDifference(input.heldMicros, Math.ceil(input.actualMicros));
-      balances.set(input.organizationId, (balances.get(input.organizationId) ?? 0) + delta);
+      balances.set(input.userId, (balances.get(input.userId) ?? 0) + delta);
       return "applied";
     },
-    async balance(organizationId) {
-      return balances.get(organizationId) ?? 0;
+    async balance(userId) {
+      return balances.get(userId) ?? 0;
     },
   };
   return { credits, balances, ledger };
@@ -200,8 +200,7 @@ export function makeModel(overrides: Partial<ModelRow> = {}): ModelRow {
   const now = new Date("2026-10-24T00:00:00Z");
   return {
     id: "model-1",
-    organizationId: "org-pub",
-    createdBy: "user-1",
+    userId: "user-pub",
     slug: "support-bot",
     name: "Support bot",
     tagline: "",

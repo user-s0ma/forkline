@@ -24,13 +24,13 @@ type Billed = { costMicros: number; inputTokens: number; outputTokens: number };
 /** 資料の chunk 番目のかたまりから事実を取り出す (Token Factory を1回呼ぶ)。chunk が範囲外なら null */
 export async function extractFacts(
   deps: NemotronDeps,
-  input: { organizationId: string; referenceId: string; role: string; material: string; chunk: number },
+  input: { userId: string; referenceId: string; role: string; material: string; chunk: number },
 ): Promise<(ReturnType<typeof parseFacts> & Billed & { chunkCount: number }) | null> {
   const chunks = chunkMaterial(input.material);
   const material = chunks[input.chunk];
   if (material === undefined) return null;
   const response = await chargedNemotronChat(deps, {
-    organizationId: input.organizationId,
+    userId: input.userId,
     kind: "dataset_build",
     referenceId: input.referenceId,
     description: `Dataset builder: facts (${input.chunk + 1}/${chunks.length})`,
@@ -50,10 +50,10 @@ export async function extractFacts(
 /** 事実ごとに、違う言い方の質問を BUILDER_PARAPHRASES 個作る (Token Factory を1回呼ぶ) */
 export async function paraphraseFacts(
   deps: NemotronDeps,
-  input: { organizationId: string; referenceId: string; role: string; facts: Fact[] },
+  input: { userId: string; referenceId: string; role: string; facts: Fact[] },
 ): Promise<ReturnType<typeof parseParaphrases> & Billed> {
   const response = await chargedNemotronChat(deps, {
-    organizationId: input.organizationId,
+    userId: input.userId,
     kind: "dataset_build",
     referenceId: input.referenceId,
     description: `Dataset builder: paraphrases (${input.facts.length} facts)`,
@@ -76,7 +76,7 @@ export type DraftCardResult =
 export async function draftModelCard(
   deps: NemotronDeps,
   input: {
-    organizationId: string;
+    userId: string;
     referenceId: string;
     locale: "ja" | "en";
     modelName: string;
@@ -85,7 +85,7 @@ export async function draftModelCard(
   },
 ): Promise<DraftCardResult> {
   const response = await chargedNemotronChat(deps, {
-    organizationId: input.organizationId,
+    userId: input.userId,
     kind: "model_card",
     referenceId: input.referenceId,
     description: `Model card draft (${input.modelName})`.slice(0, 255),

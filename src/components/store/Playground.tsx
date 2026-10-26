@@ -13,8 +13,6 @@ import { appendDelta, type Reply } from "./reply";
 
 type PlaygroundProps = {
   slug: string;
-  /** 料金を払う組織 */
-  organizationId: string;
 };
 
 /** message が null のときは、エンドポイントの起動待ち */
@@ -33,10 +31,8 @@ function toErrorState(error: unknown, fallback: string): ErrorState {
 
 function PlaygroundError({
   error,
-  organizationId,
 }: {
   error: NonNullable<ErrorState>;
-  organizationId: string;
 }) {
   const { t } = useTranslation();
   // 止まっていたエンドポイントは起こしたところなので、エラーではなく「起動中」として伝える
@@ -60,7 +56,7 @@ function PlaygroundError({
         : error.message}
       {error.insufficient && (
         <a
-          href={`/app/${encodeURIComponent(organizationId)}/billing`}
+          href="/app/billing"
           className="ml-2 font-semibold underline"
         >
           {t("store.playground.topUp")}
@@ -81,7 +77,7 @@ function useCostFormatter() {
 /** 思考は表示だけに使い、次の送信には本文だけを載せる */
 type Turn = ChatMessage & { cost?: string | null; reasoning?: string };
 
-function ChatPlayground({ slug, organizationId }: PlaygroundProps) {
+function ChatPlayground({ slug }: PlaygroundProps) {
   const { t } = useTranslation();
   const formatCost = useCostFormatter();
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -108,7 +104,6 @@ function ChatPlayground({ slug, organizationId }: PlaygroundProps) {
     let reply: Reply = { content: "", reasoning: "" };
     try {
       const { costYen } = await playgroundChatStream(
-        organizationId,
         {
           model: slug,
           messages: history.map(({ role, content: text }) => ({
@@ -187,7 +182,7 @@ function ChatPlayground({ slug, organizationId }: PlaygroundProps) {
           </p>
         )}
       </div>
-      {error && <PlaygroundError error={error} organizationId={organizationId} />}
+      {error && <PlaygroundError error={error} />}
       <form className="flex gap-2" onSubmit={send}>
         <textarea
           className="console-input h-auto! min-h-10 flex-1 resize-none py-2 leading-6"
@@ -237,16 +232,15 @@ function ChatPlayground({ slug, organizationId }: PlaygroundProps) {
 }
 
 /**
- * モデルを試すためのプレイグラウンド。料金は選んでいる組織のクレジットから引き落とされる。
+ * モデルを試すためのプレイグラウンド。料金はログインしている人のクレジットから引き落とされる。
  * コンソールのモデル画面と公開ページの両方で使う。
  */
-export function Playground({ slug, organizationId }: PlaygroundProps) {
-  // モデルや組織が変わったら会話をリセットする
+export function Playground({ slug }: PlaygroundProps) {
+  // モデルが変わったら会話をリセットする
   return (
     <ChatPlayground
-      key={`${organizationId}:${slug}`}
+      key={slug}
       slug={slug}
-      organizationId={organizationId}
     />
   );
 }

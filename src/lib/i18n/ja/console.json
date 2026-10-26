@@ -20,55 +20,9 @@
       "billing": "利用と支払い"
     }
   },
-  "auditLogs": {
-    "actionGroups": {
-      "models": "モデル",
-      "compute": "学習とエンドポイント",
-      "billing": "APIキーと支払い"
-    },
-    "actions": {
-      "model": {
-        "create": "モデルを作成",
-        "update": "モデルの設定を変更",
-        "delete": "モデルを削除",
-        "publish": "モデルを公開",
-        "unpublish": "モデルを非公開に"
-      },
-      "fine_tune": {
-        "start": "学習を開始",
-        "cancel": "学習を中止"
-      },
-      "endpoint": {
-        "deploy": "エンドポイントをデプロイ",
-        "start": "エンドポイントを起動",
-        "stop": "エンドポイントを停止",
-        "delete": "エンドポイントを削除"
-      },
-      "api_key": {
-        "create": "APIキーを発行",
-        "revoke": "APIキーを無効化"
-      },
-      "billing": {
-        "topup_start": "クレジットの購入を開始",
-        "connect": "出金口座の登録を開始",
-        "payout": "出金を申請",
-        "payout_pending": "出金を申請 (Stripe の応答待ち)"
-      },
-      "dataset": {
-        "generate": "Nemotron で学習データを作成"
-      },
-      "evaluation": {
-        "start": "モデルの評価を開始"
-      },
-      "model_card": {
-        "draft": "Nemotron でモデルカードを下書き"
-      }
-    }
-  },
   "apiKeys": {
     "title": "APIキー",
-    "description": "キーは組織で共有します。キーで呼び出した料金は、この組織のクレジットから引かれます。",
-    "managerOnly": "キーの発行と無効化は、組織のオーナーと管理者だけができます。",
+    "description": "キーで呼び出した料金は、あなたのクレジットから引かれます。",
     "create": "キーを発行",
     "createFirst": "最初のキーを発行",
     "loadFailed": "APIキーを読み込めませんでした",
@@ -94,7 +48,7 @@
   },
   "usage": {
     "title": "利用履歴",
-    "description": "この組織が API とプレイグラウンドでモデルを呼び出した記録です。",
+    "description": "あなたが API とプレイグラウンドでモデルを呼び出した記録です。",
     "loadFailed": "利用履歴を読み込めませんでした",
     "chartTitle": "日別の利用額 (30日)",
     "spend30": "30日の利用額",
@@ -126,8 +80,7 @@
   },
   "credits": {
     "title": "クレジット",
-    "description": "組織で共有する前払いの残高です。モデルの呼び出し、学習、エンドポイントの GPU 代に使います。",
-    "managerOnly": "チャージは、組織のオーナーと管理者だけができます。",
+    "description": "前払いの残高です。モデルの呼び出し、学習、エンドポイントの GPU 代に使います。",
     "loadFailed": "クレジット情報を読み込めませんでした",
     "balance": "クレジット残高",
     "held": "ほかに学習とエンドポイントのため {{amount}} を押さえています",
@@ -168,8 +121,7 @@
   },
   "earnings": {
     "title": "収益と出金",
-    "description": "この組織のモデルが呼ばれた分の収益です。手数料を引いた額を Stripe Connect で出金できます。",
-    "managerOnly": "出金口座の登録と出金は、組織のオーナーと管理者だけができます。",
+    "description": "あなたのモデルが呼ばれた分の収益です。手数料を引いた額を Stripe Connect で出金できます。",
     "loadFailed": "収益情報を読み込めませんでした",
     "available": "出金可能な収益",
     "payoutTitle": "出金",
@@ -231,7 +183,7 @@
     },
     "list": {
       "title": "モデル",
-      "description": "この組織のモデルです。Nemotron を学習させてデプロイし、料金を決めてストアに公開します。",
+      "description": "あなたのモデルです。Nemotron を学習させてデプロイし、料金を決めてストアに公開します。",
       "newButton": "モデルを作成",
       "loadError": "モデルを読み込めませんでした",
       "createFailed": "モデルを作成できませんでした",
@@ -253,7 +205,7 @@
       "backToList": "モデル一覧へ",
       "loadError": "モデルを読み込めませんでした",
       "notFoundTitle": "モデルが見つかりません",
-      "notFoundDescription": "削除されたか、この組織のモデルではありません。",
+      "notFoundDescription": "削除されたか、あなたのモデルではありません。",
       "viewPublic": "公開ページを見る",
       "tabsAria": "モデルの画面",
       "tabs": {
@@ -305,7 +257,7 @@
       "outputHint": "モデルが返した文章の量に対する料金",
       "perRequest": "1リクエストあたり",
       "perRequestHint": "トークン数にかかわらず1回ごとに掛かる料金",
-      "computeNote": "エンドポイントの GPU 代 ({{perHour}}/時) は、動いている間だけこの組織のクレジットから引かれます。料金は GPU 代を見込んで決めてください。",
+      "computeNote": "エンドポイントの GPU 代 ({{perHour}}/時) は、動いている間だけあなたのクレジットから引かれます。料金は GPU 代を見込んで決めてください。",
       "simulationTitleTokens": "売上の目安",
       "tokensLabel": "呼ばれるトークン数",
       "tokensOption": "{{tokens}} トークン",
@@ -333,7 +285,7 @@
     },
     "test": {
       "title": "テスト",
-      "description": "この組織のモデルなので、クリエイター価格は掛かりません。エンドポイントの GPU 代だけが掛かります。",
+      "description": "自分のモデルなので、クリエイター価格は掛かりません。エンドポイントの GPU 代だけが掛かります。",
       "deployFirst": "学習した LoRA をデプロイすると試せます。"
     },
     "launch": {
@@ -365,7 +317,6 @@
       "publish": {
         "title": "公開する",
         "failed": "公開の設定を変えられませんでした",
-        "managerOnly": "公開と非公開の切り替えは、組織のオーナーと管理者だけができます。",
         "needsTagline": "ストアに公開するには概要が必要です。",
         "unpublish": "公開をやめる",
         "unpublishConfirm": "公開をやめますか？ API からも呼べなくなります。",
@@ -377,14 +328,14 @@
           "private": {
             "action": "限定公開",
             "switch": "限定公開に切り替える",
-            "description": "ストアには出ず、この組織の API キーで呼べます"
+            "description": "ストアには出ず、あなたの API キーで呼べます"
           }
         }
       }
     },
     "training": {
       "title": "LoRA で学習する",
-      "description": "chat 形式の JSONL で NVIDIA Nemotron を微調整します。学習は Nebius の GPU で動き、料金はこの組織のクレジットから引かれます。",
+      "description": "chat 形式の JSONL で NVIDIA Nemotron を微調整します。学習は Nebius の GPU で動き、料金はあなたのクレジットから引かれます。",
       "baseModel": "ベースモデル",
       "baseModelHint": "小さいモデルほど安く、速く学習できます",
       "trainRate": "学習の GPU",
@@ -505,7 +456,7 @@
       "failed": "削除できませんでした"
     },
     "builder": {
-      "intro": "FAQ・マニュアル・規約・問答の例を貼ると、Nebius Token Factory の Nemotron が会話の例に直します。学習の前に中身を確かめて直してください。Token Factory の料金はこの組織のクレジットから引かれます。",
+      "intro": "FAQ・マニュアル・規約・問答の例を貼ると、Nebius Token Factory の Nemotron が会話の例に直します。学習の前に中身を確かめて直してください。Token Factory の料金はあなたのクレジットから引かれます。",
       "role": "アシスタントの役割",
       "roleHint": "誰として、誰に、どんな口調で答えるか。例を作るときだけに使います。",
       "rolePlaceholder": "靴の通販サイトの問い合わせ窓口。お客様に丁寧に、短く答える。",
@@ -540,7 +491,7 @@
     },
     "evaluation": {
       "title": "Nemotron で評価する",
-      "description": "取っておいた評価用の質問を、デプロイしたモデルと Nebius Token Factory のベースの Nemotron の両方に解かせ、Nemotron が基準の答えと比べて 1〜5 で採点します。評価のあいだエンドポイントが動き、Token Factory の料金はこの組織のクレジットから引かれます。",
+      "description": "取っておいた評価用の質問を、デプロイしたモデルと Nebius Token Factory のベースの Nemotron の両方に解かせ、Nemotron が基準の答えと比べて 1〜5 で採点します。評価のあいだエンドポイントが動き、Token Factory の料金はあなたのクレジットから引かれます。",
       "run": "評価する",
       "rerun": "もう一度評価する",
       "blockers": {

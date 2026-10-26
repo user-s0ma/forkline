@@ -22,12 +22,12 @@ import {
 } from "./compute-fakes";
 
 const HYPERPARAMETERS = { epochs: 2, learningRate: 0.0002, loraRank: 16, loraAlpha: 32 };
-const ORG = "org-pub";
+const OWNER = "user-pub";
 const START_BALANCE = 100_000_000_000;
 
 function setup(nebiusOverrides: Parameters<typeof fakeNebius>[0] = {}, balance = START_BALANCE) {
   const { nebius, calls } = fakeNebius(nebiusOverrides);
-  const { credits, balances, ledger } = fakeCredits({ [ORG]: balance });
+  const { credits, balances, ledger } = fakeCredits({ [OWNER]: balance });
   const { stores, fineTunes } = fakeStores();
   const clock = fakeClock();
   const deps = makeDeps({ nebius, credits, stores, now: clock.now });
@@ -36,9 +36,8 @@ function setup(nebiusOverrides: Parameters<typeof fakeNebius>[0] = {}, balance =
 
 function start(deps: ReturnType<typeof setup>["deps"], jsonl = sampleJsonl()) {
   return startFineTune(deps, {
-    organizationId: ORG,
+    userId: OWNER,
     modelId: "model-1",
-    createdBy: "user-1",
     baseModel: BASE_MODEL,
     datasetName: "faq.jsonl",
     jsonl,
@@ -56,17 +55,17 @@ test("学習を始めると見積もりの1.5倍を仮押さえし、データ�
   assert.equal(row.datasetExamples, 10);
   assert.equal(row.trainMicrosPerHour, microsPerHour(BASE_MODEL.trainUsdPerHour));
   assert.equal(row.heldMicros, Math.ceil(row.estimatedMicros * 1.5));
-  assert.equal(balances.get(ORG), START_BALANCE - row.heldMicros);
+  assert.equal(balances.get(OWNER), START_BALANCE - row.heldMicros);
   assert.deepEqual(
     calls.map((call) => call.name),
     ["uploadTrainingData", "startFineTune"],
   );
-  // 学習データと LoRA の置き場所は組織と学習ごとに分ける
+  // 学習データと LoRA の置き場所は利用者と学習ごとに分ける
   const upload = calls[0].args[1] as { key: string };
-  assert.equal(upload.key, `organizations/${ORG}/fine-tunes/${row.id}/train.jsonl`);
+  assert.equal(upload.key, `users/${OWNER}/fine-tunes/${row.id}/train.jsonl`);
   const job = calls[1].args[1] as { outputPrefix: string; datasetUri: string };
   assert.equal(job.datasetUri, "s3://bucket/train.jsonl");
-  assert.equal(job.outputPrefix, `organizations/${ORG}/fine-tunes/${row.id}/adapter/`);
+  assert.equal(job.outputPrefix, `users/${OWNER}/fine-tunes/${row.id}/adapter/`);
   assert.equal(fineTunes.get(row.id)?.nebiusJobId, "job-1");
 });
 
@@ -75,7 +74,7 @@ test("残高が足りなければ始めず、Nebius も呼ばない", async () =
   const result = await start(deps);
   assert.equal(result.ok, false);
   assert.equal(!result.ok && result.reason, "insufficient_credits");
-  assert.equal(balances.get(ORG), 1_000);
+  assert.equal(balances.get(OWNER), 1_000);
   assert.equal(calls.length, 0);
 });
 
@@ -84,7 +83,7 @@ test("学習データが正しくなければ、仮押さえせずに断る", as
   const result = await start(deps, '{"messages": []}\nnot json');
   assert.equal(result.ok, false);
   assert.equal(!result.ok && result.reason, "invalid_dataset");
-  assert.equal(balances.get(ORG), START_BALANCE);
+  assert.equal(balances.get(OWNER), START_BALANCE);
 });
 
 test("Job を始められなければ失敗にして、仮押さえを全部戻す", async () => {
@@ -96,7 +95,7 @@ test("Job を始められなければ失敗にして、仮押さえを全部戻�
   const result = await start(deps);
   assert.equal(result.ok, false);
   assert.equal(!result.ok && result.reason, "start_failed");
-  assert.equal(balances.get(ORG), START_BALANCE);
+  assert.equal(balances.get(OWNER), START_BALANCE);
   assert.equal(ledger.length, 0);
   const row = [...fineTunes.values()][0];
   assert.equal(row.status, "failed");
@@ -135,7 +134,7 @@ test("queued → running → succeeded と進み、終わったら実際の時�
   const expected = computeCostMicros(started.row.trainMicrosPerHour, 20 * 60);
   assert.equal(row.costMicros, expected);
   assert.equal(row.heldMicros, 0);
-  assert.equal(balances.get(ORG), START_BALANCE - expected);
+  assert.equal(balances.get(OWNER), START_BALANCE - expected);
   assert.equal(ledger.length, 1);
   assert.equal(ledger[0].kind, "training");
   assert.equal(ledger[0].referenceId, row.id);
@@ -143,7 +142,7 @@ test("queued → running → succeeded と進み、終わったら実際の時�
   // もう一度見回っても二重に引かない
   const again = await refreshFineTune(deps, row);
   assert.equal(again.status, "succeeded");
-  assert.equal(balances.get(ORG), START_BALANCE - expected);
+  assert.equal(balances.get(OWNER), START_BALANCE - expected);
 });
 
 test("同じ学習を同時に見回っても、精算は一度だけ", async () => {
@@ -156,7 +155,7 @@ test("同じ学習を同時に見回っても、精算は一度だけ", async ()
   await Promise.all([refreshFineTune(deps, started.row), refreshFineTune(deps, started.row)]);
   assert.equal(ledger.length, 1);
   assert.equal(
-    balances.get(ORG),
+    balances.get(OWNER),
     START_BALANCE - computeCostMicros(started.row.trainMicrosPerHour, 10 * 60),
   );
 });
@@ -173,7 +172,7 @@ test("失敗した学習も、使った GPU の分だけ請求して残りを戻
   assert.equal(row.error, "training crashed");
   assert.equal(fineTunes.get(row.id)?.status, "failed");
   assert.equal(
-    balances.get(ORG),
+    balances.get(OWNER),
     START_BALANCE - computeCostMicros(started.row.trainMicrosPerHour, 5 * 60),
   );
 });
@@ -191,7 +190,7 @@ test("見積もりより長くかかった分は追加で引く (残高がマイ
   state = "succeeded";
   const row = await refreshFineTune(deps, started.row);
   assert.ok(row.costMicros > started.row.heldMicros);
-  assert.equal(balances.get(ORG), START_BALANCE - row.costMicros);
+  assert.equal(balances.get(OWNER), START_BALANCE - row.costMicros);
 });
 
 test("中止すると Nebius の Job を止め、そこまでの分を精算する", async () => {
@@ -203,7 +202,7 @@ test("中止すると Nebius の Job を止め、そこまでの分を精算す�
   assert.equal(row.status, "canceled");
   assert.ok(calls.some((call) => call.name === "cancelFineTune" && call.args[1] === "job-1"));
   assert.equal(
-    balances.get(ORG),
+    balances.get(OWNER),
     START_BALANCE - computeCostMicros(started.row.trainMicrosPerHour, 2 * 60),
   );
   // 終わった学習はもう一度中止しても何も起きない
@@ -232,5 +231,5 @@ test("Nebius に問い合わせられないときは、状態を変えずに次�
   clock.advance(60_000);
   const row = await refreshFineTune(deps, started.row);
   assert.equal(row.status, "queued");
-  assert.equal(balances.get(ORG), START_BALANCE - started.row.heldMicros);
+  assert.equal(balances.get(OWNER), START_BALANCE - started.row.heldMicros);
 });

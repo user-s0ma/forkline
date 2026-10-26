@@ -179,7 +179,7 @@ export default function Login() {
         }
       }
 
-      // 同じタブで前にログインしていた人の組織のデータを見せない
+      // 同じタブで前にログインしていた人のデータを見せない
       queryClient.clear();
       navigate(callbackUrl, { replace: true });
     } catch (error) {

@@ -2,13 +2,11 @@ import { useTranslation } from "react-i18next";
 import { Playground } from "@/components/store/Playground";
 import { Section } from "./ui";
 
-/** コンソールでモデルを試す。料金は組織のクレジットから (自組織のモデルはクリエイター価格なし) */
+/** コンソールでモデルを試す。料金は自分のクレジットから (自分のモデルはクリエイター価格なし) */
 export function TestPanel({
-  organizationId,
   slug,
   disabledReason,
 }: {
-  organizationId: string;
   slug: string;
   disabledReason: string | null;
 }) {
@@ -20,7 +18,7 @@ export function TestPanel({
           {disabledReason}
         </p>
       ) : (
-        <Playground slug={slug} organizationId={organizationId} />
+        <Playground slug={slug} />
       )}
     </Section>
   );

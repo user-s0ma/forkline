@@ -13,8 +13,7 @@ export const aiModel = mysqlTable(
   "AiModel",
   {
     id: varchar("id", { length: 191 }).primaryKey(),
-    organizationId: varchar("organizationId", { length: 191 }).notNull(),
-    createdBy: varchar("createdBy", { length: 191 }).notNull(),
+    userId: varchar("userId", { length: 191 }).notNull(),
     slug: varchar("slug", { length: 64 }).notNull(),
     name: varchar("name", { length: 80 }).notNull(),
     tagline: varchar("tagline", { length: 160 }).notNull(),
@@ -50,7 +49,7 @@ export const aiModel = mysqlTable(
     endpointLastUsedAt: datetime("endpointLastUsedAt", { mode: "date", fsp: 3 }),
     /** 起動してから、まだ請求していない区間の始まり。止まっているときは null */
     endpointMeteredAt: datetime("endpointMeteredAt", { mode: "date", fsp: 3 }),
-    /** 起動したときに公開した組織の残高から仮押さえした額。止めたときに戻す */
+    /** 起動したときに公開した人の残高から仮押さえした額。止めたときに戻す */
     endpointHeldMicros: bigint("endpointHeldMicros", { mode: "number" })
       .default(0)
       .notNull(),
@@ -79,8 +78,8 @@ export const aiModel = mysqlTable(
   },
   (table) => [
     uniqueIndex("AiModel_slug_key").on(table.slug),
-    index("AiModel_organization_updatedAt_idx").on(
-      table.organizationId,
+    index("AiModel_user_updatedAt_idx").on(
+      table.userId,
       table.updatedAt,
     ),
     index("AiModel_listing_idx").on(

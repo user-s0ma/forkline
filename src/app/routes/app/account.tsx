@@ -2,11 +2,10 @@ import { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { LogOut, Menu, Plus, Trash2 } from "lucide-react";
+import { LogOut, Menu, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { authClient } from "@/lib/auth/client";
-import { toSlug } from "@/lib/organization/slug";
 import type { AppLayoutContext } from "./_layout";
 
 function SectionHeader({ title, danger }: { title: string; danger?: boolean }) {
@@ -27,18 +26,16 @@ export default function AccountPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user, refreshOrganizations, openMobileNavigation, setUserName } =
+  const { user, openMobileNavigation, setUserName } =
     useOutletContext<AppLayoutContext>();
 
   const [name, setName] = useState(user.name);
   const [isSaving, setIsSaving] = useState(false);
-  const [orgName, setOrgName] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const busy = isSaving || isCreating || isSigningOut || isDeleting;
+  const busy = isSaving || isSigningOut || isDeleting;
   const trimmedName = name.trim();
   const canSave = Boolean(trimmedName) && trimmedName !== user.name;
 
@@ -63,32 +60,13 @@ export default function AccountPage() {
     }
   };
 
-  const handleCreateOrganization = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const trimmed = orgName.trim();
-    if (!trimmed || busy) return;
-    setIsCreating(true);
-    try {
-      const { data, error } = await authClient.organization.create({
-        name: trimmed,
-        slug: toSlug(trimmed),
-      });
-      if (error) throw new Error(error.message);
-      await refreshOrganizations();
-      if (data?.id) navigate(`/app/${encodeURIComponent(data.id)}/`);
-    } catch (error) {
-      fail(error, t("appShell.createOrganizationFailed"));
-      setIsCreating(false);
-    }
-  };
-
   const handleSignOut = async () => {
     if (busy) return;
     setIsSigningOut(true);
     try {
       const { error } = await authClient.signOut();
       if (error) throw new Error(error.message);
-      // 同じタブで次の人がログインしたとき、前の人の組織のデータを見せない
+      // 同じタブで次の人がログインしたとき、前の人のデータを見せない
       queryClient.clear();
       navigate("/login", { replace: true });
     } catch (error) {
@@ -151,6 +129,9 @@ export default function AccountPage() {
                   maxLength={191}
                   onChange={(event) => setName(event.target.value)}
                 />
+                <span className="mt-1.5 block text-xs leading-5 text-ink-mute">
+                  {t("account.nameHint")}
+                </span>
               </label>
               <label className="block">
                 <span className="mb-1 block text-xs text-ink">
@@ -183,32 +164,6 @@ export default function AccountPage() {
             </form>
           </section>
 
-          <section className="console-panel overflow-hidden">
-            <SectionHeader title={t("appShell.createOrganization")} />
-            <form
-              className="flex flex-col gap-2 p-5 sm:flex-row"
-              onSubmit={handleCreateOrganization}
-            >
-              <input
-                className="console-input sm:flex-1"
-                type="text"
-                value={orgName}
-                maxLength={120}
-                placeholder={t("appShell.organizationNamePlaceholder")}
-                aria-label={t("appShell.createOrganization")}
-                onChange={(event) => setOrgName(event.target.value)}
-              />
-              <button
-                className="console-button-secondary shrink-0"
-                type="submit"
-                disabled={!orgName.trim() || busy}
-              >
-                <Plus className="h-4 w-4" />
-                {isCreating ? t("common.creating") : t("common.create")}
-              </button>
-            </form>
-          </section>
-
           <button
             className="console-panel flex w-full items-center justify-center gap-2 px-3 py-3 text-sm text-danger transition-colors hover:bg-danger-tint disabled:cursor-wait disabled:opacity-50"
             type="button"
@@ -224,10 +179,9 @@ export default function AccountPage() {
           <section id="delete" className="console-panel overflow-hidden">
             <SectionHeader title={t("account.deleteTitle")} danger />
             <form className="space-y-4 p-5" onSubmit={handleDelete}>
-              <div className="space-y-2 text-sm leading-6 text-ink">
-                <p>{t("account.deleteDescription")}</p>
-                <p>{t("account.deleteSharedOwner")}</p>
-              </div>
+              <p className="text-sm leading-6 text-ink">
+                {t("account.deleteDescription")}
+              </p>
               <label className="block">
                 <span className="mb-1 block text-xs text-ink">
                   {t("account.deleteConfirmPrompt")}

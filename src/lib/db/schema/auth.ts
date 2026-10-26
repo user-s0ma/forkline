@@ -41,7 +41,6 @@ export const session = mysqlTable(
     ipAddress: text("ipAddress"),
     userAgent: text("userAgent"),
     userId: varchar("userId", { length: 191 }).notNull(),
-    activeOrganizationId: varchar("activeOrganizationId", { length: 191 }),
   },
   (table) => [index("Session_userId_idx").on(table.userId)],
 );
@@ -86,49 +85,3 @@ export const verification = mysqlTable("Verification", {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
-
-export const organization = mysqlTable("Organization", {
-  id: id(),
-  name: varchar("name", { length: 191 }).notNull(),
-  slug: varchar("slug", { length: 191 }).unique().notNull(),
-  logo: text("logo"),
-  createdAt: createdAt(),
-  metadata: text("metadata"),
-});
-
-export const member = mysqlTable(
-  "Member",
-  {
-    id: id(),
-    organizationId: varchar("organizationId", { length: 191 }).notNull(),
-    userId: varchar("userId", { length: 191 }).notNull(),
-    role: varchar("role", { length: 191 }).default("member").notNull(),
-    createdAt: createdAt(),
-  },
-  (table) => [
-    index("Member_organizationId_idx").on(table.organizationId),
-    index("Member_userId_idx").on(table.userId),
-    uniqueIndex("Member_organization_user_idx").on(
-      table.organizationId,
-      table.userId,
-    ),
-  ],
-);
-
-export const invitation = mysqlTable(
-  "Invitation",
-  {
-    id: id(),
-    organizationId: varchar("organizationId", { length: 191 }).notNull(),
-    email: varchar("email", { length: 191 }).notNull(),
-    role: varchar("role", { length: 191 }),
-    status: varchar("status", { length: 32 }).default("pending").notNull(),
-    expiresAt: datetime("expiresAt", { mode: "date", fsp: 3 }).notNull(),
-    inviterId: varchar("inviterId", { length: 191 }).notNull(),
-    createdAt: createdAt(),
-  },
-  (table) => [
-    index("Invitation_organizationId_idx").on(table.organizationId),
-    index("Invitation_email_idx").on(table.email),
-  ],
-);

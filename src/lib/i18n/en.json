@@ -25,7 +25,6 @@
     "copy": "Copy",
     "name": "Name",
     "email": "Email",
-    "role": "Role",
     "status": "Status",
     "settings": "Settings",
     "all": "All",
@@ -37,11 +36,6 @@
     "saving": "Saving...",
     "sending": "Sending…",
     "logout": "Log out",
-    "roles": {
-      "owner": "Owner",
-      "admin": "Admin",
-      "member": "Member"
-    },
     "previous": "Previous",
     "next": "Next",
     "processing": "Processing...",
@@ -53,19 +47,6 @@
   },
   "appShell": {
     "closeMenu": "Close menu",
-    "loadOrganizationsFailed": "Failed to load organizations",
-    "nav": {
-      "auditLogs": "Audit Logs",
-      "members": "Members"
-    },
-    "navGroups": {
-      "organization": "Organization"
-    },
-    "noOrganizationsDescription": "You are not a member of any organization yet. Create one to get started, or come back once you've received an invitation.",
-    "noOrganizationsTitle": "No organizations",
-    "createOrganization": "Create organization",
-    "createOrganizationFailed": "Failed to create organization",
-    "organizationNamePlaceholder": "Acme Inc.",
     "profile": "Profile",
     "profileModal": {
       "emailHint": "Email address cannot be changed",
@@ -73,49 +54,7 @@
       "updateFailed": "Failed to update profile",
       "signingOut": "Logging out...",
       "signOutFailed": "Failed to log out"
-    },
-    "selectOrganization": "Select an organization",
-    "selectOrganizationFailed": "Failed to switch organization"
-  },
-  "auditLogs": {
-    "actionGroups": {
-      "members": "Members & invitations",
-      "organization": "Organization"
-    },
-    "actionHeader": "Action",
-    "actions": {
-      "invitation": {
-        "accept": "Accept invitation",
-        "cancel": "Cancel invitation",
-        "create": "Invite member",
-        "reject": "Decline invitation"
-      },
-      "member": {
-        "leave": "Leave organization",
-        "remove": "Remove member",
-        "role_update": "Change role"
-      },
-      "organization": {
-        "create": "Create organization",
-        "delete": "Delete organization",
-        "update": "Update organization settings"
-      }
-    },
-    "actorHeader": "Actor",
-    "allActions": "All actions",
-    "dateHeader": "Date",
-    "detailSeparator": " · ",
-    "emptyDescription": "Actions taken in this organization will be recorded here.",
-    "emptyFilteredDescription": "No records for this action. Try changing the filter.",
-    "emptyTitle": "No audit logs yet",
-    "errorTitle": "Audit logs unavailable",
-    "filterByAction": "Filter by action",
-    "fromDetail": "From: {{from}}",
-    "loadError": "Failed to load audit logs",
-    "loadErrorDescription": "Failed to load audit logs.",
-    "roleDetail": "Role: {{role}}",
-    "targetHeader": "Target",
-    "title": "Audit logs"
+    }
   },
   "auth": {
     "backToLogin": "Back to log in",
@@ -130,23 +69,6 @@
       "sentDescription": "We sent a password reset link to {{email}}.",
       "title": "Reset your password",
       "useDifferentEmail": "Use a different email address"
-    },
-    "invitation": {
-      "acceptButton": "Accept and join",
-      "acceptError": "Could not accept the invitation",
-      "backToApp": "Back to app",
-      "checking": "Checking invitation details...",
-      "declineButton": "Decline",
-      "declineError": "Could not decline the invitation",
-      "description": "You've been invited to join this organization with the {{role}} role.",
-      "descriptionWithInviter": "{{inviter}} has invited you to join this organization with the {{role}} role.",
-      "expiredDescription": "This invitation has expired. Ask your organization admin to send a new one.",
-      "notFoundDescription": "This invitation may be invalid or expired, or you may be logged in with a different account than the one that was invited.",
-      "notFoundTitle": "Invitation not found",
-      "organizationFallback": "an organization",
-      "title": "You're invited to {{organization}}",
-      "unavailableTitle": "This invitation is unavailable",
-      "usedDescription": "This invitation has already been used or was revoked."
     },
     "login": {
       "createAccount": "Create an account",
@@ -195,13 +117,6 @@
     }
   },
   "email": {
-    "invitation": {
-      "body": "{{inviter}} has invited you to the organization \"{{organization}}\". Use the button below to accept the invitation.",
-      "button": "View invitation",
-      "footer": "If you were not expecting this, you can safely discard this email.",
-      "heading": "You have been invited to an organization",
-      "subject": "Forkline invitation to {{organization}}"
-    },
     "reset": {
       "body": "Use the button below to set a new password.",
       "button": "Reset password",
@@ -217,82 +132,20 @@
       "subject": "Forkline email address verification"
     }
   },
-  "members": {
-    "cancelInvitationAria": "Cancel invitation to {{email}}",
-    "cancelInvitationFailed": "Failed to cancel invitation",
-    "columns": {
-      "actions": "Actions",
-      "joinedAt": "Joined",
-      "member": "Member"
-    },
-    "emailPlaceholder": "jane@example.com",
-    "emptyDescription": "Member information for this organization could not be loaded.",
-    "emptyTitle": "No members found",
-    "invitationMeta": "{{role}} · Valid until {{date}}",
-    "invite": "Invite member",
-    "inviteFailed": "Failed to send invitation",
-    "inviteHint": "An invitation email will be sent. They will join the organization once they accept.",
-    "leaveConfirm": "Leave the organization \"{{name}}\"? You will need a new invitation to rejoin.",
-    "leaveFailed": "Failed to leave the organization",
-    "leaveOrganization": "Leave organization",
-    "loadFailed": "Failed to load members",
-    "pendingInvitations": "Pending invitations ({{count}})",
-    "removeConfirm": "Remove {{name}} from this organization?",
-    "removeFailed": "Failed to remove member",
-    "removeMemberAria": "Remove {{email}} from the organization",
-    "roleChangeFailed": "Failed to update role",
-    "roleFor": "Role for {{email}}",
-    "sendInvite": "Send invitation",
-    "title": "Members",
-    "you": "You"
-  },
   "server": {
     "common": {
-      "adminRequired": "This action requires organization administrator permissions.",
-      "forbiddenOrganization": "You do not have permission to manage this organization.",
       "internalError": "An error occurred while processing the API request.",
       "loginRequired": "Please sign in.",
       "notFound": "API not found."
-    },
-    "account": {
-      "ownerOfShared": "\"{{name}}\" has other members. On the web, transfer ownership to someone else or delete the organization first."
     }
-  },
-  "settings": {
-    "createdAt": "Created",
-    "details": "Details",
-    "loadFailed": "Failed to load organization details",
-    "memberCount": "Members",
-    "memberCountValue_one": "{{count}} member",
-    "memberCountValue_other": "{{count}} members",
-    "organizationInfo": "Organization",
-    "organizationName": "Organization name",
-    "ownerOnlyNotice": "Only the owner can change organization details",
-    "dangerZone": "Danger zone",
-    "transferTitle": "Transfer ownership",
-    "transferDescription": "Transfer ownership to an admin member. You will become an admin.",
-    "transferSelectPlaceholder": "Select an admin",
-    "transferButton": "Transfer",
-    "transferConfirm": "Transfer ownership to {{name}}? You will become an admin and this cannot be undone. Continue?",
-    "transferFailed": "Failed to transfer ownership",
-    "transferNoMembers": "No admin available. Promote a member to admin first.",
-    "deleteTitle": "Delete organization",
-    "deleteDescription": "Delete this organization. Members will no longer be able to use it. This cannot be undone.",
-    "deleteConfirmPrompt": "To confirm, type the organization name \"{{name}}\".",
-    "deleteButton": "Delete organization",
-    "deleteSuccess": "Organization deleted",
-    "deleteFailed": "Failed to delete organization",
-    "saveChanges": "Save changes",
-    "saving": "Saving…",
-    "updateFailed": "Failed to update organization details"
   },
   "account": {
     "title": "Account",
     "saved": "Saved",
     "deleteTitle": "Delete account",
     "deleteNeedsSignIn": "For your security, sign in again before deleting your account",
-    "deleteDescription": "Delete your account and any organization where you are the only member. You will no longer be able to sign in. This cannot be undone.",
-    "deleteSharedOwner": "If you own an organization that has other members, transfer ownership or delete the organization first.",
+    "nameHint": "Shown on your models in the store as the creator's name.",
+    "deleteDescription": "Delete your account. Your published models are unpublished and your API keys stop working. You will no longer be able to sign in. This cannot be undone.",
     "deleteConfirmPrompt": "To confirm, type your email address",
     "deleteButton": "Delete account",
     "deleteFailed": "Could not delete your account",

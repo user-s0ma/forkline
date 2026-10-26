@@ -22,22 +22,22 @@ export type LedgerKind =
   | "chargeback";
 export type LedgerBalance = "credit" | "earnings";
 
-export async function ensureWallet(db: Database, organizationId: string) {
+export async function ensureWallet(db: Database, userId: string) {
   await db
     .insert(wallet)
-    .values({ organizationId })
-    .onDuplicateKeyUpdate({ set: { organizationId } });
+    .values({ userId })
+    .onDuplicateKeyUpdate({ set: { userId } });
 }
 
-export async function getWallet(env: AppEnv, organizationId: string) {
+export async function getWallet(env: AppEnv, userId: string) {
   const [row] = await getDb(env)
     .select()
     .from(wallet)
-    .where(eq(wallet.organizationId, organizationId))
+    .where(eq(wallet.userId, userId))
     .limit(1);
   return (
     row ?? {
-      organizationId,
+      userId,
       creditMicros: 0,
       earningsMicros: 0,
       stripeCustomerId: null,
@@ -48,8 +48,8 @@ export async function getWallet(env: AppEnv, organizationId: string) {
   );
 }
 
-export async function getCreditMicros(env: AppEnv, organizationId: string) {
-  return (await getWallet(env, organizationId)).creditMicros;
+export async function getCreditMicros(env: AppEnv, userId: string) {
+  return (await getWallet(env, userId)).creditMicros;
 }
 
 export function affectedRows(result: unknown) {
@@ -65,7 +65,7 @@ export function affectedRows(result: unknown) {
  */
 export async function reserveCredit(
   env: AppEnv,
-  organizationId: string,
+  userId: string,
   micros: number,
 ) {
   if (micros <= 0) return true;
@@ -74,7 +74,7 @@ export async function reserveCredit(
     .set({ creditMicros: sql`${wallet.creditMicros} - ${micros}` })
     .where(
       and(
-        eq(wallet.organizationId, organizationId),
+        eq(wallet.userId, userId),
         gte(wallet.creditMicros, micros),
       ),
     );
@@ -84,23 +84,22 @@ export async function reserveCredit(
 /** 精算に進まなかった仮押さえを戻す */
 export async function releaseCredit(
   env: AppEnv,
-  organizationId: string,
+  userId: string,
   micros: number,
 ) {
   if (micros <= 0) return;
   await getDb(env)
     .update(wallet)
     .set({ creditMicros: sql`${wallet.creditMicros} + ${micros}` })
-    .where(eq(wallet.organizationId, organizationId));
+    .where(eq(wallet.userId, userId));
 }
 
 export type SettleInput = {
   /** 利用ログの ID。決めて渡せば、同じ精算をやり直しても二重にならない (重複キーで失敗する) */
   id?: string;
-  model: { id: string; slug: string; organizationId: string };
-  consumerOrganizationId: string;
+  model: { id: string; slug: string; userId: string };
+  consumerUserId: string;
   apiKeyId: string | null;
-  userId: string | null;
   /** eval は評価 (src/lib/nemotron/run-evaluation.ts) から呼んだとき */
   source: "api" | "playground" | "eval";
   status: "succeeded" | "failed";
@@ -120,7 +119,7 @@ export function clampInt(value: number) {
 }
 
 /**
- * 呼び出した組織のクレジットを引き落とし、公開した組織の売上に計上し、利用ログを残す。
+ * 呼び出した人のクレジットを引き落とし、公開した人の売上に計上し、利用ログを残す。
  * 仮押さえした額との差だけを動かす。料金は呼び出し側 (gateway) で仮押さえ以下に抑えてあるので、
  * 呼び出しで残高がマイナスになることはない (念のため、ここでも仮押さえを上限にする)。
  */
@@ -131,31 +130,30 @@ export async function settleUsage(env: AppEnv, input: SettleInput) {
     input = { ...input, charge: capCharge(input.charge, input.heldMicros) };
   }
   await db.transaction(async (tx) => {
-    await ensureWallet(tx as unknown as Database, input.consumerOrganizationId);
+    await ensureWallet(tx as unknown as Database, input.consumerUserId);
     const due = input.charge.totalMicros - (input.heldMicros ?? 0);
     if (due !== 0) {
       await tx
         .update(wallet)
         .set({ creditMicros: sql`${wallet.creditMicros} - ${due}` })
-        .where(eq(wallet.organizationId, input.consumerOrganizationId));
+        .where(eq(wallet.userId, input.consumerUserId));
     }
     if (input.charge.creatorMicros > 0) {
-      await ensureWallet(tx as unknown as Database, input.model.organizationId);
+      await ensureWallet(tx as unknown as Database, input.model.userId);
       await tx
         .update(wallet)
         .set({
           earningsMicros: sql`${wallet.earningsMicros} + ${input.charge.creatorMicros}`,
         })
-        .where(eq(wallet.organizationId, input.model.organizationId));
+        .where(eq(wallet.userId, input.model.userId));
     }
     await tx.insert(usageRecord).values({
       id,
       modelId: input.model.id,
       modelSlug: input.model.slug,
-      publisherOrganizationId: input.model.organizationId,
-      consumerOrganizationId: input.consumerOrganizationId,
+      publisherUserId: input.model.userId,
+      consumerUserId: input.consumerUserId,
       apiKeyId: input.apiKeyId,
-      userId: input.userId,
       source: input.source,
       status: input.status,
       inputTokens: clampInt(input.inputTokens),
@@ -207,7 +205,7 @@ function isRollback(error: unknown) {
 export async function applyLedgerEntry(
   env: AppEnv,
   entry: {
-    organizationId: string;
+    userId: string;
     kind: LedgerKind;
     balance: LedgerBalance;
     amountMicros: number;
@@ -222,10 +220,10 @@ export async function applyLedgerEntry(
     entry.balance === "credit" ? wallet.creditMicros : wallet.earningsMicros;
   try {
     return await db.transaction(async (tx) => {
-      await ensureWallet(tx as unknown as Database, entry.organizationId);
+      await ensureWallet(tx as unknown as Database, entry.userId);
       await tx.insert(ledgerEntry).values({
         id: crypto.randomUUID(),
-        organizationId: entry.organizationId,
+        userId: entry.userId,
         kind: entry.kind,
         balance: entry.balance,
         amountMicros: entry.amountMicros,
@@ -233,7 +231,7 @@ export async function applyLedgerEntry(
         description: entry.description.slice(0, 255),
         createdAt: new Date(),
       });
-      const conditions = [eq(wallet.organizationId, entry.organizationId)];
+      const conditions = [eq(wallet.userId, entry.userId)];
       if (entry.amountMicros < 0 && !entry.allowNegative) {
         conditions.push(gte(column, -entry.amountMicros + Math.max(0, entry.keepMicros ?? 0)));
       }
@@ -258,7 +256,7 @@ export async function applyLedgerEntry(
 }
 
 export type HoldSettlement = {
-  organizationId: string;
+  userId: string;
   /** dataset_build / evaluation / model_card は Token Factory の Nemotron のトークン代 */
   kind: "training" | "endpoint" | "dataset_build" | "evaluation" | "model_card";
   /** 同じ精算を二度しないための ID (学習なら学習の ID) */
@@ -299,10 +297,10 @@ export async function settleHold(
 /** settleHold の中身。ほかの更新と同じトランザクションで精算したいときに使う */
 export async function writeHoldSettlement(tx: Database, input: HoldSettlement) {
   const actual = Math.max(0, Math.ceil(input.actualMicros));
-  await ensureWallet(tx, input.organizationId);
+  await ensureWallet(tx, input.userId);
   await tx.insert(ledgerEntry).values({
     id: crypto.randomUUID(),
-    organizationId: input.organizationId,
+    userId: input.userId,
     kind: input.kind,
     balance: "credit",
     amountMicros: -actual,
@@ -315,13 +313,13 @@ export async function writeHoldSettlement(tx: Database, input: HoldSettlement) {
     await tx
       .update(wallet)
       .set({ creditMicros: sql`${wallet.creditMicros} + ${delta}` })
-      .where(eq(wallet.organizationId, input.organizationId));
+      .where(eq(wallet.userId, input.userId));
   }
 }
 
 export async function updateWallet(
   env: AppEnv,
-  organizationId: string,
+  userId: string,
   values: {
     stripeCustomerId?: string;
     stripeConnectAccountId?: string;
@@ -329,8 +327,8 @@ export async function updateWallet(
   },
 ) {
   const db = getDb(env);
-  await ensureWallet(db, organizationId);
-  await db.update(wallet).set(values).where(eq(wallet.organizationId, organizationId));
+  await ensureWallet(db, userId);
+  await db.update(wallet).set(values).where(eq(wallet.userId, userId));
 }
 
 /** 学習とエンドポイントのための仮押さえの合計 (残高の画面で「押さえ中」として見せる) */

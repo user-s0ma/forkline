@@ -14,7 +14,7 @@ import {
 import {
   decryptSecretValue,
   encryptSecretValue,
-} from "../organization/secret-box";
+} from "../util/secret-box";
 import type { ComputeDeps } from "./types";
 
 /** 本番の Nebius・残高・DB をつないだ ComputeDeps */
@@ -29,10 +29,10 @@ export function computeDeps(env: AppEnv): ComputeDeps {
       open: (sealed) => decryptSecretValue(sealed, env.SECRET_ENCRYPTION_KEY),
     },
     credits: {
-      reserve: (organizationId, micros) => reserveCredit(env, organizationId, micros),
-      release: (organizationId, micros) => releaseCredit(env, organizationId, micros),
+      reserve: (userId, micros) => reserveCredit(env, userId, micros),
+      release: (userId, micros) => releaseCredit(env, userId, micros),
       settle: (input) => settleHold(env, input),
-      balance: (organizationId) => getCreditMicros(env, organizationId),
+      balance: (userId) => getCreditMicros(env, userId),
     },
     fineTunes: {
       async insert(row) {

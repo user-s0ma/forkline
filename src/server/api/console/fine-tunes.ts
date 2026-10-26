@@ -4,7 +4,6 @@ import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { fineTune } from "@/lib/db/schema";
 import { listNemotronBaseModels } from "@/lib/nebius";
-import { recordAuditLog } from "@/lib/organization/audit";
 import { endpointIdleMinutes } from "@/lib/billing/compute";
 import {
   DATASET_MAX_BYTES,
@@ -20,8 +19,8 @@ import {
   startFineTune,
 } from "@/lib/compute/fine-tune";
 import { ratesFor, type FineTuneRow } from "@/lib/compute/types";
-import { organizationAuth } from "./access";
-import { actorOf, loadOrgModel, message } from "./shared";
+import { currentUser, requireUser } from "./session";
+import { loadOwnModel, message } from "./shared";
 import type { ApiEnv } from "../types";
 
 export function toFineTuneDto(row: FineTuneRow) {
@@ -69,12 +68,12 @@ const MAX_BODY_BYTES = Math.ceil((DATASET_MAX_BYTES + EVAL_SET_MAX_BYTES) * 1.2)
 
 const fineTunes = new Hono<ApiEnv>();
 
-fineTunes.use("/:organizationId/base-models", organizationAuth());
-fineTunes.use("/:organizationId/fine-tunes/*", organizationAuth());
-fineTunes.use("/:organizationId/models/:modelId/fine-tunes", organizationAuth());
+fineTunes.use("/base-models", requireUser());
+fineTunes.use("/fine-tunes/*", requireUser());
+fineTunes.use("/models/:modelId/fine-tunes", requireUser());
 
 /** 微調整できる Nemotron と、その GPU の1時間あたりの料金 (上乗せ込み) */
-fineTunes.get("/:organizationId/base-models", (c) => {
+fineTunes.get("/base-models", (c) => {
   const items = listNemotronBaseModels().map((base) => ({
     id: base.id,
     label: base.label,
@@ -85,14 +84,14 @@ fineTunes.get("/:organizationId/base-models", (c) => {
   return c.json({ items, idleMinutes: endpointIdleMinutes(c.env) });
 });
 
-fineTunes.get("/:organizationId/models/:modelId/fine-tunes", async (c) => {
-  const organizationId = c.req.param("organizationId");
-  const model = await loadOrgModel(c.env, organizationId, c.req.param("modelId"));
+fineTunes.get("/models/:modelId/fine-tunes", async (c) => {
+  const userId = currentUser(c).id;
+  const model = await loadOwnModel(c.env, userId, c.req.param("modelId"));
   if (!model) return c.json(message(c, "server.models.notFound"), 404);
   const rows = await getDb(c.env)
     .select()
     .from(fineTune)
-    .where(and(eq(fineTune.organizationId, organizationId), eq(fineTune.modelId, model.id)))
+    .where(and(eq(fineTune.userId, userId), eq(fineTune.modelId, model.id)))
     .orderBy(desc(fineTune.createdAt))
     .limit(50);
   // 画面を開いたときにも進み具合を確かめる (見回りを待たずに済むように)
@@ -103,8 +102,8 @@ fineTunes.get("/:organizationId/models/:modelId/fine-tunes", async (c) => {
   return c.json({ items: items.map(toFineTuneDto) });
 });
 
-fineTunes.post("/:organizationId/models/:modelId/fine-tunes", async (c) => {
-  const organizationId = c.req.param("organizationId");
+fineTunes.post("/models/:modelId/fine-tunes", async (c) => {
+  const userId = currentUser(c).id;
   const length = Number(c.req.header("content-length") ?? 0);
   if (length > MAX_BODY_BYTES) {
     return c.json(
@@ -114,7 +113,7 @@ fineTunes.post("/:organizationId/models/:modelId/fine-tunes", async (c) => {
       413,
     );
   }
-  const model = await loadOrgModel(c.env, organizationId, c.req.param("modelId"));
+  const model = await loadOwnModel(c.env, userId, c.req.param("modelId"));
   if (!model) return c.json(message(c, "server.models.notFound"), 404);
   const input = startSchema.safeParse(await c.req.json().catch(() => null));
   if (!input.success) return c.json(message(c, "server.fineTunes.invalidInput"), 400);
@@ -134,11 +133,9 @@ fineTunes.post("/:organizationId/models/:modelId/fine-tunes", async (c) => {
     return c.json(message(c, "server.fineTunes.alreadyRunning"), 409);
   }
 
-  const actor = actorOf(c);
   const result = await startFineTune(computeDeps(c.env), {
-    organizationId,
+    userId,
     modelId: model.id,
-    createdBy: actor.id,
     baseModel,
     datasetName: input.data.datasetName,
     jsonl: input.data.jsonl,
@@ -178,37 +175,22 @@ fineTunes.post("/:organizationId/models/:modelId/fine-tunes", async (c) => {
       502,
     );
   }
-  await recordAuditLog(c.env, {
-    organizationId,
-    actor,
-    action: "fine_tune.start",
-    targetId: result.row.id,
-    targetLabel: model.name,
-    metadata: {
-      modelId: model.id,
-      baseModelId: baseModel.id,
-      examples: result.row.datasetExamples,
-      evalExamples: result.row.evalExamples,
-      datasetSource: result.row.datasetSource,
-      estimatedMicros: result.row.estimatedMicros,
-    },
-  });
   return c.json(toFineTuneDto(result.row), 201);
 });
 
-async function loadFineTune(env: AppEnv, organizationId: string, id: string) {
+async function loadFineTune(env: AppEnv, userId: string, id: string) {
   const [row] = await getDb(env)
     .select()
     .from(fineTune)
-    .where(and(eq(fineTune.organizationId, organizationId), eq(fineTune.id, id)))
+    .where(and(eq(fineTune.userId, userId), eq(fineTune.id, id)))
     .limit(1);
   return row ?? null;
 }
 
-fineTunes.get("/:organizationId/fine-tunes/:fineTuneId", async (c) => {
+fineTunes.get("/fine-tunes/:fineTuneId", async (c) => {
   const row = await loadFineTune(
     c.env,
-    c.req.param("organizationId"),
+    currentUser(c).id,
     c.req.param("fineTuneId"),
   );
   if (!row) return c.json(message(c, "server.fineTunes.notFound"), 404);
@@ -216,21 +198,11 @@ fineTunes.get("/:organizationId/fine-tunes/:fineTuneId", async (c) => {
   return c.json(toFineTuneDto(refreshed));
 });
 
-fineTunes.post("/:organizationId/fine-tunes/:fineTuneId/cancel", async (c) => {
-  const organizationId = c.req.param("organizationId");
-  const row = await loadFineTune(c.env, organizationId, c.req.param("fineTuneId"));
+fineTunes.post("/fine-tunes/:fineTuneId/cancel", async (c) => {
+  const userId = currentUser(c).id;
+  const row = await loadFineTune(c.env, userId, c.req.param("fineTuneId"));
   if (!row) return c.json(message(c, "server.fineTunes.notFound"), 404);
   const canceled = await cancelFineTune(computeDeps(c.env), row);
-  if (canceled.status !== row.status) {
-    await recordAuditLog(c.env, {
-      organizationId,
-      actor: actorOf(c),
-      action: "fine_tune.cancel",
-      targetId: row.id,
-      targetLabel: row.datasetName,
-      metadata: { modelId: row.modelId, costMicros: canceled.costMicros },
-    });
-  }
   return c.json(toFineTuneDto(canceled));
 });
 

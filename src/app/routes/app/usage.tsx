@@ -21,11 +21,9 @@ import { ListSkeleton } from "@/components/ui/ListSkeleton";
 import { PageBody, PageHeader } from "@/components/ui/PageHeader";
 import { getUsageSummary, listUsage } from "@/lib/api-client";
 import { localeTag, useLocale } from "@/lib/i18n";
-import type { Route } from "./+types/usage";
 
-export default function UsagePage({ params }: Route.ComponentProps) {
+export default function UsagePage() {
   const { t } = useTranslation();
-  const organizationId = params.organizationId;
   const locale = useLocale();
   const yen = useYen();
   const dateFormatter = useDateFormatter();
@@ -33,13 +31,13 @@ export default function UsagePage({ params }: Route.ComponentProps) {
   const { openMobileNavigation } = useAccountPage();
 
   const summary = useQuery({
-    queryKey: ["usage-summary", organizationId],
-    queryFn: () => getUsageSummary(organizationId),
+    queryKey: ["usage-summary"],
+    queryFn: () => getUsageSummary(),
   });
   const records = useInfiniteQuery({
-    queryKey: ["usage", organizationId],
+    queryKey: ["usage"],
     queryFn: ({ pageParam }) =>
-      listUsage(organizationId, { cursor: pageParam, pageSize: 50 }),
+      listUsage({ cursor: pageParam, pageSize: 50 }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
@@ -162,7 +160,7 @@ export default function UsagePage({ params }: Route.ComponentProps) {
               action={
                 <a
                   className="console-button-secondary"
-                  href={`/app/${encodeURIComponent(organizationId)}/explore`}
+                  href="/app/explore"
                 >
                   {t("usage.explore")}
                 </a>

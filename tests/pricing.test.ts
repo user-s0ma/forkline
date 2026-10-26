@@ -50,7 +50,7 @@ test("原価はクリエイター取り分に含めず利用者の合計にだ�
   assert.equal(charge.creatorMicros + charge.platformFeeMicros, yenToMicros(1));
 });
 
-test("自組織のモデルはクリエイター価格を請求しない", () => {
+test("自分のモデルはクリエイター価格を請求しない", () => {
   const charge = quoteUsage(
     PRICE,
     { inputTokens: 1000, outputTokens: 1000, computeMicros: 500 },

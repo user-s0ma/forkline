@@ -7,9 +7,6 @@ import { detectLocale, translate } from "@/lib/i18n";
 import { decodeCursor } from "@/lib/util/cursor";
 import type { ApiEnv } from "../types";
 
-/** 管理 (課金・出金・API キー・公開・削除) ができるロール */
-export const MANAGER_ROLES = ["owner", "admin"] as const;
-
 export function pageSizeOf(raw: string | undefined) {
   return Math.min(100, Math.max(1, Number.parseInt(raw || "50", 10) || 50));
 }
@@ -34,19 +31,15 @@ export function message(
   return { message: translate(detectLocale(c.req.raw), key, vars) };
 }
 
-export async function loadOrgModel(
+export async function loadOwnModel(
   env: AppEnv,
-  organizationId: string,
+  userId: string,
   modelId: string,
 ) {
   const [row] = await getDb(env)
     .select()
     .from(aiModel)
-    .where(and(eq(aiModel.organizationId, organizationId), eq(aiModel.id, modelId)))
+    .where(and(eq(aiModel.userId, userId), eq(aiModel.id, modelId)))
     .limit(1);
   return row ?? null;
-}
-
-export function actorOf(c: Context<ApiEnv>) {
-  return c.get("authorization").actor;
 }

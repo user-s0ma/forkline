@@ -76,7 +76,7 @@
       },
       "s5": {
         "title": "Earn",
-        "body": "Users call your model at /v1 with their own API key. Each call credits {{share}}% of your price to your organization.",
+        "body": "Users call your model at /v1 with their own API key. Each call credits {{share}}% of your price to your earnings.",
         "where": "Stripe Connect"
       }
     },
@@ -97,12 +97,12 @@
       },
       "payout": {
         "title": "Paid out through Stripe Connect",
-        "body": "Earnings collect in your organization and can be paid out through Stripe Connect from ¥{{min}}."
+        "body": "Earnings add up and can be paid out through Stripe Connect from ¥{{min}}."
       },
       "splitTitle": "Where the user's payment goes",
-      "splitCreator": "Your organization",
+      "splitCreator": "You",
       "splitFee": "Forkline fee",
-      "splitNote": "GPU time is separate: it is deducted from the creator organization's credits for the time the endpoint runs."
+      "splitNote": "GPU time is separate: it is deducted from the creator's credits for the time the endpoint runs."
     },
     "stack": {
       "title": "Built on Nebius and NVIDIA",
@@ -168,15 +168,15 @@
       "q1": "Which models can I fine-tune?",
       "a1": "{{models}}. The default is {{default}}.",
       "q2": "Who pays for GPU time, and when?",
-      "a2": "The organization that builds the model. For training, the estimate is held up front and settled on the actual time. Endpoints are billed per minute while they run.",
+      "a2": "The person who builds the model. For training, the estimate is held up front and settled on the actual time. Endpoints are billed per minute while they run.",
       "q3": "What happens to endpoints nobody uses?",
       "a3": "They stop after {{idle}} minutes without calls, and no GPU time is billed. A call to a stopped endpoint starts it and returns 503 with Retry-After.",
       "q4": "How do users pay?",
-      "a4": "Users buy prepaid credits, and each call deducts the model's price. API keys and balances belong to an organization.",
+      "a4": "Users buy prepaid credits, and each call deducts the model's price. Each user has their own API keys and balance.",
       "q5": "Does it work with the OpenAI SDK?",
       "a5": "Yes. Set base_url to https://forkline.ai/v1 and model to the model ID. Streaming is supported.",
       "q6": "Is my data used to train Forkline's own models?",
-      "a6": "No. Datasets and trained LoRA adapters are kept in Nebius Object Storage until you delete the model or organization."
+      "a6": "No. Datasets and trained LoRA adapters are kept in Nebius Object Storage until you delete the model or your account."
     },
     "finalCta": {
       "title": "Publish a Nemotron trained on your data",
@@ -204,14 +204,14 @@
       "title": "Quickstart",
       "body": "Three steps to your first call.",
       "steps": {
-        "key": "Create an organization key under \"API keys\" in the console. It is shown only once.",
+        "key": "Create a key under \"API keys\" in the console. It is shown only once.",
         "credits": "Buy credits under \"Billing\" (¥{{min}} to ¥{{max}} per purchase).",
         "call": "Set the base URL to {{url}} and call it with an OpenAI SDK or curl."
       }
     },
     "auth": {
       "title": "Authentication",
-      "body": "Send the API key as a Bearer token in the Authorization header. Keys belong to an organization, and calls are charged to that organization's credits. Owners and admins can create and revoke keys."
+      "body": "Send the API key as a Bearer token in the Authorization header. Calls are charged to the credits of the person who created the key."
     },
     "chat": {
       "title": "Chat completions",
@@ -223,17 +223,17 @@
     },
     "list": {
       "title": "List models",
-      "body": "GET /v1/models returns the models published in the store and your organization's own models. id is the model ID."
+      "body": "GET /v1/models returns the models published in the store and your own models. id is the model ID."
     },
     "pricing": {
       "title": "Pricing and units",
-      "body": "You pay the price the model's creator sets. The creator's organization pays for GPU time, so the listed price is all you pay.",
+      "body": "You pay the price the model's creator sets. The creator pays for GPU time, so the listed price is all you pay.",
       "units": {
         "tokens": "Input and output tokens are priced in yen per 1M tokens each.",
         "request": "Some models also charge a price per request.",
         "hold": "Before a call, an estimate is held from your credits; after the response it is settled on the actual token counts. If the balance is too low, the call returns 402.",
         "header": "The amount charged (JPY) is returned in the X-Forkline-Cost-JPY header for regular responses, and in a final SSE comment line starting with \": cost_jpy=\" for streams. SSE clients ignore comment lines.",
-        "self": "Calling your own organization's models does not charge the price."
+        "self": "Calling your own models does not charge the price."
       }
     },
     "warmup": {
@@ -249,7 +249,7 @@
       "meaning": "Meaning",
       "invalidRequest": "The request body is malformed (model and messages are required)",
       "invalidApiKey": "The API key is missing, malformed or revoked",
-      "insufficientCredits": "The organization's credit balance is too low",
+      "insufficientCredits": "The credit balance is too low",
       "modelSuspended": "The model has been suspended by the operator",
       "modelNotFound": "The model does not exist or is not published",
       "modelNotDeployed": "The model has not been deployed to an endpoint yet",
@@ -297,7 +297,7 @@
     },
     "compute": {
       "title": "GPU costs and idle stop",
-      "body": "GPU time for training and endpoints is deducted from the creator organization's credits.",
+      "body": "GPU time for training and endpoints is deducted from the creator's credits.",
       "items": {
         "train": "Training: {{multiplier}}× the estimate is held at the start and settled on the actual GPU time at the end. Runs longer than {{hours}} hours are stopped.",
         "endpoint": "Endpoints: the boot and idle time is held when an endpoint starts, and running time is billed every minute.",
@@ -309,7 +309,7 @@
       "body": "Prices are set in yen, per model.",
       "items": {
         "price": "Set prices per 1M input tokens, per 1M output tokens and per request. Set them all to 0 to publish for free.",
-        "fee": "Your earnings are the price users pay minus the platform fee ({{fee}}%), credited to your organization.",
+        "fee": "Your earnings are the price users pay minus the platform fee ({{fee}}%), credited to your earnings.",
         "payout": "Once Stripe Connect onboarding is complete, you can request payouts from ¥{{min}}."
       }
     }

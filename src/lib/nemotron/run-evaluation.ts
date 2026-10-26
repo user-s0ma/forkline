@@ -17,8 +17,8 @@ import { judgeMessages } from "./prompts";
  * 評価を少しずつ進める。1回の呼び出し (step) で数問だけ解かせて採点し、残りは次の step に回す
  * (Workers の1リクエストの外部呼び出しの数と時間に収めるため。画面が step を繰り返し呼ぶ)。
  *   1. 微調整したモデル: 既存の呼び出しの経路 (gateway の runChat) で答えさせる。利用ログが残り、GPU 代は時間で請求される
- *   2. ベース: Token Factory の Nemotron に同じ質問を解かせる (トークン代を組織に請求)
- *   3. 採点: Token Factory の Nemotron が基準の答えと比べて両方を 1〜5 で採点する (トークン代を組織に請求)
+ *   2. ベース: Token Factory の Nemotron に同じ質問を解かせる (トークン代を本人に請求)
+ *   3. 採点: Token Factory の Nemotron が基準の答えと比べて両方を 1〜5 で採点する (トークン代を本人に請求)
  * 全問終わったら集計して、評価を終わった状態にする。
  */
 
@@ -117,7 +117,7 @@ async function evaluateItem(
   const reference = `${item.id}:${item.attempts}`;
   try {
     const base = await chargedNemotronChat(deps.nemotron, {
-      organizationId: run.organizationId,
+      userId: run.userId,
       kind: "evaluation",
       referenceId: `${reference}:base`,
       description: `${label} baseline`,
@@ -131,7 +131,7 @@ async function evaluateItem(
       ? [fineTunedAnswer, baseAnswer]
       : [baseAnswer, fineTunedAnswer];
     const judge = await chargedNemotronChat(deps.nemotron, {
-      organizationId: run.organizationId,
+      userId: run.userId,
       kind: "evaluation",
       referenceId: `${reference}:judge`,
       description: `${label} judge`,

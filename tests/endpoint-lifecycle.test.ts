@@ -24,7 +24,7 @@ import {
   makeModel,
 } from "./compute-fakes";
 
-const ORG = "org-pub";
+const OWNER = "user-pub";
 const BALANCE = 100_000_000_000;
 const RATE = microsPerHour(BASE_MODEL.serveUsdPerHour);
 const HOLD = endpointHoldMicros(RATE, 15);
@@ -33,9 +33,8 @@ function succeededJob(): FineTuneRow {
   const at = new Date("2026-10-24T00:00:00Z");
   return {
     id: "ft-1",
-    organizationId: ORG,
+    userId: OWNER,
     modelId: "model-1",
-    createdBy: "user-1",
     baseModelId: BASE_MODEL.id,
     trainPreset: BASE_MODEL.trainPreset,
     trainMicrosPerHour: microsPerHour(BASE_MODEL.trainUsdPerHour),
@@ -65,7 +64,7 @@ function succeededJob(): FineTuneRow {
 
 function setup(model: ModelRow, nebiusOverrides: Parameters<typeof fakeNebius>[0] = {}, balance = BALANCE) {
   const { nebius, calls } = fakeNebius(nebiusOverrides);
-  const { credits, balances, ledger } = fakeCredits({ [ORG]: balance });
+  const { credits, balances, ledger } = fakeCredits({ [OWNER]: balance });
   const { stores, models } = fakeStores({ models: [model] });
   const clock = fakeClock();
   const deps = makeDeps({ nebius, credits, stores, now: clock.now });
@@ -102,7 +101,7 @@ test("デプロイすると、起動と待ち時間の分を仮押さえし、�
   assert.equal(row.endpointMicrosPerHour, RATE);
   assert.equal(row.endpointHeldMicros, HOLD);
   assert.equal(row.fineTuneId, "ft-1");
-  assert.equal(balances.get(ORG), BALANCE - HOLD);
+  assert.equal(balances.get(OWNER), BALANCE - HOLD);
   const created = calls.find((call) => call.name === "createEndpoint")!.args[1] as {
     baseModelId: string;
     adapterUri: string;
@@ -132,7 +131,7 @@ test("作れなければ仮押さえを戻して失敗にする", async () => {
   });
   const result = await deployEndpoint(deps, makeModel(), succeededJob());
   assert.equal(!result.ok && result.reason, "failed");
-  assert.equal(balances.get(ORG), BALANCE);
+  assert.equal(balances.get(OWNER), BALANCE);
   assert.equal(models.get("model-1")!.endpointStatus, "failed");
   assert.equal(models.get("model-1")!.endpointError, "no capacity");
 });
@@ -172,11 +171,11 @@ test("止まっているエンドポイントは呼び出しで起こし、起�
     assert.deepEqual(result, { ready: false, reason: "warming_up", retryAfter: 30 });
   }
   assert.equal(calls.filter((call) => call.name === "startEndpoint").length, 1);
-  assert.equal(balances.get(ORG), BALANCE - HOLD);
+  assert.equal(balances.get(OWNER), BALANCE - HOLD);
   assert.equal(models.get("model-1")!.endpointStatus, "starting");
 });
 
-test("公開した組織の残高が足りなければ起こさない", async () => {
+test("公開した人の残高が足りなければ起こさない", async () => {
   const model = runningModel({ endpointStatus: "stopped", endpointMeteredAt: null, endpointHeldMicros: 0 });
   const { deps, calls, models } = setup(model, {}, 0);
   const result = await ensureEndpointReady(deps, model, 30);
@@ -193,7 +192,7 @@ test("動いている時間を区間ごとに請求し、同じ区間を二度�
   assert.equal(ledger.length, 1);
   assert.equal(ledger[0].kind, "endpoint");
   assert.equal(ledger[0].actualMicros, computeCostMicros(RATE, 600));
-  assert.equal(balances.get(ORG), BALANCE - computeCostMicros(RATE, 600));
+  assert.equal(balances.get(OWNER), BALANCE - computeCostMicros(RATE, 600));
   assert.ok(results.some((row) => row.endpointMeteredAt?.getTime() === clock.now().getTime()));
 });
 
@@ -203,7 +202,7 @@ test("呼ばれないまま待ち時間を過ぎたら止め、最後の区間�
     getEndpoint: async () => ({ state: "running", url: "https://ep-1.example" }),
   });
   // 仮押さえは起動したときに引いてある
-  balances.set(ORG, BALANCE - HOLD);
+  balances.set(OWNER, BALANCE - HOLD);
 
   clock.advance(10 * 60_000);
   assert.equal(await sweepEndpoint(deps, models.get("model-1")!), "running");
@@ -216,7 +215,7 @@ test("呼ばれないまま待ち時間を過ぎたら止め、最後の区間�
   assert.equal(row.endpointMeteredAt, null);
   assert.equal(row.endpointHeldMicros, 0);
   const charged = computeCostMicros(RATE, 600) + computeCostMicros(RATE, 360);
-  assert.equal(balances.get(ORG), BALANCE - charged);
+  assert.equal(balances.get(OWNER), BALANCE - charged);
 });
 
 test("呼ばれていれば止めない", async () => {
@@ -239,12 +238,12 @@ test("起動中のものは起動にかかる時間を待ってから止める",
   assert.equal(models.get("model-1")!.endpointStatus, "starting");
 });
 
-test("公開した組織の残高が尽きたら止める", async () => {
+test("公開した人の残高が尽きたら止める", async () => {
   const model = runningModel();
   const { deps, clock, balances, models } = setup(model, {
     getEndpoint: async () => ({ state: "running", url: "https://ep-1.example" }),
   });
-  balances.set(ORG, 0);
+  balances.set(OWNER, 0);
   clock.advance(60_000);
   assert.equal(await sweepEndpoint(deps, models.get("model-1")!), "stopped_no_credit");
   assert.equal(models.get("model-1")!.endpointStatus, "stopped");
@@ -271,6 +270,6 @@ test("起こすのに失敗したら仮押さえを戻して止まったまま�
   });
   const result = await wakeEndpoint(deps, model);
   assert.equal(result.state, "failed");
-  assert.equal(balances.get(ORG), BALANCE);
+  assert.equal(balances.get(OWNER), BALANCE);
   assert.equal(models.get("model-1")!.endpointStatus, "stopped");
 });

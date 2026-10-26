@@ -16,9 +16,8 @@ export const fineTune = mysqlTable(
   "FineTune",
   {
     id: varchar("id", { length: 191 }).primaryKey(),
-    organizationId: varchar("organizationId", { length: 191 }).notNull(),
+    userId: varchar("userId", { length: 191 }).notNull(),
     modelId: varchar("modelId", { length: 191 }).notNull(),
-    createdBy: varchar("createdBy", { length: 191 }).notNull(),
     baseModelId: varchar("baseModelId", { length: 191 }).notNull(),
     /** 学習に使う GPU のプリセット */
     trainPreset: varchar("trainPreset", { length: 64 }).notNull(),
@@ -67,8 +66,8 @@ export const fineTune = mysqlTable(
   },
   (table) => [
     index("FineTune_model_createdAt_idx").on(table.modelId, table.createdAt),
-    index("FineTune_organization_createdAt_idx").on(
-      table.organizationId,
+    index("FineTune_user_createdAt_idx").on(
+      table.userId,
       table.createdAt,
     ),
     // 定期処理で、終わっていない学習を探すため

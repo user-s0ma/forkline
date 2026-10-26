@@ -14,8 +14,8 @@ const OPERATOR = {
   name: "関口壮真",
   nameEn: "Soma Sekiguchi",
   email: "support@forkline.ai",
-  updatedAt: "2026年10月24日",
-  updatedAtEn: "October 24, 2026",
+  updatedAt: "2026年10月26日",
+  updatedAtEn: "October 26, 2026",
 };
 
 const ON_REQUEST = "請求があれば遅滞なく開示します。";
@@ -34,10 +34,10 @@ const ENTRIES_JA: Entry[] = [
   {
     term: "販売価格",
     lines: [
-      `前払い式のクレジットを1回あたり${yen(TOPUP_MIN_YEN)}〜${yen(TOPUP_MAX_YEN)}の範囲で販売します。クレジットは組織ごとに保有します。`,
+      `前払い式のクレジットを1回あたり${yen(TOPUP_MIN_YEN)}〜${yen(TOPUP_MAX_YEN)}の範囲で販売します。クレジットはアカウントごとに保有します。`,
       "各AIモデルの利用料金は、モデルごとの詳細ページに表示される単価（クリエイターが設定する、入力・出力のトークン数あたりおよび1リクエストあたりの価格）に基づき、利用のつど購入済みクレジットから差し引かれます。",
-      "モデルの学習（LoRAの微調整）と推論エンドポイントの計算資源の料金は、利用した時間に応じて、モデルを作成した組織のクレジットから差し引かれます。開始時に見込み額を仮押さえし、終了時に実際の時間で精算します。",
-      "アカウントと組織の作成、モデルの公開は無料です。",
+      "モデルの学習（LoRAの微調整）と推論エンドポイントの計算資源の料金は、利用した時間に応じて、モデルを作成した人のクレジットから差し引かれます。開始時に見込み額を仮押さえし、終了時に実際の時間で精算します。",
+      "アカウントの作成、モデルの公開は無料です。",
       "表示価格はすべて税込です。",
     ],
   },
@@ -52,7 +52,7 @@ const ENTRIES_JA: Entry[] = [
   },
   {
     term: "サービスの提供時期",
-    lines: ["決済の完了後、直ちにクレジットが組織の残高に反映され、ご利用いただけます。"],
+    lines: ["決済の完了後、直ちにクレジットがアカウントの残高に反映され、ご利用いただけます。"],
   },
   {
     term: "返品・キャンセルについて",
@@ -64,7 +64,7 @@ const ENTRIES_JA: Entry[] = [
   {
     term: "クリエイターへの支払い",
     lines: [
-      `モデルを公開した組織には、利用料金のうちクリエイター価格部分から手数料（${PLATFORM_FEE_BPS / 100}%）を差し引いた額を売上として計上し、Stripe Connect を通じて支払います。`,
+      `モデルを公開した人には、利用料金のうちクリエイター価格部分から手数料（${PLATFORM_FEE_BPS / 100}%）を差し引いた額を売上として計上し、Stripe Connect を通じて支払います。`,
     ],
   },
   {
@@ -86,10 +86,10 @@ const ENTRIES_EN: Entry[] = [
   {
     term: "Prices",
     lines: [
-      `Prepaid credits are sold in amounts from ${yen(TOPUP_MIN_YEN)} to ${yen(TOPUP_MAX_YEN)} per purchase. Credits are held per organization.`,
+      `Prepaid credits are sold in amounts from ${yen(TOPUP_MIN_YEN)} to ${yen(TOPUP_MAX_YEN)} per purchase. Credits are held per account.`,
       "The charge for each AI model is based on the prices shown on that model's detail page (set by the creator, per number of input and output tokens and per request) and is deducted from purchased credits at each use.",
-      "Compute charges for model training (LoRA fine-tuning) and inference endpoints are deducted from the credits of the organization that created the model, according to the time used. An estimate is held at the start and settled on the actual time at the end.",
-      "Creating an account and organization, and publishing a model, are free.",
+      "Compute charges for model training (LoRA fine-tuning) and inference endpoints are deducted from the credits of the person who created the model, according to the time used. An estimate is held at the start and settled on the actual time at the end.",
+      "Creating an account and publishing a model are free.",
       "All prices include tax.",
     ],
   },
@@ -104,7 +104,7 @@ const ENTRIES_EN: Entry[] = [
   },
   {
     term: "Delivery",
-    lines: ["Credits are added to the organization's balance immediately after payment and can be used right away."],
+    lines: ["Credits are added to your account's balance immediately after payment and can be used right away."],
   },
   {
     term: "Returns and cancellations",
@@ -116,7 +116,7 @@ const ENTRIES_EN: Entry[] = [
   {
     term: "Payments to creators",
     lines: [
-      `The organization that published a model is credited with the creator-price portion of usage charges minus the fee (${PLATFORM_FEE_BPS / 100}%) as earnings, paid through Stripe Connect.`,
+      `The person who published a model is credited with the creator-price portion of usage charges minus the fee (${PLATFORM_FEE_BPS / 100}%) as earnings, paid through Stripe Connect.`,
     ],
   },
   {

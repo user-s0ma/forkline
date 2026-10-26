@@ -42,10 +42,6 @@ const SECTIONS_JA: LegalSection[] = [
         text: "氏名、メールアドレス、パスワードのハッシュ値（メールアドレスで登録した場合）、Googleログイン時にGoogleから提供されるプロフィール情報。",
       },
       {
-        label: "組織の情報:",
-        text: "組織名、メンバーとロール、招待の記録、組織内で行われた操作の記録（監査ログ）。",
-      },
-      {
         label: "モデルと学習の情報:",
         text: "モデルの設定・説明文・価格、アップロードされた学習データ（chat形式のJSONL）、学習の設定と結果（LoRAの重み）、エンドポイントのアクセストークン（暗号化して保存します）。",
       },
@@ -70,9 +66,9 @@ const SECTIONS_JA: LegalSection[] = [
     ],
   },
   {
-    heading: "3. 組織での共有",
+    heading: "3. 公開される情報",
     paragraphs: [
-      "モデル、学習データ、APIキー、クレジット、売上、利用記録は組織に属し、その組織のメンバーが閲覧・利用できます。課金・出金・APIキー・公開・削除の操作は、組織のオーナーと管理者に限られます。",
+      "モデル、学習データ、APIキー、クレジット、売上、利用記録はアカウントごとに管理し、ほかのユーザーは閲覧できません。ストアに公開したモデルには、アカウントの名前を作成者として表示します。",
     ],
   },
   {
@@ -88,7 +84,7 @@ const SECTIONS_JA: LegalSection[] = [
       },
       {
         label: "クリエイターへの開示:",
-        text: "クリエイターの組織には、自身のモデルの利用回数や売上などの集計情報を提供します。利用者を特定できる情報は提供しません。",
+        text: "クリエイターには、自身のモデルの利用回数や売上などの集計情報を提供します。利用者を特定できる情報は提供しません。",
       },
       {
         label: "法令に基づく場合:",
@@ -99,13 +95,13 @@ const SECTIONS_JA: LegalSection[] = [
   {
     heading: "5. 保存期間",
     paragraphs: [
-      "学習データとLoRAの重みは、モデルまたは組織が削除されるまで保存します。利用記録と決済の記録は、会計・税務上必要な期間保存します。",
+      "学習データとLoRAの重みは、モデルまたはアカウントが削除されるまで保存します。利用記録と決済の記録は、会計・税務上必要な期間保存します。",
     ],
   },
   {
     heading: "6. 安全管理",
     paragraphs: [
-      "運営者は、通信の暗号化、アクセストークン等の暗号化保存、APIキーのハッシュ化保存、組織とロールによるアクセス制御など、個人情報を適切に保護するための措置を講じます。",
+      "運営者は、通信の暗号化、アクセストークン等の暗号化保存、APIキーのハッシュ化保存、アカウントごとのアクセス制御など、個人情報を適切に保護するための措置を講じます。",
     ],
   },
   {
@@ -141,10 +137,6 @@ const SECTIONS_EN: LegalSection[] = [
         text: "Your name, email address, a hash of your password (if you register with email), and the profile information Google provides when you sign in with Google.",
       },
       {
-        label: "Organization information:",
-        text: "Organization name, members and roles, invitation records, and records of actions taken within the organization (audit log).",
-      },
-      {
         label: "Model and training information:",
         text: "Model settings, descriptions and prices, uploaded training data (chat-format JSONL), training settings and results (LoRA weights), and endpoint access tokens (stored encrypted).",
       },
@@ -169,9 +161,9 @@ const SECTIONS_EN: LegalSection[] = [
     ],
   },
   {
-    heading: "3. Sharing within an organization",
+    heading: "3. Information that is made public",
     paragraphs: [
-      "Models, training data, API keys, credits, earnings and usage records belong to an organization and can be viewed and used by its members. Billing, payouts, API keys, publishing and deletion are limited to the organization's owners and admins.",
+      "Models, training data, API keys, credits, earnings and usage records are kept per account and cannot be viewed by other users. Models published to the store show your account name as the creator.",
     ],
   },
   {
@@ -187,7 +179,7 @@ const SECTIONS_EN: LegalSection[] = [
       },
       {
         label: "Disclosure to creators:",
-        text: "A creator's organization receives aggregate information such as the number of calls to and earnings from its own models. We do not provide information that identifies users.",
+        text: "A creator receives aggregate information such as the number of calls to and earnings from its own models. We do not provide information that identifies users.",
       },
       {
         label: "When required by law:",
@@ -198,13 +190,13 @@ const SECTIONS_EN: LegalSection[] = [
   {
     heading: "5. Retention",
     paragraphs: [
-      "Training data and LoRA weights are kept until the model or organization is deleted. Usage and payment records are kept for the period required for accounting and tax purposes.",
+      "Training data and LoRA weights are kept until the model or account is deleted. Usage and payment records are kept for the period required for accounting and tax purposes.",
     ],
   },
   {
     heading: "6. Security",
     paragraphs: [
-      "The operator takes measures to protect personal information appropriately, including encryption in transit, encrypted storage of access tokens and similar secrets, hashed storage of API keys, and access control by organization and role.",
+      "The operator takes measures to protect personal information appropriately, including encryption in transit, encrypted storage of access tokens and similar secrets, hashed storage of API keys, and access control per account.",
     ],
   },
   {
@@ -232,13 +224,13 @@ export default function Privacy() {
   if (locale === "en") {
     return (
       <LegalPage title="Privacy Policy" notice={TRANSLATION_NOTICE}>
-        <LegalSections sections={SECTIONS_EN} effectiveDate="Effective: October 24, 2026" />
+        <LegalSections sections={SECTIONS_EN} effectiveDate="Effective: October 26, 2026" />
       </LegalPage>
     );
   }
   return (
     <LegalPage title="プライバシーポリシー">
-      <LegalSections sections={SECTIONS_JA} effectiveDate="発効日: 2026年10月24日" />
+      <LegalSections sections={SECTIONS_JA} effectiveDate="発効日: 2026年10月26日" />
     </LegalPage>
   );
 }

@@ -26,7 +26,7 @@ export function PricingPanel({
   onChange,
 }: {
   id?: string;
-  /** Nebius で動かすときの GPU の1時間あたりの料金 (公開した組織が払う) */
+  /** Nebius で動かすときの GPU の1時間あたりの料金 (公開した人が払う) */
   endpointMicrosPerHour?: number | null;
   pricing: Pricing;
   onChange: (pricing: Pricing) => void;

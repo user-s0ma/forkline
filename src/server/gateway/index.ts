@@ -4,7 +4,7 @@ import { takeRateLimit } from "./rate-limit";
 import { cors } from "hono/cors";
 import { bearerToken, hashApiKey, isApiKeyFormat } from "@/lib/billing/api-keys";
 import { getDb } from "@/lib/db/client";
-import { aiModel, apiKey, organization } from "@/lib/db/schema";
+import { aiModel, apiKey, user } from "@/lib/db/schema";
 import {
   errorResponse,
   GatewayError,
@@ -15,7 +15,7 @@ import {
 
 type GatewayEnv = {
   Bindings: AppEnv;
-  Variables: { organizationId: string; apiKeyId: string };
+  Variables: { userId: string; apiKeyId: string };
 };
 
 const LAST_USED_THROTTLE_MS = 5 * 60 * 1000;
@@ -32,7 +32,7 @@ gateway.use(
   }),
 );
 
-// API キーは組織のもの。呼び出しの料金はキーの組織のクレジットから引き落とす
+// API キーは利用者のもの。呼び出しの料金はキーの持ち主のクレジットから引き落とす
 gateway.use("*", async (c, next) => {
   if (c.req.method === "OPTIONS") return next();
   const token = bearerToken(c.req.header("Authorization"));
@@ -45,7 +45,7 @@ gateway.use("*", async (c, next) => {
   const [record] = await db
     .select({
       id: apiKey.id,
-      organizationId: apiKey.organizationId,
+      userId: apiKey.userId,
       lastUsedAt: apiKey.lastUsedAt,
     })
     .from(apiKey)
@@ -76,26 +76,26 @@ gateway.use("*", async (c, next) => {
         .catch((error) => console.error("APIキーの最終利用日時を更新できませんでした:", error)),
     );
   }
-  c.set("organizationId", record.organizationId);
+  c.set("userId", record.userId);
   c.set("apiKeyId", record.id);
   await next();
 });
 
-/** ストアに公開中のモデルと、キーの組織自身のモデル */
+/** ストアに公開中のモデルと、キーの持ち主自身のモデル */
 gateway.get("/v1/models", async (c) => {
   const rows = await getDb(c.env)
     .select({
       slug: aiModel.slug,
-      owner: organization.slug,
+      owner: user.name,
       publishedAt: aiModel.publishedAt,
       createdAt: aiModel.createdAt,
     })
     .from(aiModel)
-    .leftJoin(organization, eq(organization.id, aiModel.organizationId))
+    .leftJoin(user, eq(user.id, aiModel.userId))
     .where(
       or(
         and(eq(aiModel.status, "published"), eq(aiModel.visibility, "public")),
-        eq(aiModel.organizationId, c.get("organizationId")),
+        eq(aiModel.userId, c.get("userId")),
       ),
     )
     .orderBy(desc(aiModel.publishedAt))
@@ -114,17 +114,16 @@ gateway.get("/v1/models", async (c) => {
 gateway.post("/v1/chat/completions", async (c) => {
   // 本文は大きさの上限つきで読む (413)
   const request = await readChatRequest(c.req.raw);
-  const organizationId = c.get("organizationId");
-  const { model, config } = await resolveModel(c.env, request.model, organizationId);
+  const userId = c.get("userId");
+  const { model, config } = await resolveModel(c.env, request.model, userId);
   return runChat(
     {
       env: c.env,
       waitUntil: (promise) => c.executionCtx.waitUntil(promise),
       model,
       config,
-      consumerOrganizationId: organizationId,
+      consumerUserId: userId,
       apiKeyId: c.get("apiKeyId"),
-      userId: null,
       source: "api",
     },
     request,

@@ -25,7 +25,6 @@
     "copy": "コピー",
     "name": "名前",
     "email": "メールアドレス",
-    "role": "ロール",
     "status": "ステータス",
     "settings": "設定",
     "all": "すべて",
@@ -37,11 +36,6 @@
     "saving": "保存中...",
     "sending": "送信中…",
     "logout": "ログアウト",
-    "roles": {
-      "owner": "オーナー",
-      "admin": "管理者",
-      "member": "メンバー"
-    },
     "previous": "前へ",
     "next": "次へ",
     "processing": "処理中...",
@@ -53,19 +47,6 @@
   },
   "appShell": {
     "closeMenu": "メニューを閉じる",
-    "loadOrganizationsFailed": "組織情報を読み込めませんでした",
-    "nav": {
-      "auditLogs": "監査ログ",
-      "members": "メンバー"
-    },
-    "navGroups": {
-      "organization": "組織"
-    },
-    "noOrganizationsDescription": "所属している組織がまだありません。組織を作成して始めるか、招待を受け取ってから再度アクセスしてください。",
-    "noOrganizationsTitle": "組織がありません",
-    "createOrganization": "組織を作成",
-    "createOrganizationFailed": "組織を作成できませんでした",
-    "organizationNamePlaceholder": "株式会社Acme",
     "profile": "プロフィール",
     "profileModal": {
       "emailHint": "メールアドレスは変更できません",
@@ -73,49 +54,7 @@
       "updateFailed": "プロフィールを更新できませんでした",
       "signingOut": "ログアウト中...",
       "signOutFailed": "ログアウトできませんでした"
-    },
-    "selectOrganization": "組織を選択",
-    "selectOrganizationFailed": "組織を選択できませんでした"
-  },
-  "auditLogs": {
-    "actionGroups": {
-      "members": "メンバー・招待",
-      "organization": "組織"
-    },
-    "actionHeader": "操作",
-    "actions": {
-      "invitation": {
-        "accept": "招待を承諾",
-        "cancel": "招待を取り消し",
-        "create": "メンバーを招待",
-        "reject": "招待を辞退"
-      },
-      "member": {
-        "leave": "組織から脱退",
-        "remove": "メンバーを削除",
-        "role_update": "ロールを変更"
-      },
-      "organization": {
-        "create": "組織を作成",
-        "delete": "組織を削除",
-        "update": "組織設定を変更"
-      }
-    },
-    "actorHeader": "操作者",
-    "allActions": "すべての操作",
-    "dateHeader": "日時",
-    "detailSeparator": " ・ ",
-    "emptyDescription": "組織内での操作が行われると、ここに記録されます。",
-    "emptyFilteredDescription": "この操作の記録はありません。絞り込み条件を変えてください。",
-    "emptyTitle": "監査ログはまだありません",
-    "errorTitle": "監査ログを表示できません",
-    "filterByAction": "操作で絞り込む",
-    "fromDetail": "元: {{from}}",
-    "loadError": "監査ログを読み込めませんでした",
-    "loadErrorDescription": "監査ログを読み込めませんでした。",
-    "roleDetail": "ロール: {{role}}",
-    "targetHeader": "対象",
-    "title": "監査ログ"
+    }
   },
   "auth": {
     "backToLogin": "ログインに戻る",
@@ -130,23 +69,6 @@
       "sentDescription": "{{email}} にパスワード再設定用のリンクを送信しました。",
       "title": "パスワードを再設定",
       "useDifferentEmail": "別のメールアドレスを入力"
-    },
-    "invitation": {
-      "acceptButton": "招待を承諾して参加",
-      "acceptError": "招待を承諾できませんでした",
-      "backToApp": "アプリへ戻る",
-      "checking": "招待情報を確認しています…",
-      "declineButton": "辞退する",
-      "declineError": "招待を辞退できませんでした",
-      "description": "{{role}}として組織に招待されています。",
-      "descriptionWithInviter": "{{inviter}} から、{{role}}として組織に招待されています。",
-      "expiredDescription": "招待の有効期限が切れています。組織の管理者に再度招待を依頼してください。",
-      "notFoundDescription": "この招待は無効か、有効期限が切れているか、招待されたメールアドレスと別のアカウントでログインしている可能性があります。",
-      "notFoundTitle": "招待を確認できませんでした",
-      "organizationFallback": "組織",
-      "title": "{{organization}}への招待",
-      "unavailableTitle": "この招待は利用できません",
-      "usedDescription": "この招待はすでに使用されているか、取り消されています。"
     },
     "login": {
       "createAccount": "アカウントを作成",
@@ -195,13 +117,6 @@
     }
   },
   "email": {
-    "invitation": {
-      "body": "{{inviter}}さんから、組織「{{organization}}」に招待されています。以下のボタンから招待を承諾してください。",
-      "button": "招待を確認する",
-      "footer": "心当たりがない場合は、このメールを破棄してください。",
-      "heading": "組織に招待されています",
-      "subject": "Forkline {{organization}}への招待"
-    },
     "reset": {
       "body": "以下のボタンから、新しいパスワードを設定してください。",
       "button": "パスワードを再設定",
@@ -217,81 +132,20 @@
       "subject": "Forkline メールアドレスの確認"
     }
   },
-  "members": {
-    "cancelInvitationAria": "{{email}}への招待を取り消す",
-    "cancelInvitationFailed": "招待を取り消せませんでした",
-    "columns": {
-      "actions": "操作",
-      "joinedAt": "参加日時",
-      "member": "メンバー"
-    },
-    "emailPlaceholder": "taro@example.com",
-    "emptyDescription": "この組織のメンバー情報を取得できませんでした。",
-    "emptyTitle": "メンバーが見つかりません",
-    "invitationMeta": "{{role}}・{{date}}まで有効",
-    "invite": "メンバーを招待",
-    "inviteFailed": "招待を送信できませんでした",
-    "inviteHint": "招待メールが送信されます。相手が承諾すると組織に参加します",
-    "leaveConfirm": "組織「{{name}}」から脱退しますか？再度参加するには招待が必要です。",
-    "leaveFailed": "脱退できませんでした",
-    "leaveOrganization": "組織から脱退",
-    "loadFailed": "メンバーを読み込めませんでした",
-    "pendingInvitations": "招待中（{{count}}）",
-    "removeConfirm": "{{name}} をこの組織から削除しますか？",
-    "removeFailed": "メンバーを削除できませんでした",
-    "removeMemberAria": "{{email}}を組織から削除",
-    "roleChangeFailed": "ロールを変更できませんでした",
-    "roleFor": "{{email}}のロール",
-    "sendInvite": "招待を送信",
-    "title": "メンバー",
-    "you": "自分"
-  },
   "server": {
     "common": {
-      "adminRequired": "この操作には組織の管理者権限が必要です",
-      "forbiddenOrganization": "この組織を操作する権限がありません",
       "internalError": "API処理でエラーが発生しました",
       "loginRequired": "ログインが必要です",
       "notFound": "APIが見つかりません"
-    },
-    "account": {
-      "ownerOfShared": "「{{name}}」にはほかのメンバーがいます。先に Web で、オーナーをほかの人に渡すか、組織を削除してください。"
     }
-  },
-  "settings": {
-    "createdAt": "作成日時",
-    "details": "詳細",
-    "loadFailed": "組織情報を読み込めませんでした",
-    "memberCount": "メンバー数",
-    "memberCountValue_other": "{{count}}人",
-    "organizationInfo": "組織情報",
-    "organizationName": "組織名",
-    "ownerOnlyNotice": "組織情報を変更できるのはオーナーのみです",
-    "dangerZone": "危険な操作",
-    "transferTitle": "オーナーを譲渡",
-    "transferDescription": "管理者メンバーにオーナー権限を譲渡します。あなたは管理者になります。",
-    "transferSelectPlaceholder": "譲渡先の管理者を選択",
-    "transferButton": "譲渡する",
-    "transferConfirm": "{{name}} にオーナー権限を譲渡します。あなたは管理者になり、この操作は元に戻せません。よろしいですか？",
-    "transferFailed": "オーナーの譲渡に失敗しました",
-    "transferNoMembers": "譲渡先の管理者がいません。先にメンバーを管理者に昇格してください。",
-    "deleteTitle": "組織を削除",
-    "deleteDescription": "組織を削除します。メンバーはこの組織を使えなくなります。この操作は取り消せません。",
-    "deleteConfirmPrompt": "確認のため、組織名「{{name}}」を入力してください。",
-    "deleteButton": "組織を削除",
-    "deleteSuccess": "組織を削除しました",
-    "deleteFailed": "組織の削除に失敗しました",
-    "saveChanges": "変更を保存",
-    "saving": "保存中…",
-    "updateFailed": "組織情報を更新できませんでした"
   },
   "account": {
     "title": "アカウント",
     "saved": "保存しました",
     "deleteTitle": "アカウントを削除",
     "deleteNeedsSignIn": "安全のため、ログインし直してから削除してください",
-    "deleteDescription": "アカウントと、あなただけが入っている組織を削除します。ログインできなくなります。取り消せません。",
-    "deleteSharedOwner": "ほかのメンバーがいる組織のオーナーは、先にオーナーを渡すか、組織を削除してください。",
+    "nameHint": "ストアのモデルに、作った人の名前として表示されます。",
+    "deleteDescription": "アカウントを削除します。公開中のモデルは非公開になり、API キーは使えなくなります。ログインできなくなります。取り消せません。",
     "deleteConfirmPrompt": "確認のため、メールアドレスを入力してください",
     "deleteButton": "アカウントを削除",
     "deleteFailed": "アカウントを削除できませんでした",

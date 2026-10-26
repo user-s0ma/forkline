@@ -30,7 +30,7 @@ import {
 } from "@/lib/api-client";
 import { localizeHref, useLocale } from "@/lib/i18n";
 import { MODEL_CATEGORIES, SLUG_PATTERN } from "@/lib/billing/pricing";
-import type { AppLayoutContext } from "../../_layout";
+import type { AppLayoutContext } from "../_layout";
 
 const TABS = ["overview", "training", "test", "evaluation", "settings"] as const;
 type Tab = (typeof TABS)[number];
@@ -59,15 +59,15 @@ export default function ModelEditorPage({ params }: Route.ComponentProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { organizationId, modelId } = params;
-  const listPath = `/app/${encodeURIComponent(organizationId)}/models`;
+  const { modelId } = params;
+  const listPath = "/app/models";
   const { openMobileNavigation } = useOutletContext<AppLayoutContext>();
   const [tab, setTab] = useState<Tab | null>(null);
   const [revision, setRevision] = useState(0);
 
   const { data: model, error, isPending, refetch } = useQuery({
-    queryKey: ["model", organizationId, modelId],
-    queryFn: () => getModel(organizationId, modelId),
+    queryKey: ["model", modelId],
+    queryFn: () => getModel(modelId),
     retry: (count, failure) =>
       !(failure instanceof ApiError && failure.status === 404) && count < 1,
   });
@@ -81,8 +81,8 @@ export default function ModelEditorPage({ params }: Route.ComponentProps) {
 
   const refresh = useCallback(async () => {
     await refetch();
-    await queryClient.invalidateQueries({ queryKey: ["models", organizationId] });
-  }, [organizationId, queryClient, refetch]);
+    await queryClient.invalidateQueries({ queryKey: ["models"] });
+  }, [queryClient, refetch]);
 
   if (isPending || !model) {
     return (
@@ -125,7 +125,6 @@ export default function ModelEditorPage({ params }: Route.ComponentProps) {
   return (
     <ModelEditor
       key={`${model.id}:${revision}`}
-      organizationId={organizationId}
       listPath={listPath}
       model={model}
       tab={tab ?? initialTab}
@@ -136,7 +135,7 @@ export default function ModelEditorPage({ params }: Route.ComponentProps) {
         setRevision((value) => value + 1);
       }}
       onDeleted={async () => {
-        await queryClient.invalidateQueries({ queryKey: ["models", organizationId] });
+        await queryClient.invalidateQueries({ queryKey: ["models"] });
         navigate(listPath, { replace: true });
       }}
     />
@@ -144,7 +143,6 @@ export default function ModelEditorPage({ params }: Route.ComponentProps) {
 }
 
 function ModelEditor({
-  organizationId,
   listPath,
   model,
   tab,
@@ -153,7 +151,6 @@ function ModelEditor({
   onSaved,
   onDeleted,
 }: {
-  organizationId: string;
   listPath: string;
   model: ModelRecord;
   tab: Tab;
@@ -164,10 +161,10 @@ function ModelEditor({
 }) {
   const { t } = useTranslation();
   const locale = useLocale();
-  const { openMobileNavigation, canManageOrganization } = useOutletContext<AppLayoutContext>();
+  const { openMobileNavigation } = useOutletContext<AppLayoutContext>();
   const [draft, setDraft] = useState<ModelUpdateInput>(() => toDraft(model));
   const [isSaving, setIsSaving] = useState(false);
-  const baseModels = useBaseModels(organizationId);
+  const baseModels = useBaseModels();
   const serveRate =
     baseModels.data?.items.find((option) => option.id === model.baseModelId)
       ?.serveMicrosPerHour ?? null;
@@ -192,7 +189,7 @@ function ModelEditor({
     if (!canSave) return;
     setIsSaving(true);
     try {
-      await updateModel(organizationId, model.id, {
+      await updateModel(model.id, {
         ...draft,
         name: draft.name.trim(),
         slug: draft.slug.trim(),
@@ -271,14 +268,12 @@ function ModelEditor({
           {tab === "overview" && (
             <>
               <LaunchPanel
-                organizationId={organizationId}
                 model={model}
                 isDirty={isDirty}
-                canManage={canManageOrganization}
                 onOpenTab={onTabChange}
                 onChanged={onRefresh}
               />
-              <StatsPanel organizationId={organizationId} modelId={model.id} />
+              <StatsPanel modelId={model.id} />
               <ApiSnippet slug={model.slug} />
             </>
           )}
@@ -286,18 +281,15 @@ function ModelEditor({
           {tab === "training" && (
             <>
               <EndpointPanel
-                organizationId={organizationId}
                 model={model}
-                canManage={canManageOrganization}
                 onChanged={onRefresh}
               />
-              <TrainingPanel organizationId={organizationId} model={model} onChanged={onRefresh} />
+              <TrainingPanel model={model} onChanged={onRefresh} />
             </>
           )}
 
           {tab === "evaluation" && (
             <EvaluationPanel
-              organizationId={organizationId}
               model={model}
               onApplyCard={(card) => {
                 // 下書きは設定の欄に入れるだけ。保存は作者が設定の画面で確かめてから行う
@@ -312,9 +304,7 @@ function ModelEditor({
             <div className="grid gap-8 lg:grid-cols-[10rem_minmax(0,1fr)]">
               <nav className="hidden lg:block" aria-label={t("models.settings.navAria")}>
                 <ul className="sticky top-6 space-y-1">
-                  {SETTINGS_SECTIONS.filter(
-                    (section) => section !== "danger" || canManageOrganization,
-                  ).map((section) => (
+                  {SETTINGS_SECTIONS.map((section) => (
                     <li key={section}>
                       <a
                         className="block rounded-(--radius-control) px-3 py-1.5 text-sm text-ink-soft hover:bg-paper hover:text-ink"
@@ -345,9 +335,7 @@ function ModelEditor({
                   pricing={draft.pricing}
                   onChange={(pricing) => set({ pricing })}
                 />
-                {canManageOrganization && (
-                  <DangerZone organizationId={organizationId} model={model} onDeleted={onDeleted} />
-                )}
+                <DangerZone model={model} onDeleted={onDeleted} />
               </div>
             </div>
           )}
@@ -355,7 +343,6 @@ function ModelEditor({
           {/* テストの会話はタブを切り替えても残るよう、非表示にするだけでアンマウントしない */}
           <div hidden={tab !== "test"}>
             <TestPanel
-              organizationId={organizationId}
               slug={model.slug}
               disabledReason={testDisabled}
             />
@@ -523,11 +510,9 @@ function GeneralSection({
 }
 
 function DangerZone({
-  organizationId,
   model,
   onDeleted,
 }: {
-  organizationId: string;
   model: ModelRecord;
   onDeleted: () => Promise<unknown>;
 }) {
@@ -539,7 +524,7 @@ function DangerZone({
     if (confirmText !== model.slug || busy) return;
     setBusy(true);
     try {
-      await deleteModel(organizationId, model.id);
+      await deleteModel(model.id);
       await onDeleted();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("models.danger.failed"));

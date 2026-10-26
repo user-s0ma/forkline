@@ -40,38 +40,6 @@ export const modelPricingSchema = z.object({
 
 export type ModelPricing = z.infer<typeof modelPricingSchema>;
 
-function rawConfigObject(raw: string): Record<string, unknown> {
-  try {
-    const value: unknown = JSON.parse(raw);
-    return value && typeof value === "object" && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {};
-  } catch {
-    return {};
-  }
-}
-
-/** モデルの更新を許すか。実行の設定と価格は管理者 (owner / admin) だけが変えられる。メンバーは説明などだけ */
-export function reviewModelUpdate(
-  current: ModelPricing & { config: string },
-  next: { config: Record<string, unknown>; pricing: ModelPricing },
-  canManage: boolean,
-): boolean {
-  const before: Record<string, unknown> = {
-    ...defaultModelConfig(),
-    ...rawConfigObject(current.config),
-  };
-  const keys = new Set([...Object.keys(before), ...Object.keys(next.config)]);
-  const configChanged = [...keys].some(
-    (key) => JSON.stringify(before[key]) !== JSON.stringify(next.config[key]),
-  );
-  const pricingChanged =
-    current.priceInputMicros !== next.pricing.priceInputMicros ||
-    current.priceOutputMicros !== next.pricing.priceOutputMicros ||
-    current.pricePerRequestMicros !== next.pricing.pricePerRequestMicros;
-  return canManage || (!configChanged && !pricingChanged);
-}
-
 export function parseTags(raw: string): string[] {
   try {
     const value: unknown = JSON.parse(raw);

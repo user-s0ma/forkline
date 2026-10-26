@@ -19,11 +19,10 @@ export const evalRun = mysqlTable(
   "EvalRun",
   {
     id: varchar("id", { length: 191 }).primaryKey(),
-    organizationId: varchar("organizationId", { length: 191 }).notNull(),
+    userId: varchar("userId", { length: 191 }).notNull(),
     modelId: varchar("modelId", { length: 191 }).notNull(),
     /** 評価した LoRA を作った学習 */
     fineTuneId: varchar("fineTuneId", { length: 191 }).notNull(),
-    createdBy: varchar("createdBy", { length: 191 }).notNull(),
     /** running / succeeded / failed / canceled */
     status: varchar("status", { length: 16 }).notNull(),
     /** 比べる相手 (Token Factory のモデル ID) と採点役 */
@@ -46,7 +45,7 @@ export const evalRun = mysqlTable(
   },
   (table) => [
     index("EvalRun_model_createdAt_idx").on(table.modelId, table.createdAt),
-    index("EvalRun_organization_createdAt_idx").on(table.organizationId, table.createdAt),
+    index("EvalRun_user_createdAt_idx").on(table.userId, table.createdAt),
   ],
 );
 

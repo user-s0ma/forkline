@@ -11,7 +11,7 @@ import {
   splitEarnings,
   transferWithRetry,
 } from "../src/lib/billing/stripe";
-import { parseModelConfig, reviewModelUpdate } from "../src/lib/models/config";
+import { parseModelConfig } from "../src/lib/models/config";
 import {
   callBounds,
   GatewayError,
@@ -38,8 +38,8 @@ import {
  * 呼び出しの課金 (gateway)・出金・返金の修正のテスト。Nebius・Stripe・DB は偽物。
  */
 
-const CONSUMER = "org-consumer";
-const PUBLISHER = "org-pub";
+const CONSUMER = "user-consumer";
+const PUBLISHER = "user-pub";
 const PRICES = {
   pricePerRequestMicros: 1_000_000,
   priceInputMicros: 1_000_000_000,
@@ -75,18 +75,17 @@ function harness(model: ModelRow, consumerBalance: number, nebiusOverrides = {})
     waitUntil: (promise) => pending.push(promise),
     model,
     config: parseModelConfig(model.config)!,
-    consumerOrganizationId: CONSUMER,
+    consumerUserId: CONSUMER,
     apiKeyId: "key-1",
-    userId: null,
     source: "api",
     deps,
     settleUsage: async (_env, input) => {
       settled.push(input);
       const due = input.charge.totalMicros - (input.heldMicros ?? 0);
-      balances.set(input.consumerOrganizationId, (balances.get(input.consumerOrganizationId) ?? 0) - due);
+      balances.set(input.consumerUserId, (balances.get(input.consumerUserId) ?? 0) - due);
       earnings.set(
-        input.model.organizationId,
-        (earnings.get(input.model.organizationId) ?? 0) + input.charge.creatorMicros,
+        input.model.userId,
+        (earnings.get(input.model.userId) ?? 0) + input.charge.creatorMicros,
       );
     },
     ...overrides,
@@ -119,7 +118,7 @@ const REQUEST: ChatRequest = {
 test("H1: 上流が莫大な usage を返しても、請求は仮押さえ (最大の額) までで残高はマイナスにならない", async () => {
   const model = runningModel();
   const bounds = callBounds(parseModelConfig(model.config)!, REQUEST);
-  const hold = holdMicrosFor({ model, consumerOrganizationId: CONSUMER }, bounds);
+  const hold = holdMicrosFor({ model, consumerUserId: CONSUMER }, bounds);
   const upstream = fakeUpstream(() =>
     Response.json({
       choices: [{ message: { role: "assistant", content: "ok" } }],
@@ -158,7 +157,7 @@ test("H1: 仮押さえは入力の上限 (本文のバイト数) と出力の上
   const bounds = callBounds(parseModelConfig(model.config)!, REQUEST);
   assert.ok(bounds.inputTokens > bounds.inputBytes);
   assert.equal(
-    holdMicrosFor({ model, consumerOrganizationId: CONSUMER }, bounds),
+    holdMicrosFor({ model, consumerUserId: CONSUMER }, bounds),
     PRICES.pricePerRequestMicros + bounds.inputTokens * 1_000 + 100 * 2_000,
   );
   assert.equal(capCharge(quoteUsage(model, { inputTokens: 10 ** 9, outputTokens: 10 ** 9, computeMicros: 0 }), 5_000).totalMicros, 5_000);
@@ -328,24 +327,6 @@ test("L4: やり直しが重複 (1回目が済んでいた) なら仮押さえ�
   assert.equal(clampInt(-5), 0);
 });
 
-/* ---------------------------------------------------------------- M2: 設定と価格は管理者だけ */
-
-test("M2: メンバーは実行の設定と価格を変えられない (説明などは変えられる)", () => {
-  const pricing = { priceInputMicros: 1, priceOutputMicros: 2, pricePerRequestMicros: 3 };
-  const current = { config: "{}", ...pricing };
-  assert.equal(reviewModelUpdate(current, { config: { maxOutputTokens: 2048 }, pricing }, false), true);
-  assert.equal(reviewModelUpdate(current, { config: { maxOutputTokens: 4000 }, pricing }, false), false);
-  assert.equal(reviewModelUpdate(current, { config: { maxOutputTokens: 4000 }, pricing }, true), true);
-  assert.equal(
-    reviewModelUpdate(
-      current,
-      { config: { maxOutputTokens: 2048 }, pricing: { ...pricing, priceOutputMicros: 999 } },
-      false,
-    ),
-    false,
-  );
-});
-
 /* ---------------------------------------------------------------- M3: 出金の送金 */
 
 const stripeError = <T extends new (raw: never) => Error>(Type: T, message: string) =>
@@ -398,7 +379,7 @@ function fakeLedger() {
 
 const fakeStripe = {
   paymentIntents: {
-    retrieve: async () => ({ metadata: { kind: "credit_topup", organizationId: CONSUMER } }),
+    retrieve: async () => ({ metadata: { kind: "credit_topup", userId: CONSUMER } }),
   },
   refunds: {
     list: () =>
@@ -416,7 +397,7 @@ test("M4: 返金は返金ごとに一度だけ、クレジットから引く (�
   assert.equal(await applyChargeRefunds({} as AppEnv, fakeStripe, charge, apply), 2);
   assert.equal(await applyChargeRefunds({} as AppEnv, fakeStripe, charge, apply), 0);
   assert.deepEqual(
-    entries.map((entry) => [entry.organizationId, entry.kind, entry.amountMicros, entry.referenceId, entry.allowNegative]),
+    entries.map((entry) => [entry.userId, entry.kind, entry.amountMicros, entry.referenceId, entry.allowNegative]),
     [
       [CONSUMER, "chargeback", -1_000_000_000, "re_1", true],
       [CONSUMER, "chargeback", -500_000_000, "re_2", true],

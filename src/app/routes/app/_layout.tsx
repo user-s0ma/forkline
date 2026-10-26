@@ -1,44 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-  Link,
-  Outlet,
-  redirect,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router";
+import { useState } from "react";
+import { Link, Outlet, redirect, useLocation } from "react-router";
 import type { Route } from "./+types/_layout";
 import {
-  Activity,
   BarChart3,
   Boxes,
-  Building2,
   Coins,
   CreditCard,
-  Settings,
   Sparkles,
   SquareTerminal,
-  Users,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { auth } from "@/lib/auth/server";
-import { authClient } from "@/lib/auth/client";
 import { appContext } from "@/lib/util/app-context";
-import { getOrganizationAccess, type OrganizationAccess } from "@/lib/api";
-import { ConsoleSelect } from "@/components/ui/ConsoleSelect";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-
-export type OrganizationSummary = {
-  id: string;
-  name: string;
-  slug: string;
-  logo?: string | null;
-};
 
 export type AppLayoutContext = {
   user: {
@@ -46,15 +23,6 @@ export type AppLayoutContext = {
     name: string;
     email: string;
   };
-  organizations: OrganizationSummary[];
-  isOrganizationsLoading: boolean;
-  activeOrganizationId: string | null;
-  selectingOrganizationId: string | null;
-  activeRole: string | null;
-  canManageOrganization: boolean;
-  refreshOrganizations: () => Promise<void>;
-  refreshAccess: () => Promise<OrganizationAccess | null>;
-  selectOrganization: (organizationId: string) => Promise<boolean>;
   openMobileNavigation: () => void;
   setUserName: (name: string) => void;
 };
@@ -64,12 +32,12 @@ type NavGroup = {
   items: Array<{
     labelKey: string;
     icon: LucideIcon;
-    path?: string;
+    path: string;
     matchChildren?: boolean;
   }>;
 };
 
-const ORGANIZATION_NAV_GROUPS: NavGroup[] = [
+const NAV_GROUPS: NavGroup[] = [
   {
     labelKey: "appShell.navGroups.build",
     items: [
@@ -91,22 +59,6 @@ const ORGANIZATION_NAV_GROUPS: NavGroup[] = [
       { labelKey: "appShell.nav.earnings", icon: Coins, path: "/earnings" },
     ],
   },
-  {
-    labelKey: "appShell.navGroups.organization",
-    items: [
-      { labelKey: "appShell.nav.members", icon: Users, path: "/members" },
-      {
-        labelKey: "appShell.nav.auditLogs",
-        icon: Activity,
-        path: "/audit-logs",
-      },
-      {
-        labelKey: "common.settings",
-        icon: Settings,
-        path: "/settings",
-      },
-    ],
-  },
 ];
 
 export async function loader({ request, context }: Route.LoaderArgs) {
@@ -125,139 +77,20 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       name: session.user.name,
       email: session.user.email,
     },
-    activeOrganizationId: session.session.activeOrganizationId || null,
   };
 }
 
 export default function AppLayout({ loaderData }: Route.ComponentProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const location = useLocation();
-  const params = useParams<{ organizationId: string }>();
-  const [organizations, setOrganizations] = useState<OrganizationSummary[]>([]);
-  const [isOrganizationsLoading, setIsOrganizationsLoading] = useState(true);
-  const [activeOrganizationId, setActiveOrganizationId] = useState(
-    loaderData.activeOrganizationId,
-  );
-  const [selectingOrganizationId, setSelectingOrganizationId] = useState<
-    string | null
-  >(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [user, setUser] = useState(loaderData.user);
 
-  const refreshOrganizations = useCallback(async () => {
-    try {
-      const { data, error } = await authClient.organization.list();
-      if (error) throw new Error(error.message);
-      setOrganizations((data || []) as OrganizationSummary[]);
-    } catch (error) {
-      console.error(error);
-      toast.error(t("appShell.loadOrganizationsFailed"));
-    } finally {
-      setIsOrganizationsLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => void refreshOrganizations(), 0);
-    return () => window.clearTimeout(timer);
-  }, [refreshOrganizations]);
-
-  useEffect(() => {
-    const organizationId = params.organizationId;
-    if (
-      !organizationId ||
-      isOrganizationsLoading ||
-      activeOrganizationId === organizationId ||
-      !organizations.some((organization) => organization.id === organizationId)
-    ) {
-      return;
-    }
-
-    let cancelled = false;
-    void authClient.organization
-      .setActive({ organizationId })
-      .then(({ error }) => {
-        if (cancelled) return;
-        if (error) {
-          toast.error(t("appShell.selectOrganizationFailed"));
-          return;
-        }
-        setActiveOrganizationId(organizationId);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    activeOrganizationId,
-    isOrganizationsLoading,
-    organizations,
-    params.organizationId,
-    t,
-  ]);
-
-  const accessOrganizationId = params.organizationId || "";
-  const accessQuery = useQuery({
-    queryKey: ["organization-access", accessOrganizationId],
-    queryFn: () => getOrganizationAccess(accessOrganizationId),
-    enabled: Boolean(accessOrganizationId),
-  });
-  const organizationAccess = accessOrganizationId
-    ? (accessQuery.data ?? null)
-    : null;
-  const { refetch: refetchAccess } = accessQuery;
-  const refreshAccess = useCallback(
-    async () => (await refetchAccess()).data ?? null,
-    [refetchAccess],
-  );
-
-  const selectOrganization = useCallback(
-    async (organizationId: string) => {
-      if (selectingOrganizationId) return false;
-      setSelectingOrganizationId(organizationId);
-      try {
-        const { error } = await authClient.organization.setActive({
-          organizationId,
-        });
-        if (error) throw new Error(error.message);
-        setActiveOrganizationId(organizationId);
-        navigate(`/app/${encodeURIComponent(organizationId)}/`);
-        return true;
-      } catch (error) {
-        console.error(error);
-        toast.error(t("appShell.selectOrganizationFailed"));
-        return false;
-      } finally {
-        setSelectingOrganizationId(null);
-      }
-    },
-    [navigate, selectingOrganizationId, t],
-  );
-
   const userInitial =
     user.name.trim().charAt(0) || user.email.trim().charAt(0).toUpperCase();
-  const selectedOrganizationId = params.organizationId || "";
-  const isOrganizationScope = Boolean(params.organizationId);
-  const activeRole = organizationAccess?.role ?? null;
-  const canManageOrganization = (activeRole || "")
-    .split(",")
-    .some((role) => role === "owner" || role === "admin");
-  const navGroups = isOrganizationScope ? ORGANIZATION_NAV_GROUPS : [];
   const normalizedPath = location.pathname.replace(/\/$/, "");
-  const organizationBase = selectedOrganizationId
-    ? `/app/${encodeURIComponent(selectedOrganizationId)}`
-    : "";
   const outletContext: AppLayoutContext = {
     user,
-    organizations,
-    isOrganizationsLoading,
-    activeOrganizationId,
-    selectingOrganizationId,
-    activeRole,
-    canManageOrganization,
-    refreshOrganizations,
-    refreshAccess,
-    selectOrganization,
     openMobileNavigation: () => setMobileNavOpen(true),
     setUserName: (name) => setUser((prev) => ({ ...prev, name })),
   };
@@ -291,24 +124,8 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-4 pb-3">
-          <ConsoleSelect
-            value={selectedOrganizationId}
-            options={organizations.map((organization) => ({
-              value: organization.id,
-              label: organization.name,
-              icon: Building2,
-            }))}
-            placeholder={t("appShell.selectOrganization")}
-            disabled={selectingOrganizationId !== null}
-            onChange={(organizationId) => {
-              setMobileNavOpen(false);
-              void selectOrganization(organizationId);
-            }}
-          />
-        </div>
         <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
-          {navGroups.map((group, groupIndex) => (
+          {NAV_GROUPS.map((group, groupIndex) => (
             <div key={group.labelKey || groupIndex}>
               {group.labelKey && (
                 <p className="mb-2 px-3 text-xs font-semibold text-ink-mute">
@@ -318,25 +135,18 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
               <div className="space-y-1">
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const target =
-                    item.path !== undefined
-                      ? `${organizationBase}${item.path}`
-                      : null;
-                  const href =
-                    target === organizationBase ? `${target}/` : target;
+                  const target = `/app${item.path}`;
                   const active =
-                    target !== null &&
-                    (normalizedPath === target ||
-                      (Boolean(item.matchChildren) &&
-                        normalizedPath.startsWith(`${target}/`)));
-                  if (!href) return null;
+                    normalizedPath === target ||
+                    (Boolean(item.matchChildren) &&
+                      normalizedPath.startsWith(`${target}/`));
                   return (
                     <Link
                       key={item.labelKey}
                       className={`console-nav-item ${
                         active ? "bg-brand-tint" : ""
                       }`}
-                      to={href}
+                      to={target}
                       onClick={() => setMobileNavOpen(false)}
                     >
                       <Icon className="h-4 w-4 shrink-0" />

@@ -32,7 +32,6 @@ import {
 } from "@/lib/api-client";
 import { localeTag, useLocale } from "@/lib/i18n";
 import { microsToYen, yenToMicros } from "@/lib/billing/pricing";
-import type { Route } from "./+types/earnings";
 import { useConfirm } from "@/components/ui/useConfirm";
 
 const CONNECT_STEPS = ["register", "verify", "ready"] as const;
@@ -77,14 +76,13 @@ function ConnectSteps({ current }: { current: 0 | 1 | 2 }) {
   );
 }
 
-export default function EarningsPage({ params }: Route.ComponentProps) {
+export default function EarningsPage() {
   const { t } = useTranslation();
   const [confirm, confirmDialog] = useConfirm();
-  const organizationId = params.organizationId;
   const locale = useLocale();
   const yen = useYen();
   const numberFormatter = new Intl.NumberFormat(localeTag(locale));
-  const { openMobileNavigation, canManageOrganization: canManage } = useAccountPage();
+  const { openMobileNavigation } = useAccountPage();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [amount, setAmount] = useState("");
@@ -94,17 +92,17 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
   const handledConnect = useRef(false);
 
   const wallet = useQuery({
-    queryKey: ["wallet", organizationId],
-    queryFn: () => getWallet(organizationId),
+    queryKey: ["wallet"],
+    queryFn: () => getWallet(),
   });
   const summary = useQuery({
-    queryKey: ["earnings-summary", organizationId],
-    queryFn: () => getEarningsSummary(organizationId),
+    queryKey: ["earnings-summary"],
+    queryFn: () => getEarningsSummary(),
   });
   const ledger = useInfiniteQuery({
-    queryKey: ["ledger", organizationId, "earnings"],
+    queryKey: ["ledger", "earnings"],
     queryFn: ({ pageParam }) =>
-      listLedger(organizationId, { cursor: pageParam, pageSize: 50, balance: "earnings" }),
+      listLedger({ cursor: pageParam, pageSize: 50, balance: "earnings" }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
@@ -184,12 +182,12 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
     }
     setBusy("payout");
     try {
-      const result = await requestPayout(organizationId, amountYen);
+      const result = await requestPayout(amountYen);
       if (!result.ok && result.pending) toast.info(t("earnings.payoutPending"));
       setAmount("");
       await Promise.all([
         walletRefetch(),
-        queryClient.invalidateQueries({ queryKey: ["ledger", organizationId] }),
+        queryClient.invalidateQueries({ queryKey: ["ledger"] }),
       ]);
     } catch (error) {
       console.error(error);
@@ -214,12 +212,12 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
         description={t("earnings.description")}
         onOpenMenu={openMobileNavigation}
         actions={
-          data?.payoutsEnabled && canManage ? (
+          data?.payoutsEnabled ? (
             <button
               className="console-button-secondary"
               type="button"
               disabled={busy !== null}
-              onClick={() => void redirectTo("dashboard", () => openPayoutDashboard(organizationId))}
+              onClick={() => void redirectTo("dashboard", () => openPayoutDashboard())}
             >
               <ExternalLink className="h-4 w-4" />
               {t("earnings.dashboard")}
@@ -259,8 +257,6 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
           <div className="space-y-5 p-4 sm:p-5">
             {!data ? (
               <div className="h-20 animate-pulse rounded-(--radius-control) bg-surface" />
-            ) : !canManage ? (
-              <p className="text-sm text-ink-mute">{t("earnings.managerOnly")}</p>
             ) : (
               <>
                 <ConnectSteps current={connectStep} />
@@ -270,7 +266,7 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
                     type="button"
                     disabled={busy !== null}
                     onClick={() =>
-                      void redirectTo("connect", () => startPayoutOnboarding(organizationId))
+                      void redirectTo("connect", () => startPayoutOnboarding())
                     }
                   >
                     {busy === "connect"
@@ -284,7 +280,7 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
                       type="button"
                       disabled={busy !== null}
                       onClick={() =>
-                        void redirectTo("connect", () => startPayoutOnboarding(organizationId))
+                        void redirectTo("connect", () => startPayoutOnboarding())
                       }
                     >
                       {busy === "connect"
@@ -410,7 +406,7 @@ export default function EarningsPage({ params }: Route.ComponentProps) {
                       <td className="truncate">
                         <Link
                           className="text-brand-ink hover:underline"
-                          to={`/app/${encodeURIComponent(organizationId)}/models/${encodeURIComponent(row.modelId)}`}
+                          to={`/app/models/${encodeURIComponent(row.modelId)}`}
                         >
                           {row.name}
                         </Link>

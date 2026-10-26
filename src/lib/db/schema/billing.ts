@@ -10,9 +10,9 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 
-/** 組織ごとの残高。クレジット (使う分) と売上 (出金できる分) を分けて持つ */
+/** 利用者ごとの残高。クレジット (使う分) と売上 (出金できる分) を分けて持つ */
 export const wallet = mysqlTable("Wallet", {
-  organizationId: varchar("organizationId", { length: 191 }).primaryKey(),
+  userId: varchar("userId", { length: 191 }).primaryKey(),
   creditMicros: bigint("creditMicros", { mode: "number" }).default(0).notNull(),
   earningsMicros: bigint("earningsMicros", { mode: "number" })
     .default(0)
@@ -30,7 +30,7 @@ export const ledgerEntry = mysqlTable(
   "LedgerEntry",
   {
     id: varchar("id", { length: 191 }).primaryKey(),
-    organizationId: varchar("organizationId", { length: 191 }).notNull(),
+    userId: varchar("userId", { length: 191 }).notNull(),
     /** topup / payout / refund / adjustment / training / endpoint / dataset_build / evaluation / model_card */
     kind: varchar("kind", { length: 16 }).notNull(),
     /** credit / earnings */
@@ -43,8 +43,8 @@ export const ledgerEntry = mysqlTable(
       .notNull(),
   },
   (table) => [
-    index("LedgerEntry_organization_createdAt_idx").on(
-      table.organizationId,
+    index("LedgerEntry_user_createdAt_idx").on(
+      table.userId,
       table.createdAt,
     ),
     uniqueIndex("LedgerEntry_kind_referenceId_key").on(
@@ -54,22 +54,20 @@ export const ledgerEntry = mysqlTable(
   ],
 );
 
-/** 1回の呼び出しの記録。公開した組織と呼び出した組織の両方を持つ */
+/** 1回の呼び出しの記録。公開した人と呼び出した人の両方を持つ */
 export const usageRecord = mysqlTable(
   "UsageRecord",
   {
     id: varchar("id", { length: 191 }).primaryKey(),
     modelId: varchar("modelId", { length: 191 }).notNull(),
     modelSlug: varchar("modelSlug", { length: 64 }).notNull(),
-    publisherOrganizationId: varchar("publisherOrganizationId", {
+    publisherUserId: varchar("publisherUserId", {
       length: 191,
     }).notNull(),
-    consumerOrganizationId: varchar("consumerOrganizationId", {
+    consumerUserId: varchar("consumerUserId", {
       length: 191,
     }).notNull(),
     apiKeyId: varchar("apiKeyId", { length: 191 }),
-    /** プレイグラウンドから呼んだ人 */
-    userId: varchar("userId", { length: 191 }),
     /** api / playground / eval */
     source: varchar("source", { length: 16 }).notNull(),
     /** succeeded / failed */
@@ -87,11 +85,11 @@ export const usageRecord = mysqlTable(
   },
   (table) => [
     index("UsageRecord_consumer_createdAt_idx").on(
-      table.consumerOrganizationId,
+      table.consumerUserId,
       table.createdAt,
     ),
     index("UsageRecord_publisher_createdAt_idx").on(
-      table.publisherOrganizationId,
+      table.publisherUserId,
       table.createdAt,
     ),
     index("UsageRecord_modelId_createdAt_idx").on(
@@ -105,8 +103,7 @@ export const apiKey = mysqlTable(
   "ApiKey",
   {
     id: varchar("id", { length: 191 }).primaryKey(),
-    organizationId: varchar("organizationId", { length: 191 }).notNull(),
-    createdBy: varchar("createdBy", { length: 191 }).notNull(),
+    userId: varchar("userId", { length: 191 }).notNull(),
     name: varchar("name", { length: 80 }).notNull(),
     prefix: varchar("prefix", { length: 16 }).notNull(),
     keyHash: varchar("keyHash", { length: 64 }).notNull(),
@@ -118,8 +115,8 @@ export const apiKey = mysqlTable(
   },
   (table) => [
     uniqueIndex("ApiKey_keyHash_key").on(table.keyHash),
-    index("ApiKey_organization_createdAt_idx").on(
-      table.organizationId,
+    index("ApiKey_user_createdAt_idx").on(
+      table.userId,
       table.createdAt,
     ),
   ],

@@ -7,7 +7,7 @@ import type { ExtractResult, Fact, ParaphraseResult } from "@/lib/nemotron/datas
 import type { EvalSummary } from "@/lib/nemotron/evaluation";
 
 /*
- * 画面から呼ぶ API。組織のもの (モデル・学習・残高・キー) は /api/organizations/:id の下にある。
+ * 画面から呼ぶ API。ログインした人のもの (モデル・学習・残高・キー) は /api の下にある。
  */
 
 export class ApiError extends Error {
@@ -46,8 +46,8 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   return data as T;
 }
 
-function orgPath(organizationId: string, suffix: string) {
-  return `/api/organizations/${encodeURIComponent(organizationId)}${suffix}`;
+function consolePath(suffix: string) {
+  return `/api${suffix}`;
 }
 
 function withQuery(path: string, params: Record<string, string | number | undefined>) {
@@ -76,7 +76,6 @@ export type EndpointStatus =
 
 export type ModelRecord = {
   id: string;
-  organizationId: string;
   slug: string;
   name: string;
   tagline: string;
@@ -122,62 +121,58 @@ export type ModelUpdateInput = {
 };
 
 export function listModels(
-  organizationId: string,
   options: { cursor?: string; pageSize?: number } = {},
 ) {
   return apiRequest<Page<ModelRecord>>(
-    withQuery(orgPath(organizationId, "/models"), options),
+    withQuery(consolePath("/models"), options),
   );
 }
 
 export function createModel(
-  organizationId: string,
   input: { name: string },
 ) {
-  return apiRequest<ModelRecord>(orgPath(organizationId, "/models"), {
+  return apiRequest<ModelRecord>(consolePath("/models"), {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
-function modelPath(organizationId: string, modelId: string, suffix = "") {
-  return orgPath(organizationId, `/models/${encodeURIComponent(modelId)}${suffix}`);
+function modelPath(modelId: string, suffix = "") {
+  return consolePath(`/models/${encodeURIComponent(modelId)}${suffix}`);
 }
 
-export function getModel(organizationId: string, modelId: string) {
-  return apiRequest<ModelRecord>(modelPath(organizationId, modelId));
+export function getModel(modelId: string) {
+  return apiRequest<ModelRecord>(modelPath(modelId));
 }
 
 export function updateModel(
-  organizationId: string,
   modelId: string,
   input: ModelUpdateInput,
 ) {
-  return apiRequest<ModelRecord>(modelPath(organizationId, modelId), {
+  return apiRequest<ModelRecord>(modelPath(modelId), {
     method: "PUT",
     body: JSON.stringify(input),
   });
 }
 
 export function publishModel(
-  organizationId: string,
   modelId: string,
   visibility: ModelVisibility,
 ) {
-  return apiRequest<{ ok: true }>(modelPath(organizationId, modelId, "/publish"), {
+  return apiRequest<{ ok: true }>(modelPath(modelId, "/publish"), {
     method: "POST",
     body: JSON.stringify({ visibility }),
   });
 }
 
-export function unpublishModel(organizationId: string, modelId: string) {
-  return apiRequest<{ ok: true }>(modelPath(organizationId, modelId, "/unpublish"), {
+export function unpublishModel(modelId: string) {
+  return apiRequest<{ ok: true }>(modelPath(modelId, "/unpublish"), {
     method: "POST",
   });
 }
 
-export function deleteModel(organizationId: string, modelId: string) {
-  return apiRequest<{ ok: true }>(modelPath(organizationId, modelId), {
+export function deleteModel(modelId: string) {
+  return apiRequest<{ ok: true }>(modelPath(modelId), {
     method: "DELETE",
   });
 }
@@ -194,38 +189,38 @@ export type ModelStats = {
   }>;
 };
 
-export function getModelStats(organizationId: string, modelId: string) {
-  return apiRequest<ModelStats>(modelPath(organizationId, modelId, "/stats"));
+export function getModelStats(modelId: string) {
+  return apiRequest<ModelStats>(modelPath(modelId, "/stats"));
 }
 
 // ---------------------------------------------------------------- endpoints
 
-export function deployModel(organizationId: string, modelId: string, fineTuneId: string) {
-  return apiRequest<ModelRecord>(modelPath(organizationId, modelId, "/deploy"), {
+export function deployModel(modelId: string, fineTuneId: string) {
+  return apiRequest<ModelRecord>(modelPath(modelId, "/deploy"), {
     method: "POST",
     body: JSON.stringify({ fineTuneId }),
   });
 }
 
-export function undeployModel(organizationId: string, modelId: string) {
-  return apiRequest<{ ok: true }>(modelPath(organizationId, modelId, "/deploy"), {
+export function undeployModel(modelId: string) {
+  return apiRequest<{ ok: true }>(modelPath(modelId, "/deploy"), {
     method: "DELETE",
   });
 }
 
 /** Nebius に状態を問い合わせて、最新のモデルを返す */
-export function refreshEndpoint(organizationId: string, modelId: string) {
-  return apiRequest<ModelRecord>(modelPath(organizationId, modelId, "/endpoint"));
+export function refreshEndpoint(modelId: string) {
+  return apiRequest<ModelRecord>(modelPath(modelId, "/endpoint"));
 }
 
-export function startEndpoint(organizationId: string, modelId: string) {
-  return apiRequest<ModelRecord>(modelPath(organizationId, modelId, "/endpoint/start"), {
+export function startEndpoint(modelId: string) {
+  return apiRequest<ModelRecord>(modelPath(modelId, "/endpoint/start"), {
     method: "POST",
   });
 }
 
-export function stopEndpoint(organizationId: string, modelId: string) {
-  return apiRequest<ModelRecord>(modelPath(organizationId, modelId, "/endpoint/stop"), {
+export function stopEndpoint(modelId: string) {
+  return apiRequest<ModelRecord>(modelPath(modelId, "/endpoint/stop"), {
     method: "POST",
   });
 }
@@ -242,9 +237,9 @@ export type BaseModelOption = {
   serveMicrosPerHour: number;
 };
 
-export function listBaseModels(organizationId: string) {
+export function listBaseModels() {
   return apiRequest<{ items: BaseModelOption[]; idleMinutes: number }>(
-    orgPath(organizationId, "/base-models"),
+    consolePath("/base-models"),
   );
 }
 
@@ -277,14 +272,13 @@ export function isFineTuneActive(job: Pick<FineTuneRecord, "status">) {
   return job.status === "queued" || job.status === "running";
 }
 
-export function listFineTunes(organizationId: string, modelId: string) {
+export function listFineTunes(modelId: string) {
   return apiRequest<{ items: FineTuneRecord[] }>(
-    modelPath(organizationId, modelId, "/fine-tunes"),
+    modelPath(modelId, "/fine-tunes"),
   );
 }
 
 export function startFineTune(
-  organizationId: string,
   modelId: string,
   input: {
     baseModelId: string;
@@ -296,7 +290,7 @@ export function startFineTune(
     datasetRole?: string | null;
   },
 ) {
-  return apiRequest<FineTuneRecord>(modelPath(organizationId, modelId, "/fine-tunes"), {
+  return apiRequest<FineTuneRecord>(modelPath(modelId, "/fine-tunes"), {
     method: "POST",
     body: JSON.stringify(input),
   });
@@ -309,15 +303,15 @@ export function datasetIssuesOf(error: unknown): DatasetIssue[] {
   return Array.isArray(issues) ? (issues as DatasetIssue[]) : [];
 }
 
-export function getFineTune(organizationId: string, fineTuneId: string) {
+export function getFineTune(fineTuneId: string) {
   return apiRequest<FineTuneRecord>(
-    orgPath(organizationId, `/fine-tunes/${encodeURIComponent(fineTuneId)}`),
+    consolePath(`/fine-tunes/${encodeURIComponent(fineTuneId)}`),
   );
 }
 
-export function cancelFineTune(organizationId: string, fineTuneId: string) {
+export function cancelFineTune(fineTuneId: string) {
   return apiRequest<FineTuneRecord>(
-    orgPath(organizationId, `/fine-tunes/${encodeURIComponent(fineTuneId)}/cancel`),
+    consolePath(`/fine-tunes/${encodeURIComponent(fineTuneId)}/cancel`),
     { method: "POST" },
   );
 }
@@ -326,8 +320,8 @@ export function cancelFineTune(organizationId: string, fineTuneId: string) {
 
 type BuilderUsage = { costMicros: number; inputTokens: number; outputTokens: number };
 
-function datasetBuilder<T>(organizationId: string, modelId: string, body: Record<string, unknown>) {
-  return apiRequest<T & BuilderUsage>(modelPath(organizationId, modelId, "/dataset-builder"), {
+function datasetBuilder<T>(modelId: string, body: Record<string, unknown>) {
+  return apiRequest<T & BuilderUsage>(modelPath(modelId, "/dataset-builder"), {
     method: "POST",
     body: JSON.stringify(body),
   });
@@ -335,11 +329,10 @@ function datasetBuilder<T>(organizationId: string, modelId: string, body: Record
 
 /** 資料の chunk 番目のかたまりから、Nemotron に事実を取り出させる (1回の呼び出し) */
 export function extractDatasetFacts(
-  organizationId: string,
   modelId: string,
   input: { role: string; material: string; chunk: number },
 ) {
-  return datasetBuilder<ExtractResult & { chunkCount: number }>(organizationId, modelId, {
+  return datasetBuilder<ExtractResult & { chunkCount: number }>(modelId, {
     stage: "facts",
     ...input,
   });
@@ -347,11 +340,10 @@ export function extractDatasetFacts(
 
 /** 事実 (BUILDER_FACTS_PER_CALL 個まで) を、Nemotron に違う言い方の質問にさせる (1回の呼び出し) */
 export function paraphraseDatasetFacts(
-  organizationId: string,
   modelId: string,
   input: { role: string; facts: Fact[] },
 ) {
-  return datasetBuilder<ParaphraseResult>(organizationId, modelId, { stage: "paraphrase", ...input });
+  return datasetBuilder<ParaphraseResult>(modelId, { stage: "paraphrase", ...input });
 }
 
 export type EvalRunStatus = "running" | "succeeded" | "failed" | "canceled";
@@ -396,20 +388,20 @@ export type EvaluationOverview = {
   baselineModel: string;
 };
 
-export function listEvaluations(organizationId: string, modelId: string) {
-  return apiRequest<EvaluationOverview>(modelPath(organizationId, modelId, "/evaluations"));
+export function listEvaluations(modelId: string) {
+  return apiRequest<EvaluationOverview>(modelPath(modelId, "/evaluations"));
 }
 
-export function startEvaluation(organizationId: string, modelId: string) {
-  return apiRequest<EvalRunRecord>(modelPath(organizationId, modelId, "/evaluations"), {
+export function startEvaluation(modelId: string) {
+  return apiRequest<EvalRunRecord>(modelPath(modelId, "/evaluations"), {
     method: "POST",
     body: "{}",
   });
 }
 
-export function getEvaluation(organizationId: string, runId: string) {
+export function getEvaluation(runId: string) {
   return apiRequest<EvalRunRecord & { items: EvalItemRecord[] }>(
-    orgPath(organizationId, `/evaluations/${encodeURIComponent(runId)}`),
+    consolePath(`/evaluations/${encodeURIComponent(runId)}`),
   );
 }
 
@@ -419,9 +411,9 @@ export type EvalStepResponse =
   | { state: "warming_up"; retryAfter: number; run: EvalRunRecord };
 
 /** 評価を数問ぶん進める。残高が足りなければ 402 (ApiError) */
-export function stepEvaluation(organizationId: string, runId: string) {
+export function stepEvaluation(runId: string) {
   return apiRequest<EvalStepResponse>(
-    orgPath(organizationId, `/evaluations/${encodeURIComponent(runId)}/step`),
+    consolePath(`/evaluations/${encodeURIComponent(runId)}/step`),
     { method: "POST", body: "{}" },
   );
 }
@@ -433,8 +425,8 @@ export type ModelCardDraft = {
   costMicros: number;
 };
 
-export function draftModelCard(organizationId: string, modelId: string, locale: "ja" | "en") {
-  return apiRequest<ModelCardDraft>(modelPath(organizationId, modelId, "/model-card/draft"), {
+export function draftModelCard(modelId: string, locale: "ja" | "en") {
+  return apiRequest<ModelCardDraft>(modelPath(modelId, "/model-card/draft"), {
     method: "POST",
     body: JSON.stringify({ locale }),
   });
@@ -446,15 +438,14 @@ export type ChatMessage = { role: "system" | "user" | "assistant"; content: stri
 
 /**
  * プレイグラウンドでのチャット。生成されたそばから onDelta に渡す (思考は reasoning、本文は content)。
- * 料金は選んでいる組織のクレジットから引き落とされ、ストリーム最後のコメント行 (`: cost_jpy=…`) で届く。
+ * 料金はログインしている人のクレジットから引き落とされ、ストリーム最後のコメント行 (`: cost_jpy=…`) で届く。
  */
 export async function playgroundChatStream(
-  organizationId: string,
   input: { model: string; messages: ChatMessage[]; max_tokens?: number },
   onDelta: (delta: { content?: string; reasoning?: string }) => void,
   signal?: AbortSignal,
 ): Promise<{ costYen: number | null }> {
-  const response = await fetch(orgPath(organizationId, "/playground/chat"), {
+  const response = await fetch(consolePath("/playground/chat"), {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
@@ -602,21 +593,21 @@ export type ApiKeyRecord = {
   createdAt: string;
 };
 
-export function listApiKeys(organizationId: string) {
-  return apiRequest<{ items: ApiKeyRecord[] }>(orgPath(organizationId, "/api-keys"));
+export function listApiKeys() {
+  return apiRequest<{ items: ApiKeyRecord[] }>(consolePath("/api-keys"));
 }
 
 /** 返り値の key は発行時の1回しか取得できない。 */
-export function createApiKey(organizationId: string, name: string) {
-  return apiRequest<ApiKeyRecord & { key: string }>(orgPath(organizationId, "/api-keys"), {
+export function createApiKey(name: string) {
+  return apiRequest<ApiKeyRecord & { key: string }>(consolePath("/api-keys"), {
     method: "POST",
     body: JSON.stringify({ name }),
   });
 }
 
-export function revokeApiKey(organizationId: string, keyId: string) {
+export function revokeApiKey(keyId: string) {
   return apiRequest<{ ok: true }>(
-    orgPath(organizationId, `/api-keys/${encodeURIComponent(keyId)}`),
+    consolePath(`/api-keys/${encodeURIComponent(keyId)}`),
     { method: "DELETE" },
   );
 }
@@ -638,8 +629,8 @@ export type WalletSummary = {
   limits: { topupMinYen: number; topupMaxYen: number; payoutMinYen: number };
 };
 
-export function getWallet(organizationId: string) {
-  return apiRequest<WalletSummary>(orgPath(organizationId, "/wallet"));
+export function getWallet() {
+  return apiRequest<WalletSummary>(consolePath("/wallet"));
 }
 
 export type LedgerKind =
@@ -665,17 +656,16 @@ export type LedgerRecord = {
 };
 
 export function listLedger(
-  organizationId: string,
   options: { cursor?: string; pageSize?: number; balance?: "credit" | "earnings" } = {},
 ) {
   return apiRequest<Page<LedgerRecord>>(
-    withQuery(orgPath(organizationId, "/wallet/ledger"), options),
+    withQuery(consolePath("/wallet/ledger"), options),
   );
 }
 
 /** Stripe Checkout の URL を返す。遷移後 /app/:id/billing?topup=success|cancel に戻る */
-export function startTopup(organizationId: string, amountYen: number) {
-  return apiRequest<{ url: string }>(orgPath(organizationId, "/wallet/topup"), {
+export function startTopup(amountYen: number) {
+  return apiRequest<{ url: string }>(consolePath("/wallet/topup"), {
     method: "POST",
     body: JSON.stringify({ amountYen }),
   });
@@ -694,24 +684,23 @@ export type UsageRecordItem = {
 };
 
 export function listUsage(
-  organizationId: string,
   options: { cursor?: string; pageSize?: number } = {},
 ) {
   return apiRequest<Page<UsageRecordItem>>(
-    withQuery(orgPath(organizationId, "/usage"), options),
+    withQuery(consolePath("/usage"), options),
   );
 }
 
 export type DailyAmount = { day: string; requests: number; micros: number };
 
-export function getUsageSummary(organizationId: string) {
+export function getUsageSummary() {
   return apiRequest<{
     days: DailyAmount[];
     byModel: Array<{ modelSlug: string; requests: number; micros: number }>;
-  }>(orgPath(organizationId, "/usage/summary"));
+  }>(consolePath("/usage/summary"));
 }
 
-export function getEarningsSummary(organizationId: string) {
+export function getEarningsSummary() {
   return apiRequest<{
     days: DailyAmount[];
     byModel: Array<{
@@ -721,28 +710,28 @@ export function getEarningsSummary(organizationId: string) {
       requests: number;
       micros: number;
     }>;
-  }>(orgPath(organizationId, "/earnings/summary"));
+  }>(consolePath("/earnings/summary"));
 }
 
 /** Stripe Connect の登録の URL。戻り先は /app/:id/earnings?connect=return|refresh */
-export function startPayoutOnboarding(organizationId: string, country: "JP" | "US" = "JP") {
-  return apiRequest<{ url: string }>(orgPath(organizationId, "/payouts/connect"), {
+export function startPayoutOnboarding(country: "JP" | "US" = "JP") {
+  return apiRequest<{ url: string }>(consolePath("/payouts/connect"), {
     method: "POST",
     body: JSON.stringify({ country }),
   });
 }
 
-export function openPayoutDashboard(organizationId: string) {
-  return apiRequest<{ url: string }>(orgPath(organizationId, "/payouts/dashboard"), {
+export function openPayoutDashboard() {
+  return apiRequest<{ url: string }>(consolePath("/payouts/dashboard"), {
     method: "POST",
   });
 }
 
-export function requestPayout(organizationId: string, amountYen: number) {
+export function requestPayout(amountYen: number) {
   // pending: Stripe から応答が無く、送金されたか確認中 (202)
   return apiRequest<
     { ok: true; transferId: string } | { ok: false; pending: true; referenceId: string }
-  >(orgPath(organizationId, "/payouts"), {
+  >(consolePath("/payouts"), {
     method: "POST",
     body: JSON.stringify({ amountYen }),
   });

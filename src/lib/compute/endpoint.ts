@@ -14,12 +14,12 @@ import {
 } from "./types";
 
 /*
- * Nebius の推論エンドポイントの流れ。GPU 代は、モデルを公開した組織が動いていた時間の分だけ払う。
+ * Nebius の推論エンドポイントの流れ。GPU 代は、モデルを公開した人が動いていた時間の分だけ払う。
  *   起動: (起動時間 + 待ち時間) 分を仮押さえして作る/起動する。課金の区間を始める
  *   稼働: 見回りのたびに、前回から今までの区間を請求する (台帳の kind = endpoint)
  *   停止: 最後の区間を請求し、仮押さえを戻す
  * Nebius が RUNNING を返しても、vLLM が LoRA を読み込み終えるまでは starting のままにする (checkEndpointReady)。
- * 呼ばれないまま ENDPOINT_IDLE_MINUTES 分たったものや、残高が尽きた組織のものは見回りで止める。
+ * 呼ばれないまま ENDPOINT_IDLE_MINUTES 分たったものや、残高が尽きた人のものは見回りで止める。
  * 状態を変えるときは、まず条件付きの更新で状態を決め、更新できたときだけ仮押さえを動かす (同時に呼ばれても二重にしない)。
  */
 
@@ -73,7 +73,7 @@ async function meterPeriod(
   const cost = computeCostMicros(rateOf(model), seconds);
   try {
     const billed = await deps.models.meter(model.id, since, now, {
-      organizationId: model.organizationId,
+      userId: model.userId,
       kind: "endpoint",
       referenceId: `${model.id}:${since.getTime()}`,
       heldMicros: 0,
@@ -119,7 +119,7 @@ async function settleStopped(
       endpointHeldMicros: held,
     });
     if (updated) {
-      if (held > 0) await deps.credits.release(model.organizationId, held);
+      if (held > 0) await deps.credits.release(model.userId, held);
       return { ...metered.model, ...next };
     }
   }
@@ -175,7 +175,7 @@ export async function deployEndpoint(
   const hold = holdFor(deps, rate);
   // 失敗したときに戻す状態。引き継いだ deploying の行は失敗にする
   const previousStatus = abandoned ? "failed" : fresh.endpointStatus;
-  if (!(await deps.credits.reserve(model.organizationId, hold))) {
+  if (!(await deps.credits.reserve(model.userId, hold))) {
     await restore({ endpointStatus: previousStatus, endpointLastUsedAt: fresh.endpointLastUsedAt });
     return { ok: false, reason: "insufficient_credits", holdMicros: hold };
   }
@@ -199,7 +199,7 @@ export async function deployEndpoint(
       };
       if (await restore(cleared)) {
         if (fresh.endpointHeldMicros > 0) {
-          await deps.credits.release(model.organizationId, fresh.endpointHeldMicros);
+          await deps.credits.release(model.userId, fresh.endpointHeldMicros);
         }
         current = { ...current, ...cleared };
       }
@@ -230,7 +230,7 @@ export async function deployEndpoint(
       await deps.nebius
         .deleteEndpoint(deps.env, endpointId)
         .catch((error) => console.error("余分なエンドポイントを消せませんでした:", endpointId, error));
-      await deps.credits.release(model.organizationId, hold);
+      await deps.credits.release(model.userId, hold);
       return { ok: false, reason: "busy" };
     }
     return { ok: true, model: { ...current, ...patch } };
@@ -242,7 +242,7 @@ export async function deployEndpoint(
         .deleteEndpoint(deps.env, orphan)
         .catch((deleteError) => console.error("作ったエンドポイントを消せませんでした:", orphan, deleteError));
     }
-    await deps.credits.release(model.organizationId, hold);
+    await deps.credits.release(model.userId, hold);
     // 前のエンドポイントが残っていれば元の状態に、消した後なら失敗にする
     const patch: Patch = {
       endpointStatus: current.endpointId ? previousStatus : "failed",
@@ -274,7 +274,7 @@ export async function wakeEndpoint(
     return { state: "unchanged", model };
   }
   const hold = holdFor(deps, rateOf(model));
-  if (!(await deps.credits.reserve(model.organizationId, hold))) {
+  if (!(await deps.credits.reserve(model.userId, hold))) {
     return { state: "insufficient_credits", holdMicros: hold };
   }
   const now = deps.now();
@@ -288,7 +288,7 @@ export async function wakeEndpoint(
   };
   const claimed = await deps.models.update(model.id, starting, { endpointStatus: ["stopped"] });
   if (!claimed) {
-    await deps.credits.release(model.organizationId, hold);
+    await deps.credits.release(model.userId, hold);
     return { state: "unchanged", model };
   }
   try {
@@ -307,7 +307,7 @@ export async function wakeEndpoint(
       endpointStatus: ["starting"],
       endpointHeldMicros: hold,
     });
-    if (reverted) await deps.credits.release(model.organizationId, hold);
+    if (reverted) await deps.credits.release(model.userId, hold);
     return { state: "failed", model: { ...model, ...patch } };
   }
 }
@@ -436,7 +436,7 @@ export async function removeEndpoint(
     const fresh = (await deps.models.get(model.id)) ?? current;
     const held = fresh.endpointHeldMicros;
     if (await deps.models.update(model.id, patch, { endpointHeldMicros: held })) {
-      if (held > 0) await deps.credits.release(model.organizationId, held);
+      if (held > 0) await deps.credits.release(model.userId, held);
       return { ...fresh, ...patch };
     }
   }
@@ -517,7 +517,7 @@ export type SweepOutcome =
   | "unchanged";
 
 /**
- * 見回り (1分ごと): 状態を読み、区間を請求し、待ち時間を過ぎたものと残高が尽きた組織のものを止める
+ * 見回り (1分ごと): 状態を読み、区間を請求し、待ち時間を過ぎたものと残高が尽きた人のものを止める
  */
 export async function sweepEndpoint(
   deps: ComputeDeps,
@@ -537,7 +537,7 @@ export async function sweepEndpoint(
     await stopEndpointFor(deps, current);
     return "stopped_idle";
   }
-  if ((await deps.credits.balance(current.organizationId)) < 0) {
+  if ((await deps.credits.balance(current.userId)) < 0) {
     await stopEndpointFor(deps, current);
     return "stopped_no_credit";
   }

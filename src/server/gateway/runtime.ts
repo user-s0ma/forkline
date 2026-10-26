@@ -31,10 +31,8 @@ export type Invocation = {
   model: ModelRow;
   /** モデルの実行の設定 (返答の上限など) */
   config: ModelConfig;
-  consumerOrganizationId: string;
+  consumerUserId: string;
   apiKeyId: string | null;
-  /** プレイグラウンドから呼んだ人 (API キーのときは null) */
-  userId: string | null;
   /** eval は評価 (src/lib/nemotron/run-evaluation.ts) から呼んだとき */
   source: "api" | "playground" | "eval";
   /** 実行前に仮押さえした額。精算で差を清算し、0 に戻す */
@@ -76,11 +74,11 @@ export function errorResponse(error: GatewayError) {
   );
 }
 
-/** 公開済みのモデル、または呼び出した組織自身のモデルだけを解決する。 */
+/** 公開済みのモデル、または呼び出した人自身のモデルだけを解決する。 */
 export async function resolveModel(
   env: AppEnv,
   slug: string,
-  consumerOrganizationId: string,
+  consumerUserId: string,
 ) {
   const [model] = await getDb(env)
     .select()
@@ -90,7 +88,7 @@ export async function resolveModel(
         eq(aiModel.slug, slug),
         or(
           and(eq(aiModel.status, "published"), eq(aiModel.visibility, "public")),
-          eq(aiModel.organizationId, consumerOrganizationId),
+          eq(aiModel.userId, consumerUserId),
         ),
       ),
     )
@@ -111,15 +109,15 @@ export async function resolveModel(
   return { model, config };
 }
 
-function isSelfUse(invocation: Pick<Invocation, "model" | "consumerOrganizationId">) {
-  return invocation.model.organizationId === invocation.consumerOrganizationId;
+function isSelfUse(invocation: Pick<Invocation, "model" | "consumerUserId">) {
+  return invocation.model.userId === invocation.consumerUserId;
 }
 
 /**
- * 呼び出しごとの料金が掛からないか。GPU 代は呼び出しごとではなく、公開した組織が動いていた時間で払うので、
- * クリエイター価格が無い (または自組織のモデルの) ときは無料
+ * 呼び出しごとの料金が掛からないか。GPU 代は呼び出しごとではなく、公開した人が動いていた時間で払うので、
+ * クリエイター価格が無い (または自分のモデルの) ときは無料
  */
-export function isFree(invocation: Pick<Invocation, "model" | "consumerOrganizationId">) {
+export function isFree(invocation: Pick<Invocation, "model" | "consumerUserId">) {
   const { model } = invocation;
   return (
     isSelfUse(invocation) ||
@@ -185,7 +183,7 @@ export function estimateUsage(bounds: CallBounds | undefined, streamedBytes: num
 
 /** 1回の実行で請求しうる最大の額。これを仮押さえし、請求はこれを超えない */
 export function holdMicrosFor(
-  invocation: Pick<Invocation, "model" | "consumerOrganizationId">,
+  invocation: Pick<Invocation, "model" | "consumerUserId">,
   bounds: Pick<CallBounds, "inputTokens" | "outputTokens">,
 ) {
   if (isSelfUse(invocation)) return MIN_BALANCE_MICROS;
@@ -211,21 +209,21 @@ function insufficientCredits() {
 
 /**
  * 実行前に最大の額を仮押さえする。足りなければ 402。
- * 呼び出しごとの料金が無いモデルでも、ほかの組織からの呼び出しは残高がある組織に限る
+ * 呼び出しごとの料金が無いモデルでも、ほかの人からの呼び出しは残高がある人に限る
  * (残高の無いキーで止まったエンドポイントを何度も起こし、作者に GPU 代を払わせないため)
  */
 export async function assertBalance(invocation: Invocation) {
   if (isSelfUse(invocation)) return;
   const credits = creditsOf(invocation);
   if (isFree(invocation)) {
-    if ((await credits.balance(invocation.consumerOrganizationId)) < MIN_BALANCE_MICROS) {
+    if ((await credits.balance(invocation.consumerUserId)) < MIN_BALANCE_MICROS) {
       throw insufficientCredits();
     }
     return;
   }
   const bounds = invocation.bounds ?? { inputTokens: 0, outputTokens: 0, inputBytes: 0 };
   const hold = holdMicrosFor(invocation, bounds);
-  if (!(await credits.reserve(invocation.consumerOrganizationId, hold))) {
+  if (!(await credits.reserve(invocation.consumerUserId, hold))) {
     throw insufficientCredits();
   }
   invocation.heldMicros = hold;
@@ -237,9 +235,9 @@ export async function releaseHold(invocation: Invocation) {
   if (held <= 0) return;
   invocation.heldMicros = 0;
   await creditsOf(invocation)
-    .release(invocation.consumerOrganizationId, held)
+    .release(invocation.consumerUserId, held)
     .catch((error) =>
-      console.error("仮押さえを戻せませんでした:", invocation.consumerOrganizationId, held, error),
+      console.error("仮押さえを戻せませんでした:", invocation.consumerUserId, held, error),
     );
 }
 
@@ -281,9 +279,8 @@ export function settle(
     id: crypto.randomUUID(),
     heldMicros,
     model: invocation.model,
-    consumerOrganizationId: invocation.consumerOrganizationId,
+    consumerUserId: invocation.consumerUserId,
     apiKeyId: invocation.apiKeyId,
-    userId: invocation.userId,
     source: invocation.source,
     status: outcome.succeeded ? "succeeded" : "failed",
     inputTokens: usage?.inputTokens ?? 0,
@@ -305,9 +302,9 @@ export function settle(
       // 精算できなかった仮押さえは戻す (記録の無いまま残高から引かれたままにしない)
       if (heldMicros > 0) {
         await creditsOf(invocation)
-          .release(invocation.consumerOrganizationId, heldMicros)
+          .release(invocation.consumerUserId, heldMicros)
           .catch((releaseError: unknown) =>
-            console.error("仮押さえを戻せませんでした:", invocation.consumerOrganizationId, releaseError),
+            console.error("仮押さえを戻せませんでした:", invocation.consumerUserId, releaseError),
           );
       }
     });
@@ -502,7 +499,7 @@ async function nebiusTarget(invocation: Invocation) {
       "Insufficient credits to start this model's endpoint. Top up your balance to continue.",
     );
   }
-  // 公開した組織の残高が尽きているときも、利用者には「いまは使えない」とだけ伝える
+  // 公開した人の残高が尽きているときも、利用者には「いまは使えない」とだけ伝える
   throw new GatewayError(503, "model_unavailable", "The model is temporarily unavailable.");
 }
 

@@ -28,13 +28,13 @@ export type NebiusClient = Pick<
 
 export type CreditPort = {
   /** 残高から仮押さえする。足りなければ false */
-  reserve(organizationId: string, micros: number): Promise<boolean>;
+  reserve(userId: string, micros: number): Promise<boolean>;
   /** 仮押さえを戻す */
-  release(organizationId: string, micros: number): Promise<void>;
+  release(userId: string, micros: number): Promise<void>;
   /** 仮押さえを実際の料金で清算する (同じ referenceId は一度だけ) */
   settle(input: HoldSettlement): Promise<"applied" | "duplicate">;
   /** いまの残高 (仮押さえを引いたあと) */
-  balance(organizationId: string): Promise<number>;
+  balance(userId: string): Promise<number>;
 };
 
 export type FineTuneRow = typeof fineTune.$inferSelect;

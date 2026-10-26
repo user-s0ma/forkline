@@ -1,7 +1,7 @@
 // デプロイ済みのエンドポイントに /v1/models を直接聞く。`npx tsx scripts/endpoint-probe.ts`
 import { readFileSync } from "node:fs";
 import mysql from "mysql2/promise";
-import { decryptSecretValue } from "../src/lib/organization/secret-box";
+import { decryptSecretValue } from "../src/lib/util/secret-box";
 const env: Record<string, string> = {};
 for (const line of readFileSync(".env", "utf8").split(/\r?\n/)) {
   const m = line.match(/^([A-Z0-9_]+)=(.*)$/);

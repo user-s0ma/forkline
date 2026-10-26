@@ -41,22 +41,21 @@ curl https://forkline.ai/v1/chat/completions \
   }'
 ```
 
-`GET /v1/models` lists the published models and your organization's own models. Any OpenAI SDK works by setting the base URL to `https://forkline.ai/v1`.
+`GET /v1/models` lists the published models and your own models. Any OpenAI SDK works by setting the base URL to `https://forkline.ai/v1`.
 
-## Organizations and billing
+## Accounts and billing
 
-- Models, credits, API keys and earnings belong to an **organization**. Members can train, deploy and test; owners and admins manage API keys, credits, payouts and publishing. Important actions are recorded in the audit log.
+- Models, credits, API keys and earnings belong to your account. Your account name is shown as the creator of the models you publish.
 - Credits are bought with Stripe Checkout. All amounts are integers in micro-yen (1 yen = 1,000,000).
-- Training holds 1.5× the estimated cost when it starts and settles the actual GPU time when it ends. Running endpoints are billed every minute to the organization that owns the model.
+- Training holds 1.5× the estimated cost when it starts and settles the actual GPU time when it ends. Running endpoints are billed every minute to the person who owns the model.
 - GPU rates, markup, exchange rate and idle timeout are in `src/lib/billing/compute.ts` and `src/lib/nebius/models.ts`. Check them against current Nebius pricing before running in production.
 - Token Factory calls (dataset builder, evaluation, model card) hold an estimate before each call and settle the actual tokens afterwards, at the per-token rate in `src/lib/billing/compute.ts`.
 - Each model call holds the most it can cost (per-request price, the request size as input tokens, and the model's output limit as `max_tokens`) and is never charged more than that. A stream cut off before the final usage is charged from what was streamed.
-- Creator earnings can be paid out `EARNINGS_HOLD_DAYS` days (default 7) after they are earned. Refunds and chargebacks of credit purchases are taken back from the organization's credits, which may go negative and then block usage.
-- Only owners and admins can change a model's runtime settings (the output token limit) and prices.
+- Creator earnings can be paid out `EARNINGS_HOLD_DAYS` days (default 7) after they are earned. Refunds and chargebacks of credit purchases are taken back from the buyer's credits, which may go negative and then block usage.
 
 ## Tech stack
 
-React Router 8 and Hono on Node.js, served from a Nebius CPU VM behind Caddy. TiDB Serverless (MySQL) with Drizzle, better-auth (email/password, Google, organizations), Cloudflare Turnstile, email through the Cloudflare Email Service REST API, Stripe and Stripe Connect, i18n (Japanese and English).
+React Router 8 and Hono on Node.js, served from a Nebius CPU VM behind Caddy. TiDB Serverless (MySQL) with Drizzle, better-auth (email/password, Google), Cloudflare Turnstile, email through the Cloudflare Email Service REST API, Stripe and Stripe Connect, i18n (Japanese and English).
 
 ## Setup
 

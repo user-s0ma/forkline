@@ -50,9 +50,8 @@ export function isActiveFineTune(status: string) {
 }
 
 export type StartFineTuneInput = {
-  organizationId: string;
+  userId: string;
   modelId: string;
-  createdBy: string;
   baseModel: NemotronBaseModel;
   datasetName: string;
   jsonl: string;
@@ -83,13 +82,13 @@ export function quoteFineTune(input: {
   return { estimatedMicros, holdMicros: trainingHoldMicros(estimatedMicros) };
 }
 
-/** 学習データを置く場所。組織と学習ごとに分ける */
-export function datasetKey(organizationId: string, fineTuneId: string) {
-  return `organizations/${organizationId}/fine-tunes/${fineTuneId}/train.jsonl`;
+/** 学習データを置く場所。利用者と学習ごとに分ける */
+export function datasetKey(userId: string, fineTuneId: string) {
+  return `users/${userId}/fine-tunes/${fineTuneId}/train.jsonl`;
 }
 
-export function adapterPrefix(organizationId: string, fineTuneId: string) {
-  return `organizations/${organizationId}/fine-tunes/${fineTuneId}/adapter/`;
+export function adapterPrefix(userId: string, fineTuneId: string) {
+  return `users/${userId}/fine-tunes/${fineTuneId}/adapter/`;
 }
 
 export async function startFineTune(
@@ -112,16 +111,15 @@ export async function startFineTune(
     datasetBytes: check.bytes,
     epochs: input.hyperparameters.epochs,
   });
-  if (!(await deps.credits.reserve(input.organizationId, holdMicros))) {
+  if (!(await deps.credits.reserve(input.userId, holdMicros))) {
     return { ok: false, reason: "insufficient_credits", holdMicros };
   }
 
   const now = deps.now();
   const row: FineTuneRow = {
     id: crypto.randomUUID(),
-    organizationId: input.organizationId,
+    userId: input.userId,
     modelId: input.modelId,
-    createdBy: input.createdBy,
     baseModelId: input.baseModel.id,
     trainPreset: input.baseModel.trainPreset,
     trainMicrosPerHour,
@@ -152,7 +150,7 @@ export async function startFineTune(
   try {
     await deps.fineTunes.insert(row);
   } catch (error) {
-    await deps.credits.release(input.organizationId, holdMicros);
+    await deps.credits.release(input.userId, holdMicros);
     // 同じモデルの学習がもう走っている (activeKey の一意の索引)
     if (isDuplicateKeyError(error)) return { ok: false, reason: "already_running" };
     throw error;
@@ -161,14 +159,14 @@ export async function startFineTune(
   let jobId: string | null = null;
   try {
     const { datasetUri } = await deps.nebius.uploadTrainingData(deps.env, {
-      key: datasetKey(input.organizationId, row.id),
+      key: datasetKey(input.userId, row.id),
       jsonl: input.jsonl,
     });
     row.datasetUri = datasetUri;
     const started = await deps.nebius.startFineTune(deps.env, {
       baseModelId: input.baseModel.id,
       datasetUri,
-      outputPrefix: adapterPrefix(input.organizationId, row.id),
+      outputPrefix: adapterPrefix(input.userId, row.id),
       hyperparameters: input.hyperparameters,
     });
     jobId = started.jobId;
@@ -211,7 +209,7 @@ export async function startFineTune(
       if (jobId) {
         // 少しでも動いた分は精算する (Job の ID で一度だけ)
         await deps.credits.settle({
-          organizationId: input.organizationId,
+          userId: input.userId,
           kind: "training",
           referenceId: row.id,
           heldMicros: holdMicros,
@@ -219,7 +217,7 @@ export async function startFineTune(
           description: `Fine-tune ${input.baseModel.id} (failed to record)`,
         });
       } else {
-        await deps.credits.release(input.organizationId, holdMicros);
+        await deps.credits.release(input.userId, holdMicros);
       }
     }
     Object.assign(row, patch, { updatedAt: completedAt });
@@ -268,7 +266,7 @@ async function finish(
   const updated = await deps.fineTunes.update(row.id, patch, ACTIVE_FINE_TUNE_STATUSES);
   if (!updated) return row;
   const settlement = {
-    organizationId: row.organizationId,
+    userId: row.userId,
     kind: "training" as const,
     referenceId: row.id,
     heldMicros: row.heldMicros,
@@ -302,7 +300,7 @@ export async function refreshFineTune(
     // 失敗にできたときだけ仮押さえを戻す (同時に問い合わせが来ても一度だけ)
     const updated = await deps.fineTunes.update(row.id, patch, ACTIVE_FINE_TUNE_STATUSES);
     if (!updated) return row;
-    await deps.credits.release(row.organizationId, row.heldMicros);
+    await deps.credits.release(row.userId, row.heldMicros);
     return { ...row, ...patch };
   }
 

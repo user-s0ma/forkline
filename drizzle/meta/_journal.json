@@ -29,6 +29,13 @@
       "when": 1792823580274,
       "tag": "0003_drop_endpoint_runtime_and_org_secrets",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1792993849473,
+      "tag": "0004_remove_organizations",
+      "breakpoints": true
     }
   ]
 }

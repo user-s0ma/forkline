@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { getDb } from "../db/client";
-import { organization } from "../db/schema";
+import { wallet } from "../db/schema";
 import { yenToMicros } from "./pricing";
 import { applyLedgerEntry, getWallet, updateWallet } from "./wallet";
 
@@ -13,26 +13,19 @@ export function getStripe(env: AppEnv) {
   });
 }
 
-/** 組織の Stripe の顧客。クレジットの購入は組織単位で記録する */
+/** 利用者の Stripe の顧客。クレジットの購入は利用者ごとに記録する */
 export async function ensureStripeCustomer(
   env: AppEnv,
   stripe: Stripe,
-  organizationId: string,
-  email: string,
+  user: { id: string; name: string; email: string },
 ) {
-  const current = await getWallet(env, organizationId);
+  const current = await getWallet(env, user.id);
   if (current.stripeCustomerId) return current.stripeCustomerId;
-  const [org] = await getDb(env)
-    .select({ name: organization.name })
-    .from(organization)
-    .where(eq(organization.id, organizationId))
-    .limit(1);
-  if (!org) throw new Error("Organization not found");
   const customer = await stripe.customers.create(
-    { name: org.name, email, metadata: { organizationId } },
-    { idempotencyKey: `customer:org:${organizationId}` },
+    { name: user.name, email: user.email, metadata: { userId: user.id } },
+    { idempotencyKey: `customer:user:${user.id}` },
   );
-  await updateWallet(env, organizationId, { stripeCustomerId: customer.id });
+  await updateWallet(env, user.id, { stripeCustomerId: customer.id });
   return customer.id;
 }
 
@@ -60,18 +53,18 @@ export function isPayoutReady(account: Stripe.Account) {
   );
 }
 
-/** 決済完了したチェックアウトを組織のクレジットに反映する。セッションIDで冪等。 */
+/** 決済完了したチェックアウトを利用者のクレジットに反映する。セッションIDで冪等。 */
 export async function fulfillTopup(
   env: AppEnv,
   session: Stripe.Checkout.Session,
 ) {
   if (session.metadata?.kind !== TOPUP_METADATA_KIND) return "ignored" as const;
   if (session.payment_status !== "paid") return "unpaid" as const;
-  const organizationId = session.metadata.organizationId;
+  const userId = session.metadata.userId;
   const amountYen = session.amount_total ?? 0;
-  if (!organizationId || amountYen <= 0) return "ignored" as const;
+  if (!userId || amountYen <= 0) return "ignored" as const;
   return applyLedgerEntry(env, {
-    organizationId,
+    userId,
     kind: "topup",
     balance: "credit",
     amountMicros: yenToMicros(amountYen),
@@ -80,40 +73,39 @@ export async function fulfillTopup(
   });
 }
 
+/** 出金口座の状態を、その口座を持つ利用者の残高の行に写す */
 export async function syncConnectAccount(
   env: AppEnv,
   account: Stripe.Account,
 ) {
-  const organizationId = account.metadata?.organizationId;
-  if (!organizationId) return;
-  await updateWallet(env, organizationId, {
-    stripeConnectAccountId: account.id,
-    payoutsEnabled: isPayoutReady(account),
-  });
+  await getDb(env)
+    .update(wallet)
+    .set({ payoutsEnabled: isPayoutReady(account) })
+    .where(eq(wallet.stripeConnectAccountId, account.id));
 }
 
 /* ---------------------------------------------------------------- 返金・チャージバック */
 
 type LedgerApply = typeof applyLedgerEntry;
 
-/** チャージの PaymentIntent に付けた組織 (チェックアウトで payment_intent_data.metadata に入れてある) */
-async function topupOrganizationOf(
+/** チャージの PaymentIntent に付けた利用者 (チェックアウトで payment_intent_data.metadata に入れてある) */
+async function topupUserOf(
   stripe: Pick<Stripe, "paymentIntents">,
   source: { metadata?: Stripe.Metadata | null; payment_intent?: string | Stripe.PaymentIntent | null },
 ) {
-  if (source.metadata?.kind === TOPUP_METADATA_KIND && source.metadata.organizationId) {
-    return source.metadata.organizationId;
+  if (source.metadata?.kind === TOPUP_METADATA_KIND && source.metadata.userId) {
+    return source.metadata.userId;
   }
   const intent =
     typeof source.payment_intent === "string"
       ? await stripe.paymentIntents.retrieve(source.payment_intent)
       : source.payment_intent;
   if (intent?.metadata?.kind !== TOPUP_METADATA_KIND) return null;
-  return intent.metadata.organizationId || null;
+  return intent.metadata.userId || null;
 }
 
 /**
- * チャージの支払いが返金されたら、返金した額を組織のクレジットから引く (残高がマイナスになってもよい。
+ * チャージの支払いが返金されたら、返金した額を利用者のクレジットから引く (残高がマイナスになってもよい。
  * マイナスの間は呼び出しも学習もできない)。返金ごとに refund の ID で一度だけ
  */
 export async function applyChargeRefunds(
@@ -122,14 +114,14 @@ export async function applyChargeRefunds(
   charge: Stripe.Charge,
   apply: LedgerApply = applyLedgerEntry,
 ) {
-  const organizationId = await topupOrganizationOf(stripe, charge);
-  if (!organizationId) return 0;
+  const userId = await topupUserOf(stripe, charge);
+  if (!userId) return 0;
   let applied = 0;
   for await (const refund of stripe.refunds.list({ charge: charge.id, limit: 100 })) {
     // 失敗・取り消しになった返金は引かない
     if (refund.status === "failed" || refund.status === "canceled" || refund.amount <= 0) continue;
     const result = await apply(env, {
-      organizationId,
+      userId,
       kind: "chargeback",
       balance: "credit",
       amountMicros: -yenToMicros(refund.amount),
@@ -150,11 +142,11 @@ export async function applyDispute(
   outcome: "created" | "won",
   apply: LedgerApply = applyLedgerEntry,
 ) {
-  const organizationId = await topupOrganizationOf(stripe, dispute);
-  if (!organizationId || dispute.amount <= 0) return "ignored" as const;
+  const userId = await topupUserOf(stripe, dispute);
+  if (!userId || dispute.amount <= 0) return "ignored" as const;
   const micros = yenToMicros(dispute.amount);
   return apply(env, {
-    organizationId,
+    userId,
     kind: "chargeback",
     balance: "credit",
     amountMicros: outcome === "created" ? -micros : micros,

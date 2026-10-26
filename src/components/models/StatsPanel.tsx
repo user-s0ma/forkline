@@ -7,17 +7,15 @@ import { formatYen } from "@/lib/billing/pricing";
 import { Section } from "./ui";
 
 export function StatsPanel({
-  organizationId,
   modelId,
 }: {
-  organizationId: string;
   modelId: string;
 }) {
   const { t } = useTranslation();
   const tag = localeTag(useLocale());
   const { data, isPending, error } = useQuery({
-    queryKey: ["model-stats", organizationId, modelId],
-    queryFn: () => getModelStats(organizationId, modelId),
+    queryKey: ["model-stats", modelId],
+    queryFn: () => getModelStats(modelId),
   });
   // 横軸の基準日は表示した時点で固定する
   const [today] = useState(() => Date.now());

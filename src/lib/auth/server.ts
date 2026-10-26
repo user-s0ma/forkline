@@ -1,21 +1,11 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
-import { captcha, organization } from "better-auth/plugins";
-import { eq } from "drizzle-orm";
-import { recordAuditLog, type AuditAction } from "../organization/audit";
+import { captcha } from "better-auth/plugins";
 import { getDb } from "../db/client";
 import { detectLocale, translate } from "../i18n";
-import { leaveOrganizationsForDeletion } from "../organization/cleanup";
-import { retireOrganizationModels } from "../compute/retire";
+import { retireUserModels } from "../compute/retire";
 import { sendEmail } from "../email/send";
 import * as schema from "../db/schema";
-
-const MEMBER_AUDIT_PATHS: Record<string, AuditAction> = {
-  "/organization/remove-member": "member.remove",
-  "/organization/update-member-role": "member.role_update",
-  "/organization/leave": "member.leave",
-};
 
 function escapeHtml(value: string) {
   return value
@@ -149,8 +139,8 @@ function createAuth(env: AppEnv, requestOrigin?: string) {
     user: {
       deleteUser: {
         enabled: true,
-        async beforeDelete(user, request) {
-          await leaveOrganizationsForDeletion(env, user.id, request);
+        async beforeDelete(user) {
+          await retireUserModels(env, user.id);
         },
       },
     },
@@ -191,150 +181,7 @@ function createAuth(env: AppEnv, requestOrigin?: string) {
             { secretKey: "disabled-in-local-development", endpoints: ["/__captcha-disabled-in-local-development"] }
           : { secretKey: env.TURNSTILE_SECRET_KEY }),
       }),
-      organization({
-        allowUserToCreateOrganization: true,
-        organizationLimit: 10,
-        async sendInvitationEmail(data, request) {
-          const locale = detectLocale(request);
-          const url = `${baseURL}/accept-invitation/${data.id}`;
-          const inviterName = data.inviter.user.name || data.inviter.user.email;
-          await sendEmail(env, {
-            from: emailFrom,
-            to: data.email,
-            subject: translate(locale, "email.invitation.subject", {
-              organization: data.organization.name,
-            }),
-            ...renderEmail({
-              locale,
-              heading: translate(locale, "email.invitation.heading"),
-              body: translate(locale, "email.invitation.body", {
-                inviter: inviterName,
-                organization: data.organization.name,
-              }),
-              buttonLabel: translate(locale, "email.invitation.button"),
-              url,
-              footer: translate(locale, "email.invitation.footer"),
-            }),
-          });
-        },
-        organizationHooks: {
-          async afterCreateOrganization({ organization, user }) {
-            await recordAuditLog(env, {
-              organizationId: organization.id,
-              actor: { id: user.id, name: user.name, email: user.email },
-              action: "organization.create",
-              targetId: organization.id,
-              targetLabel: organization.name,
-            });
-          },
-          async afterUpdateOrganization({ organization, user, member }) {
-            await recordAuditLog(env, {
-              organizationId: member.organizationId,
-              actor: { id: user.id, name: user.name, email: user.email },
-              action: "organization.update",
-              targetId: member.organizationId,
-              targetLabel: organization?.name ?? "",
-            });
-          },
-          async afterDeleteOrganization({ organization, user }) {
-            await retireOrganizationModels(env, organization.id).catch((error) =>
-              console.error("組織のモデルを片付けられませんでした:", organization.id, error),
-            );
-            await recordAuditLog(env, {
-              organizationId: organization.id,
-              actor: { id: user.id, name: user.name, email: user.email },
-              action: "organization.delete",
-              targetId: organization.id,
-              targetLabel: organization.name,
-            });
-          },
-          async afterCreateInvitation({ invitation, inviter }) {
-            await recordAuditLog(env, {
-              organizationId: invitation.organizationId,
-              actor: {
-                id: inviter.id,
-                name: inviter.name,
-                email: inviter.email,
-              },
-              action: "invitation.create",
-              targetLabel: invitation.email,
-              metadata: { role: invitation.role },
-            });
-          },
-          async afterAcceptInvitation({ invitation, member, user }) {
-            await recordAuditLog(env, {
-              organizationId: invitation.organizationId,
-              actor: { id: user.id, name: user.name, email: user.email },
-              action: "invitation.accept",
-              targetId: user.id,
-              targetLabel: invitation.email,
-              metadata: { role: member.role },
-            });
-          },
-          async afterRejectInvitation({ invitation, user }) {
-            await recordAuditLog(env, {
-              organizationId: invitation.organizationId,
-              actor: { id: user.id, name: user.name, email: user.email },
-              action: "invitation.reject",
-              targetLabel: invitation.email,
-            });
-          },
-          async afterCancelInvitation({ invitation, cancelledBy }) {
-            await recordAuditLog(env, {
-              organizationId: invitation.organizationId,
-              actor: {
-                id: cancelledBy.id,
-                name: cancelledBy.name,
-                email: cancelledBy.email,
-              },
-              action: "invitation.cancel",
-              targetLabel: invitation.email,
-            });
-          },
-        },
-      }),
     ],
-    hooks: {
-      after: createAuthMiddleware(async (ctx) => {
-        const action = MEMBER_AUDIT_PATHS[ctx.path];
-        if (!action) return;
-
-        const returned = ctx.context.returned;
-        const record = (
-          returned && typeof returned === "object" && "member" in returned
-            ? (returned as { member: unknown }).member
-            : returned
-        ) as {
-          userId?: string;
-          organizationId?: string;
-          role?: string;
-        } | null;
-        if (!record?.userId || !record.organizationId) return;
-
-        const session = await getSessionFromCtx(ctx);
-        if (!session) return;
-
-        const [affected] = await getDb(env)
-          .select({ name: schema.user.name, email: schema.user.email })
-          .from(schema.user)
-          .where(eq(schema.user.id, record.userId))
-          .limit(1);
-
-        await recordAuditLog(env, {
-          organizationId: record.organizationId,
-          actor: {
-            id: session.user.id,
-            name: session.user.name,
-            email: session.user.email,
-          },
-          action,
-          targetId: record.userId,
-          targetLabel: affected?.email || record.userId,
-          metadata:
-            action === "member.role_update" ? { role: record.role } : {},
-        });
-      }),
-    },
   });
 }
 

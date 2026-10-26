@@ -39,11 +39,9 @@ export type BuiltDataset = {
  * 作者は例を直したり消したり、評価用に回すかを選んでから、学習データとして使う。
  */
 export function DatasetBuilder({
-  organizationId,
   modelId,
   onUse,
 }: {
-  organizationId: string;
   modelId: string;
   onUse: (dataset: BuiltDataset) => void;
 }) {
@@ -116,9 +114,9 @@ export function DatasetBuilder({
       },
       {
         extract: (chunk) =>
-          extractDatasetFacts(organizationId, modelId, { role: assistantRole, material, chunk }),
+          extractDatasetFacts(modelId, { role: assistantRole, material, chunk }),
         paraphrase: (batch) =>
-          paraphraseDatasetFacts(organizationId, modelId, { role: assistantRole, facts: batch }),
+          paraphraseDatasetFacts(modelId, { role: assistantRole, facts: batch }),
         shouldStop: () => stopRef.current,
         isFatal: (error) => error instanceof ApiError && error.status === 402,
         onProgress: (state) => {
@@ -141,7 +139,7 @@ export function DatasetBuilder({
     setFailedChunks(result.failed);
     setSpent(result.costMicros);
     setProgress({ done: result.total, total: result.total });
-    await queryClient.invalidateQueries({ queryKey: ["wallet", organizationId] });
+    await queryClient.invalidateQueries({ queryKey: ["wallet"] });
   };
 
   const update = (key: string, patch: Partial<Row>) =>

@@ -4,7 +4,6 @@ import { Link, useNavigate, useOutletContext } from "react-router";
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import type { Route } from "./+types/_index";
 import { EndpointBadge, ModelLamp } from "@/components/models/ui";
 import { InfiniteScrollSentinel } from "@/components/ui/InfiniteScrollSentinel";
 import { ListSkeleton } from "@/components/ui/ListSkeleton";
@@ -12,14 +11,13 @@ import { Modal } from "@/components/ui/Modal";
 import { PageBody, PageHeader } from "@/components/ui/PageHeader";
 import { createModel, listModels } from "@/lib/api-client";
 import { localeTag, useLocale } from "@/lib/i18n";
-import type { AppLayoutContext } from "../../_layout";
+import type { AppLayoutContext } from "../_layout";
 
-export default function ModelsPage({ params }: Route.ComponentProps) {
+export default function ModelsPage() {
   const { t } = useTranslation();
   const locale = useLocale();
   const navigate = useNavigate();
-  const organizationId = params.organizationId;
-  const base = `/app/${encodeURIComponent(organizationId)}/models`;
+  const base = "/app/models";
   const detailPath = (modelId: string) => `${base}/${encodeURIComponent(modelId)}`;
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(localeTag(locale), { dateStyle: "medium" }),
@@ -30,9 +28,9 @@ export default function ModelsPage({ params }: Route.ComponentProps) {
 
   const { data, error, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useInfiniteQuery({
-      queryKey: ["models", organizationId],
+      queryKey: ["models"],
       queryFn: ({ pageParam }) =>
-        listModels(organizationId, { cursor: pageParam, pageSize: 50 }),
+        listModels({ cursor: pageParam, pageSize: 50 }),
       initialPageParam: undefined as string | undefined,
       getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     });
@@ -147,7 +145,6 @@ export default function ModelsPage({ params }: Route.ComponentProps) {
       </PageBody>
       {createOpen && (
         <CreateModelModal
-          organizationId={organizationId}
           onCreated={(modelId) => navigate(detailPath(modelId))}
           onClose={() => setCreateOpen(false)}
         />
@@ -177,11 +174,9 @@ function EmptyModels({ onCreate }: { onCreate: () => void }) {
 }
 
 function CreateModelModal({
-  organizationId,
   onCreated,
   onClose,
 }: {
-  organizationId: string;
   onCreated: (modelId: string) => void;
   onClose: () => void;
 }) {
@@ -195,7 +190,7 @@ function CreateModelModal({
     if (!trimmed || isCreating) return;
     setIsCreating(true);
     try {
-      const model = await createModel(organizationId, { name: trimmed });
+      const model = await createModel({ name: trimmed });
       onCreated(model.id);
     } catch (error) {
       console.error(error);

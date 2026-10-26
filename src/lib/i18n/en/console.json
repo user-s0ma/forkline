@@ -20,55 +20,9 @@
       "billing": "Usage and billing"
     }
   },
-  "auditLogs": {
-    "actionGroups": {
-      "models": "Models",
-      "compute": "Training and endpoints",
-      "billing": "API keys and billing"
-    },
-    "actions": {
-      "model": {
-        "create": "Created a model",
-        "update": "Updated a model",
-        "delete": "Deleted a model",
-        "publish": "Published a model",
-        "unpublish": "Unpublished a model"
-      },
-      "fine_tune": {
-        "start": "Started a fine-tune",
-        "cancel": "Canceled a fine-tune"
-      },
-      "endpoint": {
-        "deploy": "Deployed an endpoint",
-        "start": "Started an endpoint",
-        "stop": "Stopped an endpoint",
-        "delete": "Deleted an endpoint"
-      },
-      "api_key": {
-        "create": "Created an API key",
-        "revoke": "Revoked an API key"
-      },
-      "billing": {
-        "topup_start": "Started a credit purchase",
-        "connect": "Started payout account setup",
-        "payout": "Requested a payout",
-        "payout_pending": "Requested a payout (waiting for Stripe)"
-      },
-      "dataset": {
-        "generate": "Generated training data with Nemotron"
-      },
-      "evaluation": {
-        "start": "Started a model evaluation"
-      },
-      "model_card": {
-        "draft": "Drafted a model card with Nemotron"
-      }
-    }
-  },
   "apiKeys": {
     "title": "API keys",
-    "description": "Keys are shared across the organization. Calls made with a key are charged to this organization's credits.",
-    "managerOnly": "Only owners and admins can create or revoke keys.",
+    "description": "Calls made with a key are charged to your credits.",
     "create": "Create key",
     "createFirst": "Create your first key",
     "loadFailed": "Could not load API keys",
@@ -94,7 +48,7 @@
   },
   "usage": {
     "title": "Usage",
-    "description": "Calls this organization made through the API and the playground.",
+    "description": "Calls you made through the API and the playground.",
     "loadFailed": "Could not load usage",
     "chartTitle": "Daily spend (30 days)",
     "spend30": "Spend, 30 days",
@@ -126,8 +80,7 @@
   },
   "credits": {
     "title": "Credits",
-    "description": "Prepaid balance shared by the organization. It pays for model calls, training and endpoint GPU time.",
-    "managerOnly": "Only owners and admins can top up.",
+    "description": "Prepaid balance. It pays for model calls, training and endpoint GPU time.",
     "loadFailed": "Could not load credits",
     "balance": "Credit balance",
     "held": "{{amount}} more is held for training and endpoints",
@@ -168,8 +121,7 @@
   },
   "earnings": {
     "title": "Earnings and payouts",
-    "description": "Revenue from calls to this organization's models. You can pay out the amount after fees through Stripe Connect.",
-    "managerOnly": "Only owners and admins can set up payouts and withdraw.",
+    "description": "Revenue from calls to your models. You can pay out the amount after fees through Stripe Connect.",
     "loadFailed": "Could not load earnings",
     "available": "Available to pay out",
     "payoutTitle": "Payout",
@@ -231,7 +183,7 @@
     },
     "list": {
       "title": "Models",
-      "description": "Your organization's models. Train Nemotron, deploy it, set a price and publish it to the store.",
+      "description": "Your models. Train Nemotron, deploy it, set a price and publish it to the store.",
       "newButton": "New model",
       "loadError": "Could not load models",
       "createFailed": "Could not create the model",
@@ -253,7 +205,7 @@
       "backToList": "All models",
       "loadError": "Could not load the model",
       "notFoundTitle": "Model not found",
-      "notFoundDescription": "It was deleted or belongs to another organization.",
+      "notFoundDescription": "It was deleted or belongs to someone else.",
       "viewPublic": "View public page",
       "tabsAria": "Model sections",
       "tabs": {
@@ -305,7 +257,7 @@
       "outputHint": "Charged for the generated tokens",
       "perRequest": "Per request",
       "perRequestHint": "Charged once per call, regardless of tokens",
-      "computeNote": "Endpoint GPU time ({{perHour}}/hour) is charged to this organization's credits while it runs. Set prices that cover it.",
+      "computeNote": "Endpoint GPU time ({{perHour}}/hour) is charged to your credits while it runs. Set prices that cover it.",
       "simulationTitleTokens": "Revenue estimate",
       "tokensLabel": "Tokens served",
       "tokensOption": "{{tokens}} tokens",
@@ -365,7 +317,6 @@
       "publish": {
         "title": "Publish",
         "failed": "Could not change publishing",
-        "managerOnly": "Only owners and admins can publish or unpublish.",
         "needsTagline": "A tagline is required to publish to the store.",
         "unpublish": "Unpublish",
         "unpublishConfirm": "Unpublish? It will no longer be callable through the API by others.",
@@ -377,14 +328,14 @@
           "private": {
             "action": "Publish unlisted",
             "switch": "Switch to unlisted",
-            "description": "Not listed; callable with this organization's keys"
+            "description": "Not listed; callable with your API keys"
           }
         }
       }
     },
     "training": {
       "title": "Train a LoRA",
-      "description": "Fine-tune NVIDIA Nemotron with a chat-format JSONL. Training runs on Nebius GPUs and is charged to this organization's credits.",
+      "description": "Fine-tune NVIDIA Nemotron with a chat-format JSONL. Training runs on Nebius GPUs and is charged to your credits.",
       "baseModel": "Base model",
       "baseModelHint": "Smaller models are cheaper and faster to train",
       "trainRate": "Training GPU",
@@ -505,7 +456,7 @@
       "failed": "Could not delete"
     },
     "builder": {
-      "intro": "Paste your FAQ, manual, policy or example Q&A. Nemotron on Nebius Token Factory turns it into chat examples. Review and edit them before training. Token Factory usage is charged to this organization's credits.",
+      "intro": "Paste your FAQ, manual, policy or example Q&A. Nemotron on Nebius Token Factory turns it into chat examples. Review and edit them before training. Token Factory usage is charged to your credits.",
       "role": "Assistant's role",
       "roleHint": "Who the assistant is, who it talks to and in what tone. Used only to write the examples.",
       "rolePlaceholder": "Support agent for an online shoe store. Answers customers politely and briefly.",
@@ -540,7 +491,7 @@
     },
     "evaluation": {
       "title": "Evaluate with Nemotron",
-      "description": "Sends each held-out question to your deployed model and to the base Nemotron on Nebius Token Factory, then Nemotron grades both answers against the reference answer (1–5). Your endpoint runs while this is in progress, and Token Factory usage is charged to this organization's credits.",
+      "description": "Sends each held-out question to your deployed model and to the base Nemotron on Nebius Token Factory, then Nemotron grades both answers against the reference answer (1–5). Your endpoint runs while this is in progress, and Token Factory usage is charged to your credits.",
       "run": "Run evaluation",
       "rerun": "Run again",
       "blockers": {

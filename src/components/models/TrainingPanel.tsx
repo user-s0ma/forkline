@@ -76,11 +76,9 @@ function splitUpload(text: string) {
  * 見積もりを見てから始める。終わった学習はここからデプロイする。
  */
 export function TrainingPanel({
-  organizationId,
   model,
   onChanged,
 }: {
-  organizationId: string;
   model: ModelRecord;
   onChanged: () => Promise<unknown>;
 }) {
@@ -88,8 +86,8 @@ export function TrainingPanel({
   const [confirm, confirmDialog] = useConfirm();
   const yen = useYen();
   const queryClient = useQueryClient();
-  const baseModels = useBaseModels(organizationId);
-  const jobs = useFineTunes(organizationId, model.id);
+  const baseModels = useBaseModels();
+  const jobs = useFineTunes(model.id);
   const items = jobs.data?.items ?? [];
   const active = items.find(isFineTuneActive);
 
@@ -137,8 +135,8 @@ export function TrainingPanel({
     Boolean(selected && dataset?.check.ok && hyperparametersValid) && !active && !busy;
 
   const refresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["fine-tunes", organizationId, model.id] });
-    await queryClient.invalidateQueries({ queryKey: ["wallet", organizationId] });
+    await queryClient.invalidateQueries({ queryKey: ["fine-tunes", model.id] });
+    await queryClient.invalidateQueries({ queryKey: ["wallet"] });
   };
 
   const pickFile = async (file: File | undefined) => {
@@ -173,7 +171,7 @@ export function TrainingPanel({
         : holdOut
           ? splitUpload(dataset.text)
           : { trainJsonl: dataset.text, evalJsonl: null };
-      await startFineTune(organizationId, model.id, {
+      await startFineTune(model.id, {
         baseModelId: selected.id,
         datasetName: dataset.name,
         jsonl: split.trainJsonl,
@@ -198,7 +196,7 @@ export function TrainingPanel({
     if (!(await confirm(t("models.training.cancelConfirm"), { danger: true }))) return;
     setBusy(job.id);
     try {
-      await cancelFineTune(organizationId, job.id);
+      await cancelFineTune(job.id);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("models.training.cancelFailed"));
     } finally {
@@ -211,14 +209,14 @@ export function TrainingPanel({
     if (model.endpointId && !(await confirm(t("models.endpoint.redeployConfirm")))) return;
     setBusy(job.id);
     try {
-      await deployModel(organizationId, model.id, job.id);
+      await deployModel(model.id, job.id);
       toast.success(t("models.endpoint.deployStarted"));
       await onChanged();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("models.endpoint.deployFailed"));
     } finally {
       setBusy(null);
-      await queryClient.invalidateQueries({ queryKey: ["wallet", organizationId] });
+      await queryClient.invalidateQueries({ queryKey: ["wallet"] });
     }
   };
 
@@ -299,7 +297,7 @@ export function TrainingPanel({
 
             {/* 作りかけの例を残すよう、切り替えても消さずに隠すだけにする */}
             <div hidden={mode !== "builder"}>
-              <DatasetBuilder organizationId={organizationId} modelId={model.id} onUse={useBuilt} />
+              <DatasetBuilder modelId={model.id} onUse={useBuilt} />
             </div>
 
             <div hidden={mode !== "upload"}>

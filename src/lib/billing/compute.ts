@@ -94,7 +94,7 @@ export const ENDPOINT_RETRY_AFTER_SECONDS = 30;
 
 /*
  * 学習データ作り・評価・モデルカードの下書きで呼ぶ Token Factory の Nemotron の料金。
- * 組織のクレジットから、使ったトークン数 × 単価 (上乗せ込み) を引く。
+ * 利用者のクレジットから、使ったトークン数 × 単価 (上乗せ込み) を引く。
  * 要確認: Token Factory の価格表 (https://tokenfactory.nebius.com/) で、
  * DEFAULT_TOKEN_FACTORY_MODEL の 100万トークンあたりの USD と照らし合わせること。
  */

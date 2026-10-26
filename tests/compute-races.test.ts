@@ -35,7 +35,7 @@ import {
  * 同時に呼ばれたとき・途中で失敗したときに、仮押さえと請求が二重にも抜けにもならないことを確かめる。
  */
 
-const ORG = "org-pub";
+const OWNER = "user-pub";
 const BALANCE = 100_000_000_000;
 const RATE = microsPerHour(BASE_MODEL.serveUsdPerHour);
 const HOLD = endpointHoldMicros(RATE, 15);
@@ -47,7 +47,7 @@ function setup(
   balance = BALANCE,
 ) {
   const { nebius, calls } = fakeNebius(nebiusOverrides);
-  const { credits, balances, ledger } = fakeCredits({ [ORG]: balance });
+  const { credits, balances, ledger } = fakeCredits({ [OWNER]: balance });
   const { stores, models, fineTunes } = fakeStores(initial);
   const clock = fakeClock();
   const deps = makeDeps({ nebius, credits, stores, now: clock.now });
@@ -81,9 +81,8 @@ function runningModel(overrides: Partial<ModelRow> = {}) {
 function succeededJob(): FineTuneRow {
   return {
     id: "ft-1",
-    organizationId: ORG,
+    userId: OWNER,
     modelId: "model-1",
-    createdBy: "user-1",
     baseModelId: BASE_MODEL.id,
     trainPreset: BASE_MODEL.trainPreset,
     trainMicrosPerHour: microsPerHour(BASE_MODEL.trainUsdPerHour),
@@ -119,7 +118,7 @@ test("H4: 起こすときの仮押さえは状態と一緒に記録し、古い�
   const woke = await wakeEndpoint(deps, model);
   assert.equal(woke.state, "starting");
   assert.equal(models.get("model-1")!.endpointHeldMicros, HOLD);
-  assert.equal(balances.get(ORG), BALANCE - HOLD);
+  assert.equal(balances.get(OWNER), BALANCE - HOLD);
 
   // 起こす前に読んだ行 (仮押さえ 0) のまま止める
   clock.advance(60_000);
@@ -128,7 +127,7 @@ test("H4: 起こすときの仮押さえは状態と一緒に記録し、古い�
   const row = models.get("model-1")!;
   assert.equal(row.endpointStatus, "stopped");
   assert.equal(row.endpointHeldMicros, 0);
-  assert.equal(balances.get(ORG), BALANCE - computeCostMicros(RATE, 60));
+  assert.equal(balances.get(OWNER), BALANCE - computeCostMicros(RATE, 60));
 });
 
 test("H4: 起動を頼んだ直後に Nebius が STOPPED を返しても、止まったことにしない", async () => {
@@ -141,14 +140,14 @@ test("H4: 起動を頼んだ直後に Nebius が STOPPED を返しても、止�
   await refreshEndpoint(deps, models.get("model-1")!);
   assert.equal(models.get("model-1")!.endpointStatus, "starting");
   assert.equal(models.get("model-1")!.endpointHeldMicros, HOLD);
-  assert.equal(balances.get(ORG), BALANCE - HOLD);
+  assert.equal(balances.get(OWNER), BALANCE - HOLD);
 
   // 猶予を過ぎても STOPPED なら、本当に止まったものとして精算する
   clock.advance(STOPPED_WHILE_STARTING_GRACE_MS);
   await refreshEndpoint(deps, models.get("model-1")!);
   assert.equal(models.get("model-1")!.endpointStatus, "stopped");
   const seconds = (60_000 + STOPPED_WHILE_STARTING_GRACE_MS) / 1000;
-  assert.equal(balances.get(ORG), BALANCE - computeCostMicros(RATE, seconds));
+  assert.equal(balances.get(OWNER), BALANCE - computeCostMicros(RATE, seconds));
 });
 
 test("H4: 起動に失敗したら、自分が書いた起動中のときだけ戻す", async () => {
@@ -161,17 +160,17 @@ test("H4: 起動に失敗したら、自分が書いた起動中のときだけ�
   const results = await Promise.all([wakeEndpoint(deps, model), wakeEndpoint(deps, model)]);
   assert.deepEqual(results.map((result) => result.state).sort(), ["failed", "unchanged"]);
   assert.equal(models.get("model-1")!.endpointStatus, "stopped");
-  assert.equal(balances.get(ORG), BALANCE);
+  assert.equal(balances.get(OWNER), BALANCE);
 });
 
 test("H4: 消すときは、いまの行に記録してある仮押さえを戻す", async () => {
   const model = runningModel();
   const { deps, balances, models } = setup({ models: [model] });
-  balances.set(ORG, BALANCE - HOLD);
+  balances.set(OWNER, BALANCE - HOLD);
   // 古い行 (仮押さえ 0、止まっている) から消しても、記録してある仮押さえは戻る
   await removeEndpoint(deps, { ...model, endpointStatus: "stopped", endpointHeldMicros: 0 });
   assert.equal(models.get("model-1")!.endpointStatus, "none");
-  assert.equal(balances.get(ORG), BALANCE);
+  assert.equal(balances.get(OWNER), BALANCE);
 });
 
 /* ---------------------------------------------------------------- H5: デプロイ */
@@ -186,7 +185,7 @@ test("H5: 同時のデプロイは1つだけ進み、エンドポイントも仮
   assert.equal(results.filter((result) => result.ok).length, 1);
   assert.ok(results.some((result) => !result.ok && result.reason === "busy"));
   assert.equal(calls.filter((call) => call.name === "createEndpoint").length, 1);
-  assert.equal(balances.get(ORG), BALANCE - HOLD);
+  assert.equal(balances.get(OWNER), BALANCE - HOLD);
   assert.equal(models.get("model-1")!.endpointStatus, "starting");
   assert.equal(models.get("model-1")!.endpointHeldMicros, HOLD);
 });
@@ -208,7 +207,7 @@ test("H5: 作った後に割り込まれたら、作ったエンドポイント�
     calls.filter((call) => call.name === "deleteEndpoint").map((call) => call.args[1]),
     ["ep-2"],
   );
-  assert.equal(balances.get(ORG), BALANCE);
+  assert.equal(balances.get(OWNER), BALANCE);
   assert.equal(models.get("model-1")!.endpointId, null);
 });
 
@@ -217,7 +216,7 @@ test("H5: 動いているものを載せ替えると、前の最後の区間を�
   const { deps, calls, balances, ledger, models, clock } = setup({ models: [model] }, {
     createEndpoint: async () => ({ endpointId: "ep-2", authToken: "b".repeat(64) }),
   });
-  balances.set(ORG, BALANCE - HOLD);
+  balances.set(OWNER, BALANCE - HOLD);
   clock.advance(10 * 60_000);
   const result = await deployEndpoint(deps, model, succeededJob());
   assert.ok(result.ok);
@@ -225,7 +224,7 @@ test("H5: 動いているものを載せ替えると、前の最後の区間を�
   assert.equal(ledger.length, 1);
   assert.equal(ledger[0].actualMicros, computeCostMicros(RATE, 600));
   assert.equal(models.get("model-1")!.endpointId, "ep-2");
-  assert.equal(balances.get(ORG), BALANCE - computeCostMicros(RATE, 600) - HOLD);
+  assert.equal(balances.get(OWNER), BALANCE - computeCostMicros(RATE, 600) - HOLD);
 });
 
 test("H5: 残高が足りなければ元の状態に戻す", async () => {
@@ -279,7 +278,7 @@ test("M6: 止めるときに最後の区間を請求できなければ、止ま�
   const { deps, balances, models, clock } = setup({ models: [model] }, {
     getEndpoint: async () => ({ state: "stopped" as const }),
   });
-  balances.set(ORG, BALANCE - HOLD);
+  balances.set(OWNER, BALANCE - HOLD);
   const settle = deps.credits.settle;
   deps.credits.settle = async () => {
     throw new Error("db down");
@@ -293,7 +292,7 @@ test("M6: 止めるときに最後の区間を請求できなければ、止ま�
   deps.credits.settle = settle;
   await refreshEndpoint(deps, models.get("model-1")!);
   assert.equal(models.get("model-1")!.endpointStatus, "stopped");
-  assert.equal(balances.get(ORG), BALANCE - computeCostMicros(RATE, 60));
+  assert.equal(balances.get(OWNER), BALANCE - computeCostMicros(RATE, 60));
 });
 
 /* ---------------------------------------------------------------- 学習 (H3, M5, L2) */
@@ -302,9 +301,8 @@ const HYPERPARAMETERS = { epochs: 2, learningRate: 0.0002, loraRank: 16, loraAlp
 
 function start(deps: ReturnType<typeof setup>["deps"]) {
   return startFineTune(deps, {
-    organizationId: ORG,
+    userId: OWNER,
     modelId: "model-1",
-    createdBy: "user-1",
     baseModel: BASE_MODEL,
     datasetName: "faq.jsonl",
     jsonl: sampleJsonl(),
@@ -327,7 +325,7 @@ test("H3: Job の ID が無いまま時間切れの学習は、同時に問い�
   const { deps, balances, fineTunes, clock } = setup({ fineTunes: [row] }, {}, BALANCE - held);
   clock.advance(11 * 60_000);
   await Promise.all([refreshFineTune(deps, row), refreshFineTune(deps, row), refreshFineTune(deps, row)]);
-  assert.equal(balances.get(ORG), BALANCE);
+  assert.equal(balances.get(OWNER), BALANCE);
   assert.equal(fineTunes.get("ft-1")!.status, "failed");
   assert.equal(fineTunes.get("ft-1")!.activeKey, null);
 });
@@ -345,7 +343,7 @@ test("H3: 止めるのと終わったのを見つけるのが同時でも、精�
   ]);
   assert.equal(ledger.length, 1);
   const cost = computeCostMicros(result.row.trainMicrosPerHour, 30 * 60);
-  assert.equal(balances.get(ORG), BALANCE - cost);
+  assert.equal(balances.get(OWNER), BALANCE - cost);
   const final = fineTunes.get(result.row.id)!;
   assert.equal(final.heldMicros, 0);
   assert.ok(["canceled", "succeeded"].includes(final.status));
@@ -374,7 +372,7 @@ test("M5: Job を始めた後に記録に失敗したら、Job を止めて失�
   assert.equal(row.nebiusJobId, "job-1");
   assert.equal(row.heldMicros, 0);
   assert.equal(row.activeKey, null);
-  assert.equal(balances.get(ORG), BALANCE);
+  assert.equal(balances.get(OWNER), BALANCE);
 });
 
 test("L2: 同じモデルで同時に学習を始めても1つだけ。終われば次を始められる", async () => {
@@ -385,7 +383,7 @@ test("L2: 同じモデルで同時に学習を始めても1つだけ。終われ
   assert.ok(results.some((result) => !result.ok && result.reason === "already_running"));
   assert.equal(calls.filter((call) => call.name === "startFineTune").length, 1);
   const first = ok[0].ok ? ok[0].row : null;
-  assert.equal(balances.get(ORG), BALANCE - first!.heldMicros);
+  assert.equal(balances.get(OWNER), BALANCE - first!.heldMicros);
 
   await cancelFineTune(deps, first!);
   const next = await start(deps);

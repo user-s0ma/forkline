@@ -5,13 +5,13 @@ import { holdDifference, sumHeld } from "../src/lib/billing/wallet";
 import { holdMicrosFor, isFree, type Invocation } from "../src/server/gateway/runtime";
 
 function invocation(overrides: {
-  organizationId: string;
+  userId: string;
   prices?: Partial<Invocation["model"]>;
 }) {
   return {
-    consumerOrganizationId: "consumer",
+    consumerUserId: "consumer",
     model: {
-      organizationId: overrides.organizationId,
+      userId: overrides.userId,
       priceInputMicros: 0,
       priceOutputMicros: 0,
       pricePerRequestMicros: 0,
@@ -20,11 +20,11 @@ function invocation(overrides: {
   } as unknown as Invocation;
 }
 
-test("自組織のモデルとクリエイター価格の無いモデルは、呼び出しごとの料金が掛からない", () => {
-  assert.equal(isFree(invocation({ organizationId: "consumer", prices: { priceOutputMicros: 5 } })), true);
-  assert.equal(isFree(invocation({ organizationId: "publisher" })), true);
+test("自分のモデルとクリエイター価格の無いモデルは、呼び出しごとの料金が掛からない", () => {
+  assert.equal(isFree(invocation({ userId: "consumer", prices: { priceOutputMicros: 5 } })), true);
+  assert.equal(isFree(invocation({ userId: "publisher" })), true);
   assert.equal(
-    isFree(invocation({ organizationId: "publisher", prices: { pricePerRequestMicros: 1 } })),
+    isFree(invocation({ userId: "publisher", prices: { pricePerRequestMicros: 1 } })),
     false,
   );
 });
@@ -34,7 +34,7 @@ test("仮押さえは1回あたりの料金と、入出力のトークンの上�
   assert.equal(
     holdMicrosFor(
       invocation({
-        organizationId: "publisher",
+        userId: "publisher",
         prices: { pricePerRequestMicros: 5_000_000, priceOutputMicros: 1_000_000_000 },
       }),
       bounds,
@@ -42,7 +42,7 @@ test("仮押さえは1回あたりの料金と、入出力のトークンの上�
     5_000_000 + 4_000_000,
   );
   assert.equal(
-    holdMicrosFor(invocation({ organizationId: "publisher", prices: { priceInputMicros: 1 } }), bounds),
+    holdMicrosFor(invocation({ userId: "publisher", prices: { priceInputMicros: 1 } }), bounds),
     MIN_BALANCE_MICROS,
   );
 });

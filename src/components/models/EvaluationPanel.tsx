@@ -37,11 +37,9 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * 評価は画面が step を繰り返し呼んで少しずつ進める (タブを離れたら止まり、戻ると続きから進む)。
  */
 export function EvaluationPanel({
-  organizationId,
   model,
   onApplyCard,
 }: {
-  organizationId: string;
   model: ModelRecord;
   onApplyCard: (draft: CardDraft) => void;
 }) {
@@ -49,14 +47,14 @@ export function EvaluationPanel({
   const yen = useYen();
   const queryClient = useQueryClient();
   const overview = useQuery({
-    queryKey: ["evaluations", organizationId, model.id],
-    queryFn: () => listEvaluations(organizationId, model.id),
+    queryKey: ["evaluations", model.id],
+    queryFn: () => listEvaluations(model.id),
   });
   const runs = overview.data?.items ?? [];
   const latest = runs[0] as EvalRunRecord | undefined;
   const detail = useQuery({
-    queryKey: ["evaluation", organizationId, latest?.id],
-    queryFn: () => getEvaluation(organizationId, latest!.id),
+    queryKey: ["evaluation", latest?.id],
+    queryFn: () => getEvaluation(latest!.id),
     enabled: Boolean(latest),
   });
   const [stepping, setStepping] = useState(false);
@@ -67,10 +65,10 @@ export function EvaluationPanel({
   const loopRef = useRef<{ runId: string; token: object } | null>(null);
 
   const refresh = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ["evaluations", organizationId, model.id] });
-    await queryClient.invalidateQueries({ queryKey: ["evaluation", organizationId] });
-    await queryClient.invalidateQueries({ queryKey: ["wallet", organizationId] });
-  }, [model.id, organizationId, queryClient]);
+    await queryClient.invalidateQueries({ queryKey: ["evaluations", model.id] });
+    await queryClient.invalidateQueries({ queryKey: ["evaluation"] });
+    await queryClient.invalidateQueries({ queryKey: ["wallet"] });
+  }, [model.id, queryClient]);
 
   // 進行中の評価があれば、終わるまで step を呼び続ける
   const runLoop = useCallback(
@@ -85,7 +83,7 @@ export function EvaluationPanel({
         while (alive()) {
           let response;
           try {
-            response = await stepEvaluation(organizationId, runId);
+            response = await stepEvaluation(runId);
           } catch (error) {
             if (error instanceof ApiError && error.status === 402) {
               setPaused(true);
@@ -96,7 +94,7 @@ export function EvaluationPanel({
             }
             break;
           }
-          await queryClient.invalidateQueries({ queryKey: ["evaluation", organizationId, runId] });
+          await queryClient.invalidateQueries({ queryKey: ["evaluation", runId] });
           if (response.state === "done") break;
           if (response.state === "warming_up") {
             setWarming(true);
@@ -112,7 +110,7 @@ export function EvaluationPanel({
         await refresh();
       }
     },
-    [organizationId, queryClient, refresh, t],
+    [queryClient, refresh, t],
   );
 
   useEffect(() => {
@@ -131,7 +129,7 @@ export function EvaluationPanel({
     if (starting) return;
     setStarting(true);
     try {
-      const run = await startEvaluation(organizationId, model.id);
+      const run = await startEvaluation(model.id);
       loopRef.current = null;
       setPaused(false);
       await refresh();
@@ -230,7 +228,7 @@ export function EvaluationPanel({
         <EvalItemsTable items={detail.data.items} />
       )}
 
-      <ModelCardSection organizationId={organizationId} model={model} onApply={onApplyCard} />
+      <ModelCardSection model={model} onApply={onApplyCard} />
 
       {runs.length > 1 && <RunHistory runs={runs.slice(1)} />}
     </div>
@@ -415,11 +413,9 @@ function RunHistory({ runs }: { runs: EvalRunRecord[] }) {
 
 /** Nemotron にモデルカードの下書きを作らせ、直してから設定の画面に入れる */
 function ModelCardSection({
-  organizationId,
   model,
   onApply,
 }: {
-  organizationId: string;
   model: ModelRecord;
   onApply: (draft: CardDraft) => void;
 }) {
@@ -435,14 +431,14 @@ function ModelCardSection({
   const generate = async () => {
     setBusy(true);
     try {
-      const result = await draftModelCard(organizationId, model.id, locale === "ja" ? "ja" : "en");
+      const result = await draftModelCard(model.id, locale === "ja" ? "ja" : "en");
       setDraft({ tagline: result.tagline, description: result.description, tags: result.tags });
       setCost(result.costMicros);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("models.card.failed"));
     } finally {
       setBusy(false);
-      await queryClient.invalidateQueries({ queryKey: ["wallet", organizationId] });
+      await queryClient.invalidateQueries({ queryKey: ["wallet"] });
     }
   };
 

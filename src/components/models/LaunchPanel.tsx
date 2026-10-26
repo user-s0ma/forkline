@@ -64,26 +64,21 @@ function Step({
 
 /**
  * 公開までの手順。学習 → デプロイ → 料金 → 公開。
- * 公開と非公開の切り替えは組織の管理者だけができる。
  */
 export function LaunchPanel({
-  organizationId,
   model,
   isDirty,
-  canManage,
   onOpenTab,
   onChanged,
 }: {
-  organizationId: string;
   model: ModelRecord;
   isDirty: boolean;
-  canManage: boolean;
   onOpenTab: (tab: "training" | "settings" | "test") => void;
   onChanged: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
   const [confirm, confirmDialog] = useConfirm();
-  const jobs = useFineTunes(organizationId, model.id);
+  const jobs = useFineTunes(model.id);
   const trained = (jobs.data?.items ?? []).some((job) => job.status === "succeeded");
   const training = (jobs.data?.items ?? []).some(
     (job) => job.status === "queued" || job.status === "running",
@@ -95,13 +90,13 @@ export function LaunchPanel({
   const [busy, setBusy] = useState(false);
 
   const missingTagline = !model.tagline.trim();
-  const blocked = busy || isDirty || !configured || !canManage;
+  const blocked = busy || isDirty || !configured;
 
   const publish = async (visibility: ModelVisibility) => {
     if (blocked || (visibility === "public" && missingTagline)) return;
     setBusy(true);
     try {
-      await publishModel(organizationId, model.id, visibility);
+      await publishModel(model.id, visibility);
       await onChanged();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("models.launch.publish.failed"));
@@ -114,7 +109,7 @@ export function LaunchPanel({
     if (busy || !(await confirm(t("models.launch.publish.unpublishConfirm"), { danger: true }))) return;
     setBusy(true);
     try {
-      await unpublishModel(organizationId, model.id);
+      await unpublishModel(model.id);
       await onChanged();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("models.launch.publish.failed"));
@@ -137,9 +132,7 @@ export function LaunchPanel({
         )
       }
     >
-      {!canManage ? (
-        <p className="text-sm text-ink-mute">{t("models.launch.publish.managerOnly")}</p>
-      ) : published ? (
+      {published ? (
         <div className="flex flex-wrap items-center gap-2">
           <button
             className="console-button-secondary"

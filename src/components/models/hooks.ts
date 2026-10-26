@@ -10,18 +10,18 @@ import type { DatasetIssue } from "@/lib/models/dataset";
 /** 学習中は、この間隔で状態を問い合わせる */
 const POLL_MS = 10_000;
 
-export function useBaseModels(organizationId: string) {
+export function useBaseModels() {
   return useQuery({
-    queryKey: ["base-models", organizationId],
-    queryFn: () => listBaseModels(organizationId),
+    queryKey: ["base-models"],
+    queryFn: () => listBaseModels(),
     staleTime: 5 * 60_000,
   });
 }
 
-export function useFineTunes(organizationId: string, modelId: string) {
+export function useFineTunes(modelId: string) {
   return useQuery({
-    queryKey: ["fine-tunes", organizationId, modelId],
-    queryFn: () => listFineTunes(organizationId, modelId),
+    queryKey: ["fine-tunes", modelId],
+    queryFn: () => listFineTunes(modelId),
     refetchInterval: (query) =>
       query.state.data?.items.some(isFineTuneActive) ? POLL_MS : false,
   });

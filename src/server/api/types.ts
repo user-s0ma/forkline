@@ -1,13 +1,12 @@
-import type { AuditActor } from "@/lib/organization/audit";
-
-export type OrganizationAuthorization = {
-  actor: AuditActor;
-  role: string | null;
+export type SessionUser = {
+  id: string;
+  name: string;
+  email: string;
 };
 
 export type ApiEnv = {
   Bindings: AppEnv;
   Variables: {
-    authorization: OrganizationAuthorization;
+    user: SessionUser;
   };
 };

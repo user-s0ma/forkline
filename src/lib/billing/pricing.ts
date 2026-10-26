@@ -47,8 +47,8 @@ export type UsageCharge = {
 
 /**
  * 1回の呼び出しの請求額を内訳付きで計算する。
- * 自組織のモデルを使う場合 (selfUse) はクリエイター価格を取らず原価のみ。
- * Nebius のエンドポイントの GPU 代は呼び出しごとではなく、動いていた時間で公開した組織に請求する
+ * 自分のモデルを使う場合 (selfUse) はクリエイター価格を取らず原価のみ。
+ * Nebius のエンドポイントの GPU 代は呼び出しごとではなく、動いていた時間で公開した人に請求する
  * (src/lib/billing/compute.ts)。ここでの computeMicros は呼び出しごとの原価があるときだけ使う。
  */
 export function quoteUsage(

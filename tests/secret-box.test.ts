@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   decryptSecretValue,
   encryptSecretValue,
-} from "../src/lib/organization/secret-box";
+} from "../src/lib/util/secret-box";
 
 const KEY = "test-encryption-key-with-at-least-32-characters";
 
