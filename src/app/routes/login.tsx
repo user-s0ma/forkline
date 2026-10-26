@@ -100,6 +100,10 @@ export default function Login() {
     null,
   );
   const { captchaWidget, captchaHeaders, resetCaptcha } = useAuthTurnstile();
+  // 自分のアカウントの欄は畳んでおく。ログインが要るページから来たときや、確認のメールを送ったあとは開く
+  const [ownAccountOpen, setOwnAccountOpen] = useState(
+    () => searchParams.has("callbackUrl") || searchParams.has("error"),
+  );
 
   const callbackUrl = useMemo(() => {
     const value = searchParams.get("callbackUrl");
@@ -255,7 +259,13 @@ export default function Login() {
               <p className="text-sm leading-6 text-ink-soft">{t("auth.login.tryDemoNote")}</p>
               <DemoButton className="ui-button-primary mt-2 w-full" />
             </div>
-            <p className="px-4 pt-3 pb-2 text-xs font-medium text-ink-mute">{t("auth.login.orSignIn")}</p>
+            <details
+              open={ownAccountOpen || verificationEmail !== null}
+              onToggle={(event) => setOwnAccountOpen(event.currentTarget.open)}
+            >
+              <summary className="cursor-pointer px-4 py-3 text-sm text-ink-mute hover:text-ink">
+                {t("auth.login.orSignIn")}
+              </summary>
             <div className="ui-tabs">
               <button
                 className="ui-tab"
@@ -358,6 +368,7 @@ export default function Login() {
                 {captchaWidget}
               </form>
             </div>
+            </details>
           </section>
         </div>
       </main>
