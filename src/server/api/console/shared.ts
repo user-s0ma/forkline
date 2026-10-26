@@ -3,7 +3,7 @@ import type { Context } from "hono";
 import type { MySqlColumn } from "drizzle-orm/mysql-core";
 import { getDb } from "@/lib/db/client";
 import { aiModel } from "@/lib/db/schema";
-import { detectLocale, translate } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import { decodeCursor } from "@/lib/util/cursor";
 import type { ApiEnv } from "../types";
 
@@ -28,7 +28,7 @@ export function message(
   key: string,
   vars?: Record<string, string | number>,
 ) {
-  return { message: translate(detectLocale(c.req.raw), key, vars) };
+  return { message: translate(key, vars) };
 }
 
 export async function loadOwnModel(

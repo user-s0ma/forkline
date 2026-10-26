@@ -23,14 +23,14 @@ const SERVE_COMMAND = "python3 /opt/forkline/serve.py";
  * 要確認: 名前の規則。小文字英数字とハイフン、63 文字までに絞っている
  */
 export function normalizeResourceName(name: unknown): string {
-  if (typeof name !== "string") throw new NebiusError("エンドポイントの名前がありません");
+  if (typeof name !== "string") throw new NebiusError("The endpoint name is missing");
   const out = name
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/-{2,}/g, "-")
     .slice(0, 63)
     .replace(/^-+|-+$/g, "");
-  if (out === "") throw new NebiusError("エンドポイントの名前には英数字を含めてください");
+  if (out === "") throw new NebiusError("The endpoint name must contain letters or digits");
   return out;
 }
 
@@ -40,9 +40,9 @@ export async function createEndpoint(
 ): Promise<{ endpointId: string; authToken: string }> {
   const name = normalizeResourceName(input?.name);
   const model = findModel(input.baseModelId);
-  if (!model) throw new NebiusError("このベースモデルは推論に対応していません");
+  if (!model) throw new NebiusError("This base model does not support inference");
   const { bucket } = s3Config(env);
-  const adapterKey = parseS3Uri(input.adapterUri, bucket, "LoRA の URI").replace(/\/+$/, "");
+  const adapterKey = parseS3Uri(input.adapterUri, bucket, "LoRA URI").replace(/\/+$/, "");
   const image = requireString(env.NEBIUS_SERVE_IMAGE, "NEBIUS_SERVE_IMAGE");
 
   const args = [
@@ -77,7 +77,7 @@ export async function createEndpoint(
     },
     spec,
   });
-  return { endpointId: operationResourceId(op, "エンドポイント"), authToken };
+  return { endpointId: operationResourceId(op, "endpoint"), authToken };
 }
 
 type EndpointResource = {
@@ -100,7 +100,7 @@ export function pickPublicUrl(list: unknown): string | undefined {
 }
 
 export async function getEndpoint(env: NebiusEnv, endpointId: string): Promise<EndpointStatus> {
-  const id = assertResourceId(endpointId, "エンドポイント");
+  const id = assertResourceId(endpointId, "endpoint");
   const ep = await nebiusApi<EndpointResource>(env, "GET", `/ai/v1/endpoints/${encodeURIComponent(id)}`);
   const state = ep.status?.state ?? "STATE_UNSPECIFIED";
   switch (state) {
@@ -119,7 +119,7 @@ export async function getEndpoint(env: NebiusEnv, endpointId: string): Promise<E
       const parts = [d?.code, d?.message].filter((s) => typeof s === "string" && s !== "");
       return {
         state: "failed",
-        error: parts.length > 0 ? `エンドポイントでエラーが起きました (${parts.join(": ").slice(0, 300)})` : "エンドポイントでエラーが起きました",
+        error: parts.length > 0 ? `The endpoint reported an error (${parts.join(": ").slice(0, 300)})` : "The endpoint reported an error",
       };
     }
     default:
@@ -129,17 +129,17 @@ export async function getEndpoint(env: NebiusEnv, endpointId: string): Promise<E
 }
 
 export async function startEndpoint(env: NebiusEnv, endpointId: string): Promise<void> {
-  const id = assertResourceId(endpointId, "エンドポイント");
+  const id = assertResourceId(endpointId, "endpoint");
   await nebiusApi(env, "POST", "/ai/v1/endpoints/start", { id });
 }
 
 export async function stopEndpoint(env: NebiusEnv, endpointId: string): Promise<void> {
-  const id = assertResourceId(endpointId, "エンドポイント");
+  const id = assertResourceId(endpointId, "endpoint");
   await nebiusApi(env, "POST", "/ai/v1/endpoints/stop", { id });
 }
 
 export async function deleteEndpoint(env: NebiusEnv, endpointId: string): Promise<void> {
-  const id = assertResourceId(endpointId, "エンドポイント");
+  const id = assertResourceId(endpointId, "endpoint");
   // 要確認: ジョブの削除 (DELETE /ai/v1/jobs/<id>) と同じ形と見ている
   await nebiusApi(env, "DELETE", `/ai/v1/endpoints/${encodeURIComponent(id)}`);
 }

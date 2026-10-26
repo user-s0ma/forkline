@@ -4,30 +4,19 @@ import {
   route,
   index,
 } from "@react-router/dev/routes";
-import { MARKETING_PATHS, NON_DEFAULT_LOCALES } from "../lib/i18n/locales";
+import { MARKETING_PATHS } from "../lib/i18n/locales";
 
 const file = (path: string) =>
   path === "/" ? "routes/_index.tsx" : `routes/${path.slice(1)}.tsx`;
-const seg = (path: string) => (path === "/" ? "home" : path.slice(1));
 const subPaths = MARKETING_PATHS.filter((p) => p !== "/");
 
 const marketing: RouteConfigEntry[] = subPaths.map((path) =>
   route(path.slice(1), file(path)),
 );
 
-const localeMirrors: RouteConfigEntry[] = NON_DEFAULT_LOCALES.flatMap(
-  (locale) =>
-    MARKETING_PATHS.map((path) =>
-      route(path === "/" ? locale : `${locale}${path}`, file(path), {
-        id: `${seg(path)}-${locale}`,
-      }),
-    ),
-);
-
 export default [
   index("routes/_index.tsx"),
   ...marketing,
-  ...localeMirrors,
 
   route("robots.txt", "routes/robots.txt.tsx"),
   route("sitemap.xml", "routes/sitemap.xml.tsx"),

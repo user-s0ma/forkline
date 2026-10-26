@@ -14,7 +14,7 @@ import {
   type PublicEvaluation,
   type StoreModelDetail,
 } from "@/lib/api-client";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 
 /*
  * モデル詳細の中身 (/models/:slug)。
@@ -57,14 +57,13 @@ function StatChip({
 /** カテゴリ・ベースモデル・リクエスト数・公開日・公開者 */
 export function ModelStats({ model }: { model: StoreModelDetail }) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const numberFormatter = useMemo(
-    () => new Intl.NumberFormat(localeTag(locale)),
-    [locale],
+    () => new Intl.NumberFormat(LOCALE_TAG),
+    [],
   );
   const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(localeTag(locale), { dateStyle: "medium" }),
-    [locale],
+    () => new Intl.DateTimeFormat(LOCALE_TAG, { dateStyle: "medium" }),
+    [],
   );
   return (
     <div className="flex flex-wrap gap-2">
@@ -127,10 +126,9 @@ function ModelIdPanel({ slug }: { slug: string }) {
  */
 function EvaluationSection({ evaluation }: { evaluation: PublicEvaluation }) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(localeTag(locale), { dateStyle: "medium" }),
-    [locale],
+    () => new Intl.DateTimeFormat(LOCALE_TAG, { dateStyle: "medium" }),
+    [],
   );
   const stats = [
     {

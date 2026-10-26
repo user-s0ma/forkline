@@ -54,7 +54,7 @@ export async function errorDetail(
 
 export function requireString(value: unknown, name: string): string {
   if (typeof value !== "string" || value.trim() === "") {
-    throw new NebiusError(`${name} が設定されていません`);
+    throw new NebiusError(`${name} is not set`);
   }
   return value.trim();
 }

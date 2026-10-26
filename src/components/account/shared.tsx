@@ -5,7 +5,7 @@ import { Check, Copy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { DailyAmount } from "@/lib/api-client";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 
 /** 数字を1枚のパネルに並べる帯。セルは1pxの線で区切る */
 export function StatStrip({ children, cols = 4 }: { children: ReactNode; cols?: 3 | 4 }) {
@@ -106,7 +106,6 @@ export function DailyBars({
   /** brand=支出、earn=収益 */
   tone?: "brand" | "earn";
 }) {
-  const locale = useLocale();
   const series = useMemo(() => {
     const byDay = new Map(days.map((day) => [day.day, day]));
     const result: Array<{ day: string; micros: number; requests: number }> = [];
@@ -128,11 +127,11 @@ export function DailyBars({
   const max = Math.max(1, peak);
   const dayFormatter = useMemo(
     () =>
-      new Intl.DateTimeFormat(localeTag(locale), {
+      new Intl.DateTimeFormat(LOCALE_TAG, {
         month: "numeric",
         day: "numeric",
       }),
-    [locale],
+    [],
   );
   const format = (day: string) => dayFormatter.format(new Date(`${day}T00:00:00`));
   const barColor =

@@ -30,7 +30,7 @@ import {
   requestPayout,
   startPayoutOnboarding,
 } from "@/lib/api-client";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 import { microsToYen, yenToMicros } from "@/lib/billing/pricing";
 import { useConfirm } from "@/components/ui/useConfirm";
 
@@ -79,9 +79,8 @@ function ConnectSteps({ current }: { current: 0 | 1 | 2 }) {
 export default function EarningsPage() {
   const { t } = useTranslation();
   const [confirm, confirmDialog] = useConfirm();
-  const locale = useLocale();
   const yen = useYen();
-  const numberFormatter = new Intl.NumberFormat(localeTag(locale));
+  const numberFormatter = new Intl.NumberFormat(LOCALE_TAG);
   const { openMobileNavigation } = useAccountPage();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();

@@ -91,11 +91,11 @@ export type S3Config = {
 export function s3Config(env: NebiusEnv): S3Config {
   const endpoint = trimSlash(requireString(env.NEBIUS_S3_ENDPOINT, "NEBIUS_S3_ENDPOINT"));
   if (!/^https?:\/\/[^/\s]+$/.test(endpoint)) {
-    throw new NebiusError("NEBIUS_S3_ENDPOINT は https://storage.<region>.nebius.cloud の形で設定してください");
+    throw new NebiusError("Set NEBIUS_S3_ENDPOINT in the form https://storage.<region>.nebius.cloud");
   }
   const bucket = requireString(env.NEBIUS_S3_BUCKET, "NEBIUS_S3_BUCKET");
   if (!/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/.test(bucket)) {
-    throw new NebiusError("NEBIUS_S3_BUCKET の名前が正しくありません");
+    throw new NebiusError("Invalid NEBIUS_S3_BUCKET name");
   }
   return {
     endpoint,
@@ -121,14 +121,14 @@ export function s3Uri(bucket: string, key: string): string {
 
 /** s3://bucket/key を分ける。バケットが env と違えば受け付けない */
 export function parseS3Uri(uri: unknown, bucket: string, what: string): string {
-  if (typeof uri !== "string") throw new NebiusError(`${what}が正しくありません`);
+  if (typeof uri !== "string") throw new NebiusError(`Invalid ${what}`);
   const prefix = `s3://${bucket}/`;
   if (!uri.startsWith(prefix)) {
-    throw new NebiusError(`${what}は ${prefix} で始まる必要があります`);
+    throw new NebiusError(`${what} must start with ${prefix}`);
   }
   const key = uri.slice(prefix.length);
   if (!isSafeKey(key.replace(/\/$/, "")) || key === "") {
-    throw new NebiusError(`${what}のパスが正しくありません`);
+    throw new NebiusError(`Invalid ${what} path`);
   }
   return key;
 }
@@ -167,7 +167,7 @@ export async function s3Request(
       body: bodyBytes,
     });
   } catch {
-    throw new NebiusError("Object Storage につながりませんでした");
+    throw new NebiusError("Could not reach Object Storage");
   }
 }
 
@@ -175,7 +175,7 @@ export async function s3Put(env: NebiusEnv, key: string, body: string, contentTy
   const res = await s3Request(env, { method: "PUT", key, body, contentType });
   if (!res.ok) {
     const detail = await errorDetail(res, env);
-    throw new NebiusError(`Object Storage への保存に失敗しました (${res.status}${detail ? ` ${detail}` : ""})`, res.status);
+    throw new NebiusError(`Saving to Object Storage failed (${res.status}${detail ? ` ${detail}` : ""})`, res.status);
   }
 }
 
@@ -183,5 +183,5 @@ export async function s3Exists(env: NebiusEnv, key: string): Promise<boolean> {
   const res = await s3Request(env, { method: "HEAD", key });
   if (res.ok) return true;
   if (res.status === 404) return false;
-  throw new NebiusError(`Object Storage を確認できませんでした (${res.status})`, res.status);
+  throw new NebiusError(`Could not check Object Storage (${res.status})`, res.status);
 }

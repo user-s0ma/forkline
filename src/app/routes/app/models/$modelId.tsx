@@ -30,7 +30,6 @@ import {
   type ModelRecord,
   type ModelUpdateInput,
 } from "@/lib/api-client";
-import { localizeHref, useLocale } from "@/lib/i18n";
 import { MODEL_CATEGORIES, SLUG_PATTERN } from "@/lib/billing/pricing";
 import type { AppLayoutContext } from "../_layout";
 
@@ -162,7 +161,6 @@ function ModelEditor({
   onDeleted: () => Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const { openMobileNavigation, user } = useOutletContext<AppLayoutContext>();
   const [draft, setDraft] = useState<ModelUpdateInput>(() => toDraft(model));
   const [isSaving, setIsSaving] = useState(false);
@@ -174,7 +172,7 @@ function ModelEditor({
   const isDirty = JSON.stringify(draft) !== JSON.stringify(toDraft(model));
   const slugValid = SLUG_PATTERN.test(draft.slug);
   const canSave = isDirty && slugValid && Boolean(draft.name.trim()) && !isSaving;
-  const publicHref = localizeHref(`/models/${model.slug}`, locale);
+  const publicHref = `/models/${model.slug}`;
   const isPublic = model.status === "published" && model.visibility === "public";
   const testDisabled = model.endpointId ? null : t("models.test.deployFirst");
 

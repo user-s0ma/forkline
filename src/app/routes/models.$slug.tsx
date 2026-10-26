@@ -14,13 +14,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { appContext } from "@/lib/util/app-context";
 import { shareMeta } from "@/lib/share-meta";
 import { findPublicModel } from "@/server/api/store";
-import {
-  localeFromMatches,
-  localizeHref,
-  OG_LOCALE,
-  translate,
-  useLocale,
-} from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 
 /** リンクを共有したときのタイトル・説明・OG 画像のために、名前と説明だけをサーバーで読む */
 export async function loader({ params, context }: Route.LoaderArgs) {
@@ -34,24 +28,23 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   }
 }
 
-export function meta({ matches, params, loaderData }: Route.MetaArgs): Route.MetaDescriptors {
-  const locale = localeFromMatches(matches);
+export function meta({ params, loaderData }: Route.MetaArgs): Route.MetaDescriptors {
   if (!loaderData) {
     return [
-      { title: translate(locale, "store.detailMetaTitle") },
-      { name: "description", content: translate(locale, "store.metaDescription") },
+      { title: translate("store.detailMetaTitle") },
+      { name: "description", content: translate("store.metaDescription") },
     ];
   }
   const appUrl = import.meta.env.VITE_PUBLIC_APP_URL ?? "";
-  const title = `${loaderData.name} | ${translate(locale, "site.name")}`;
-  const description = loaderData.tagline || translate(locale, "store.metaDescription");
+  const title = `${loaderData.name} | ${translate("site.name")}`;
+  const description = loaderData.tagline || translate("store.metaDescription");
   const slug = encodeURIComponent(params.slug);
   return [
     { title },
     { name: "description", content: description },
     ...shareMeta({
-      title: `${loaderData.name} | ${translate(OG_LOCALE, "site.name")}`,
-      description: loaderData.tagline || translate(OG_LOCALE, "store.metaDescription"),
+      title: `${loaderData.name} | ${translate("site.name")}`,
+      description: loaderData.tagline || translate("store.metaDescription"),
       url: `${appUrl}/models/${slug}`,
       image: `${appUrl}/api/og/models/${slug}`,
       imageAlt: loaderData.name,
@@ -72,9 +65,8 @@ function DetailSkeleton() {
 
 export default function ModelDetail({ params }: Route.ComponentProps) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const { data: model, isPending, notFound } = useStoreModel(params.slug);
-  const exploreHref = localizeHref("/models", locale);
+  const exploreHref = "/models";
 
   const back = (
     <a

@@ -17,48 +17,48 @@ const TRAIN_COMMAND = "python3 /opt/forkline/train.py";
 /** chat 形式の JSONL を 1 行ずつ確かめる。だめなら何行目かを示す */
 export function validateChatJsonl(jsonl: string): number {
   if (typeof jsonl !== "string" || jsonl.trim() === "") {
-    throw new NebiusError("学習データが空です");
+    throw new NebiusError("The training data is empty");
   }
   if (new TextEncoder().encode(jsonl).length > MAX_TRAINING_BYTES) {
-    throw new NebiusError("学習データが大きすぎます (50MB まで)");
+    throw new NebiusError("The training data is too large (50 MB max)");
   }
   const lines = jsonl.split(/\r?\n/);
   let count = 0;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (line === "") continue;
-    const where = `学習データの ${i + 1} 行目`;
+    const where = `Training data line ${i + 1}`;
     let row: unknown;
     try {
       row = JSON.parse(line);
     } catch {
-      throw new NebiusError(`${where}が JSON として読めません`);
+      throw new NebiusError(`${where} is not valid JSON`);
     }
     const messages = (row as { messages?: unknown } | null)?.messages;
     if (!Array.isArray(messages) || messages.length === 0) {
-      throw new NebiusError(`${where}に messages の配列がありません`);
+      throw new NebiusError(`${where} has no messages array`);
     }
     let hasAssistant = false;
     for (const m of messages) {
       const role = (m as { role?: unknown } | null)?.role;
       const content = (m as { content?: unknown } | null)?.content;
       if (role !== "system" && role !== "user" && role !== "assistant") {
-        throw new NebiusError(`${where}の role は system / user / assistant のどれかにしてください`);
+        throw new NebiusError(`${where}: role must be system, user or assistant`);
       }
       if (typeof content !== "string") {
-        throw new NebiusError(`${where}の content が文字列ではありません`);
+        throw new NebiusError(`${where}: content is not a string`);
       }
       if (role === "assistant") hasAssistant = true;
     }
     if (!hasAssistant) {
-      throw new NebiusError(`${where}に assistant の発言がありません`);
+      throw new NebiusError(`${where} has no assistant message`);
     }
     count++;
     if (count > MAX_TRAINING_LINES) {
-      throw new NebiusError(`学習データは ${MAX_TRAINING_LINES} 行までです`);
+      throw new NebiusError(`The training data can have at most ${MAX_TRAINING_LINES} lines`);
     }
   }
-  if (count === 0) throw new NebiusError("学習データが空です");
+  if (count === 0) throw new NebiusError("The training data is empty");
   return count;
 }
 
@@ -67,7 +67,7 @@ export async function uploadTrainingData(
   input: { key: string; jsonl: string },
 ): Promise<{ datasetUri: string }> {
   if (typeof input?.key !== "string" || !isSafeKey(input.key)) {
-    throw new NebiusError("学習データの保存先のキーが正しくありません (英数字と . _ - / のみ)");
+    throw new NebiusError("Invalid training data key (letters, digits and . _ - / only)");
   }
   validateChatJsonl(input.jsonl);
   const { bucket } = s3Config(env);
@@ -76,30 +76,30 @@ export async function uploadTrainingData(
 }
 
 export function validateHyperparameters(h: FineTuneHyperparameters): void {
-  if (!h || typeof h !== "object") throw new NebiusError("学習の設定がありません");
+  if (!h || typeof h !== "object") throw new NebiusError("Training settings are missing");
   if (!Number.isInteger(h.epochs) || h.epochs < 1 || h.epochs > 20) {
-    throw new NebiusError("epochs は 1 から 20 の整数にしてください");
+    throw new NebiusError("epochs must be an integer from 1 to 20");
   }
   if (typeof h.learningRate !== "number" || !(h.learningRate >= 1e-6 && h.learningRate <= 1e-2)) {
-    throw new NebiusError("learningRate は 0.000001 から 0.01 の間にしてください");
+    throw new NebiusError("learningRate must be between 0.000001 and 0.01");
   }
   if (![4, 8, 16, 32, 64].includes(h.loraRank)) {
-    throw new NebiusError("loraRank は 4, 8, 16, 32, 64 のどれかにしてください");
+    throw new NebiusError("loraRank must be one of 4, 8, 16, 32, 64");
   }
   if (!Number.isInteger(h.loraAlpha) || h.loraAlpha < 1 || h.loraAlpha > 256) {
-    throw new NebiusError("loraAlpha は 1 から 256 の整数にしてください");
+    throw new NebiusError("loraAlpha must be an integer from 1 to 256");
   }
 }
 
 /** outputPrefix (キーか s3:// の URI) をキーに揃える。末尾の / は付けない */
 function normalizeOutputPrefix(prefix: unknown, bucket: string): string {
   if (typeof prefix !== "string" || prefix.trim() === "") {
-    throw new NebiusError("LoRA の保存先が指定されていません");
+    throw new NebiusError("No LoRA output path was given");
   }
-  const key = prefix.startsWith("s3://") ? parseS3Uri(prefix, bucket, "LoRA の保存先") : prefix;
+  const key = prefix.startsWith("s3://") ? parseS3Uri(prefix, bucket, "LoRA output path") : prefix;
   const trimmed = key.replace(/\/+$/, "");
   if (!isSafeKey(trimmed)) {
-    throw new NebiusError("LoRA の保存先のパスが正しくありません");
+    throw new NebiusError("Invalid LoRA output path");
   }
   return trimmed;
 }
@@ -132,9 +132,9 @@ export async function startFineTune(
   },
 ): Promise<{ jobId: string }> {
   const model = findModel(input?.baseModelId);
-  if (!model) throw new NebiusError("このベースモデルは微調整に対応していません");
+  if (!model) throw new NebiusError("This base model does not support fine-tuning");
   const { bucket } = s3Config(env);
-  const datasetKey = parseS3Uri(input.datasetUri, bucket, "学習データの URI");
+  const datasetKey = parseS3Uri(input.datasetUri, bucket, "training data URI");
   const outputKey = normalizeOutputPrefix(input.outputPrefix, bucket);
   validateHyperparameters(input.hyperparameters);
   const image = requireString(env.NEBIUS_TRAIN_IMAGE, "NEBIUS_TRAIN_IMAGE");
@@ -173,7 +173,7 @@ export async function startFineTune(
     },
     spec,
   });
-  return { jobId: operationResourceId(op, "ジョブ") };
+  return { jobId: operationResourceId(op, "job") };
 }
 
 type JobResource = {
@@ -187,7 +187,7 @@ function stateMessage(details: { code?: string; message?: string } | undefined, 
 }
 
 export async function getFineTune(env: NebiusEnv, jobId: string): Promise<FineTuneStatus> {
-  const id = assertResourceId(jobId, "ジョブ");
+  const id = assertResourceId(jobId, "job");
   const job = await nebiusApi<JobResource>(env, "GET", `/ai/v1/jobs/${encodeURIComponent(id)}`);
   const state = job.status?.state ?? "STATE_UNSPECIFIED";
   switch (state) {
@@ -197,23 +197,23 @@ export async function getFineTune(env: NebiusEnv, jobId: string): Promise<FineTu
       const { bucket } = s3Config(env);
       const outputUri = /(?:^|\s)--output-uri\s+(\S+)/.exec(job.spec?.args ?? "")?.[1];
       if (!outputUri) {
-        return { state: "failed", error: "ジョブの設定から LoRA の保存先を読めませんでした" };
+        return { state: "failed", error: "Could not read the LoRA output path from the job settings" };
       }
-      const key = parseS3Uri(outputUri, bucket, "LoRA の保存先");
+      const key = parseS3Uri(outputUri, bucket, "LoRA output path");
       // 学習スクリプトは最後に adapter_config.json を書く。無ければ失敗とみなす
       if (!(await s3Exists(env, `${key}/adapter_config.json`))) {
-        return { state: "failed", error: "学習は終わりましたが LoRA のファイルが見つかりません" };
+        return { state: "failed", error: "Training finished but the LoRA files were not found" };
       }
       return { state: "succeeded", adapterUri: outputUri };
     }
     case "FAILED":
-      return { state: "failed", error: stateMessage(job.status?.stateDetails, "学習ジョブが失敗しました") };
+      return { state: "failed", error: stateMessage(job.status?.stateDetails, "The training job failed") };
     case "ERROR":
-      return { state: "failed", error: stateMessage(job.status?.stateDetails, "Nebius 側のエラーで学習ジョブが止まりました") };
+      return { state: "failed", error: stateMessage(job.status?.stateDetails, "The training job stopped because of an error on Nebius") };
     case "CANCELLING":
     case "CANCELLED":
     case "DELETING":
-      return { state: "failed", error: "学習ジョブは取り消されました" };
+      return { state: "failed", error: "The training job was cancelled" };
     default:
       // STATE_UNSPECIFIED / PROVISIONING / STARTING / IMAGE_PULLING
       return { state: "queued" };
@@ -221,7 +221,7 @@ export async function getFineTune(env: NebiusEnv, jobId: string): Promise<FineTu
 }
 
 export async function cancelFineTune(env: NebiusEnv, jobId: string): Promise<void> {
-  const id = assertResourceId(jobId, "ジョブ");
+  const id = assertResourceId(jobId, "job");
   // 要確認: エンドポイントの stop/start (POST /ai/v1/endpoints/stop、本文 {id}) と同じ形と見ている
   await nebiusApi(env, "POST", "/ai/v1/jobs/cancel", { id });
 }

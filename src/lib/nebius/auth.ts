@@ -34,7 +34,7 @@ export async function getAccessToken(env: NebiusEnv): Promise<string> {
     const token = env.NEBIUS_API_KEY?.trim();
     if (!token) {
       throw new NebiusError(
-        "Nebius の認証情報がありません。NEBIUS_SERVICE_ACCOUNT_ID / NEBIUS_AUTHORIZED_KEY_ID / NEBIUS_AUTHORIZED_PRIVATE_KEY か NEBIUS_API_KEY を設定してください",
+        "Nebius credentials are missing. Set NEBIUS_SERVICE_ACCOUNT_ID / NEBIUS_AUTHORIZED_KEY_ID / NEBIUS_AUTHORIZED_PRIVATE_KEY or NEBIUS_API_KEY",
       );
     }
     return token;
@@ -69,17 +69,17 @@ export async function getAccessToken(env: NebiusEnv): Promise<string> {
       body: form.toString(),
     });
   } catch {
-    throw new NebiusError("Nebius の認証サーバーにつながりませんでした");
+    throw new NebiusError("Could not reach the Nebius auth server");
   }
   if (!res.ok) {
     const detail = await errorDetail(res, env, [jwt]);
-    throw new NebiusError(`Nebius のアクセストークンを取得できませんでした (${res.status} ${detail})`, res.status);
+    throw new NebiusError(`Could not get a Nebius access token (${res.status} ${detail})`, res.status);
   }
   const json = (await res.json().catch(() => null)) as
     | { access_token?: unknown; expires_in?: unknown }
     | null;
   if (!json || typeof json.access_token !== "string" || json.access_token === "") {
-    throw new NebiusError("Nebius の認証サーバーの応答にアクセストークンがありません");
+    throw new NebiusError("The Nebius auth server response has no access token");
   }
   const expiresIn = typeof json.expires_in === "number" && json.expires_in > 0 ? json.expires_in : 3600;
   // 切れる 5 分前には取り直す
@@ -115,7 +115,7 @@ export async function signServiceAccountJwt(input: {
       ["sign"],
     );
   } catch {
-    throw new NebiusError("NEBIUS_AUTHORIZED_PRIVATE_KEY を RSA の秘密鍵として読めませんでした");
+    throw new NebiusError("Could not read NEBIUS_AUTHORIZED_PRIVATE_KEY as an RSA private key");
   }
   const signature = await crypto.subtle.sign(
     "RSASSA-PKCS1-v1_5",
@@ -134,7 +134,7 @@ export function pemToPkcs8(pem: string): ArrayBuffer {
     .replace(/-----END [A-Z ]+-----/, "")
     .replace(/\s+/g, "");
   if (!/^[A-Za-z0-9+/=]+$/.test(b64)) {
-    throw new NebiusError("NEBIUS_AUTHORIZED_PRIVATE_KEY が PEM の形ではありません");
+    throw new NebiusError("NEBIUS_AUTHORIZED_PRIVATE_KEY is not in PEM format");
   }
   const bin = atob(b64);
   const der = new Uint8Array(bin.length);

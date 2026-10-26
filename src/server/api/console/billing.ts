@@ -4,7 +4,7 @@ import { z } from "zod";
 import { encodeCursor } from "@/lib/util/cursor";
 import { getDb } from "@/lib/db/client";
 import { aiModel, fineTune, ledgerEntry, usageRecord } from "@/lib/db/schema";
-import { detectLocale, translate } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import {
   CURRENCY,
   microsToYen,
@@ -171,7 +171,6 @@ billing.get("/wallet/ledger", async (c) => {
 
 billing.post("/wallet/topup", async (c) => {
   const userId = currentUser(c).id;
-  const locale = detectLocale(c.req.raw);
   const input = topupSchema.safeParse(await c.req.json().catch(() => null));
   if (!input.success) {
     return c.json(
@@ -192,7 +191,7 @@ billing.post("/wallet/topup", async (c) => {
         price_data: {
           currency: CURRENCY,
           unit_amount: input.data.amountYen,
-          product_data: { name: translate(locale, "server.billing.topupProduct") },
+          product_data: { name: translate("server.billing.topupProduct") },
         },
       },
     ],

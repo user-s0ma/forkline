@@ -7,12 +7,6 @@ export function toLocalTime(date = new Date()) {
   return new Date(date.getTime() + JST_OFFSET_MS);
 }
 
-export function formatLocalDateTime(value: string | Date) {
-  const local = toLocalTime(value instanceof Date ? value : new Date(value));
-  const weekday = "日月火水木金土"[local.getUTCDay()];
-  return `${local.getUTCMonth() + 1}/${local.getUTCDate()}(${weekday}) ${String(local.getUTCHours()).padStart(2, "0")}:${String(local.getUTCMinutes()).padStart(2, "0")}`;
-}
-
 export function localDayIndex(time: number) {
   return Math.floor((time + JST_OFFSET_MS) / DAY_MS);
 }

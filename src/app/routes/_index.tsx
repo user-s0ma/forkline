@@ -7,7 +7,7 @@ import { FlowDiagram } from "@/components/landing/FlowDiagram";
 import { DemoButton } from "@/components/account/DemoButton";
 import { SiteFooter, SiteHeader } from "@/components/landing/SiteChrome";
 import { listStoreModels, type StoreListing } from "@/lib/api-client";
-import { localeTag, localizeHref, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 import {
   formatYen,
   PAYOUT_MIN_YEN,
@@ -91,7 +91,7 @@ const WHY_KEYS = ["gpu", "idle", "api", "payout"] as const;
 
 function Why({ idleMinutes }: { idleMinutes: number }) {
   const { t } = useTranslation();
-  const tag = localeTag(useLocale());
+  const tag = LOCALE_TAG;
   return (
     <div className="grid gap-12 lg:grid-cols-12">
       <div className="lg:col-span-5">
@@ -209,7 +209,7 @@ function Stack() {
 /** 一覧に出す代表価格。1リクエストあたり > 出力 > 入力 の順で選ぶ */
 function usePriceText() {
   const { t } = useTranslation();
-  const tag = localeTag(useLocale());
+  const tag = LOCALE_TAG;
   return ({ pricing }: StoreListing) => {
     if (pricing.priceOutputMicros > 0) {
       return { price: formatYen(pricing.priceOutputMicros, tag), unit: t("landing.models.perMillionOutput") };
@@ -226,12 +226,11 @@ function usePriceText() {
 
 function ModelRow({ model }: { model: StoreListing }) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const priceText = usePriceText()(model);
   return (
     <li>
       <a
-        href={localizeHref(`/models/${encodeURIComponent(model.slug)}`, locale)}
+        href={`/models/${encodeURIComponent(model.slug)}`}
         className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 px-5 py-5 transition-colors hover:bg-paper sm:grid-cols-[1.4fr_0.9fr_0.8fr]"
       >
         <span className="min-w-0">
@@ -260,7 +259,6 @@ function ModelRow({ model }: { model: StoreListing }) {
 
 function LiveModels() {
   const { t } = useTranslation();
-  const locale = useLocale();
   const { data, isPending, isError } = useQuery({
     queryKey: ["landing-models"],
     queryFn: () => listStoreModels({ sort: "popular" }),
@@ -298,7 +296,7 @@ function LiveModels() {
         </ul>
       )}
       <a
-        href={localizeHref("/models", locale)}
+        href="/models"
         className="block border-t border-line px-5 py-4 text-sm font-semibold text-brand-ink transition-colors hover:bg-paper"
       >
         {t("landing.models.viewAll")}
@@ -435,7 +433,6 @@ function DemoModelScores() {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const idleMinutes = loaderData?.idleMinutes ?? DEFAULT_ENDPOINT_IDLE_MINUTES;
 
   return (
@@ -512,7 +509,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <div className="lg:col-span-4">
               <SectionTitle title={t("landing.api.title")} lead={t("landing.api.lead")} />
               <a
-                href={localizeHref("/docs", locale)}
+                href="/docs"
                 className="mt-6 inline-flex text-sm font-semibold text-brand-ink hover:underline"
               >
                 {t("landing.api.docs")}

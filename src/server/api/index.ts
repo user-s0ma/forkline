@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { detectLocale, translate } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import { auth } from "@/lib/auth/server";
 import { demoMayWrite, isDemoUser } from "@/lib/auth/demo";
 import { loggableError } from "@/lib/billing/stripe";
@@ -54,7 +54,7 @@ api.use("/api/*", async (c, next) => {
   if (demoMayWrite(c.req.method, path)) return next();
   const session = await auth(c.env, new URL(c.req.url).origin).api.getSession({ headers: c.req.raw.headers });
   if (session && isDemoUser(session.user)) {
-    return c.json({ message: translate(detectLocale(c.req.raw), "server.common.demoReadOnly") }, 403);
+    return c.json({ message: translate("server.common.demoReadOnly") }, 403);
   }
   return next();
 });
@@ -71,9 +71,7 @@ api.onError((error, c) => {
   console.error(loggableError(error));
   return c.json(
     {
-      message: translate(
-        detectLocale(c.req.raw),
-        "server.common.internalError",
+      message: translate("server.common.internalError",
       ),
     },
     500,
@@ -82,7 +80,7 @@ api.onError((error, c) => {
 
 api.notFound((c) =>
   c.json(
-    { message: translate(detectLocale(c.req.raw), "server.common.notFound") },
+    { message: translate("server.common.notFound") },
     404,
   ),
 );

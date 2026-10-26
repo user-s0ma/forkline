@@ -8,14 +8,12 @@ export type LegalSection = {
   items?: Array<{ label: string; text: string }>;
 };
 
-/** 規約・ポリシーの本文。英語版は参考訳で、notice に「日本語版が優先する」旨を出す */
+/** 規約・ポリシーの本文 */
 export function LegalPage({
   title,
-  notice,
   children,
 }: {
   title: string;
-  notice?: string;
   children: ReactNode;
 }) {
   return (
@@ -24,11 +22,6 @@ export function LegalPage({
       <PageBand title={title} size="sm" />
       <section>
         <div className="ui-container max-w-3xl! py-12 lg:py-16">
-          {notice && (
-            <p className="mb-10 rounded-xl border border-line bg-paper px-5 py-4 text-sm leading-6 text-ink-soft">
-              {notice}
-            </p>
-          )}
           {children}
         </div>
       </section>
@@ -71,5 +64,3 @@ export function LegalSections({
 }
 
 /** 英語版の冒頭に出す注記 */
-export const TRANSLATION_NOTICE =
-  "This English version is a translation provided for convenience. If it differs from the Japanese version, the Japanese version prevails.";

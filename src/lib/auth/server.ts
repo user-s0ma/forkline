@@ -4,7 +4,7 @@ import { APIError, createAuthEndpoint, createAuthMiddleware, getSessionFromCtx }
 import { setSessionCookie } from "better-auth/cookies";
 import { captcha } from "better-auth/plugins";
 import { getDb } from "../db/client";
-import { detectLocale, translate } from "../i18n";
+import { translate } from "../i18n";
 import { retireUserModels } from "../compute/retire";
 import { sendEmail } from "../email/send";
 import * as schema from "../db/schema";
@@ -20,14 +20,12 @@ function escapeHtml(value: string) {
 }
 
 function renderEmail({
-  locale,
   heading,
   body,
   buttonLabel,
   url,
   footer,
 }: {
-  locale: Locale;
   heading: string;
   body: string;
   buttonLabel: string;
@@ -37,7 +35,7 @@ function renderEmail({
   const text = [heading, "", body, url, "", footer].join("\n");
   const html = `
     <!doctype html>
-    <html lang="${locale}">
+    <html lang="en">
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -69,7 +67,7 @@ function renderEmail({
 export function turnstileDisabled(env: Pick<AppEnv, "TURNSTILE_SECRET_KEY">, baseURL: string) {
   if (env.TURNSTILE_SECRET_KEY?.trim()) return false;
   if (!baseURL.startsWith("http://")) {
-    throw new Error("TURNSTILE_SECRET_KEY が設定されていません");
+    throw new Error("TURNSTILE_SECRET_KEY is not set");
   }
   return true;
 }
@@ -132,19 +130,17 @@ function createAuth(env: AppEnv, requestOrigin?: string) {
       maxPasswordLength: 128,
       resetPasswordTokenExpiresIn: 60 * 60,
       revokeSessionsOnPasswordReset: true,
-      async sendResetPassword({ user, url }, request) {
-        const locale = detectLocale(request);
+      async sendResetPassword({ user, url }) {
         await sendEmail(env, {
           from: emailFrom,
           to: user.email,
-          subject: translate(locale, "email.reset.subject"),
+          subject: translate("email.reset.subject"),
           ...renderEmail({
-            locale,
-            heading: translate(locale, "email.reset.heading"),
-            body: translate(locale, "email.reset.body"),
-            buttonLabel: translate(locale, "email.reset.button"),
+            heading: translate("email.reset.heading"),
+            body: translate("email.reset.body"),
+            buttonLabel: translate("email.reset.button"),
             url,
-            footer: translate(locale, "email.reset.footer"),
+            footer: translate("email.reset.footer"),
           }),
         });
       },
@@ -154,19 +150,17 @@ function createAuth(env: AppEnv, requestOrigin?: string) {
       sendOnSignIn: true,
       autoSignInAfterVerification: true,
       expiresIn: 60 * 60,
-      async sendVerificationEmail({ user, url }, request) {
-        const locale = detectLocale(request);
+      async sendVerificationEmail({ user, url }) {
         await sendEmail(env, {
           from: emailFrom,
           to: user.email,
-          subject: translate(locale, "email.verify.subject"),
+          subject: translate("email.verify.subject"),
           ...renderEmail({
-            locale,
-            heading: translate(locale, "email.verify.heading"),
-            body: translate(locale, "email.verify.body"),
-            buttonLabel: translate(locale, "email.verify.button"),
+            heading: translate("email.verify.heading"),
+            body: translate("email.verify.body"),
+            buttonLabel: translate("email.verify.button"),
             url,
-            footer: translate(locale, "email.verify.footer"),
+            footer: translate("email.verify.footer"),
           }),
         });
       },

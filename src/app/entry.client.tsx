@@ -2,9 +2,9 @@ import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { HydratedRouter } from "react-router/dom";
 import { I18nextProvider } from "react-i18next";
-import { clientLocale, createI18n } from "@/lib/i18n";
+import { createI18n } from "@/lib/i18n";
 
-const i18n = createI18n(clientLocale());
+const i18n = createI18n();
 
 startTransition(() => {
   hydrateRoot(

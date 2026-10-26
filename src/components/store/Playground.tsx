@@ -6,7 +6,7 @@ import {
   playgroundChatStream,
   type ChatMessage,
 } from "@/lib/api-client";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 import { formatYen, yenToMicros } from "@/lib/billing/pricing";
 import { AssistantReply } from "./AssistantReply";
 import { appendDelta, type Reply } from "./reply";
@@ -67,11 +67,10 @@ function PlaygroundError({
 }
 
 function useCostFormatter() {
-  const locale = useLocale();
   return (costYen: number | null) =>
     costYen === null
       ? null
-      : formatYen(yenToMicros(costYen), localeTag(locale));
+      : formatYen(yenToMicros(costYen), LOCALE_TAG);
 }
 
 /** 思考は表示だけに使い、次の送信には本文だけを載せる */

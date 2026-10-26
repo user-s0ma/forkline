@@ -20,14 +20,13 @@ import { InfiniteScrollSentinel } from "@/components/ui/InfiniteScrollSentinel";
 import { ListSkeleton } from "@/components/ui/ListSkeleton";
 import { PageBody, PageHeader } from "@/components/ui/PageHeader";
 import { getUsageSummary, listUsage } from "@/lib/api-client";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 
 export default function UsagePage() {
   const { t } = useTranslation();
-  const locale = useLocale();
   const yen = useYen();
   const dateFormatter = useDateFormatter();
-  const numberFormatter = new Intl.NumberFormat(localeTag(locale));
+  const numberFormatter = new Intl.NumberFormat(LOCALE_TAG);
   const { openMobileNavigation } = useAccountPage();
 
   const summary = useQuery({

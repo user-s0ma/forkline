@@ -1,6 +1,6 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { auth } from "@/lib/auth/server";
-import { detectLocale, translate } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import type { ApiEnv, SessionUser } from "../types";
 
 /** ログインしている人だけを通す。モデル・学習・残高・キーは、その人のものだけを扱う */
@@ -11,7 +11,7 @@ export function requireUser(): MiddlewareHandler<ApiEnv> {
     });
     if (!session) {
       return c.json(
-        { message: translate(detectLocale(c.req.raw), "server.common.loginRequired") },
+        { message: translate("server.common.loginRequired") },
         401,
       );
     }

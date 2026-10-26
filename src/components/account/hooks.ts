@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useOutletContext } from "react-router";
 import { toast } from "sonner";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 import { formatYen } from "@/lib/billing/pricing";
 import type { AppLayoutContext } from "@/app/routes/app/_layout";
 
@@ -11,8 +11,7 @@ export function useAccountPage() {
 }
 
 export function useYen() {
-  const locale = useLocale();
-  const tag = localeTag(locale);
+  const tag = LOCALE_TAG;
   return useMemo(() => (micros: number) => formatYen(micros, tag), [tag]);
 }
 
@@ -22,11 +21,10 @@ export function useDateFormatter(
     timeStyle: "short",
   },
 ) {
-  const locale = useLocale();
   const key = JSON.stringify(options);
   return useMemo(
-    () => new Intl.DateTimeFormat(localeTag(locale), JSON.parse(key)),
-    [locale, key],
+    () => new Intl.DateTimeFormat(LOCALE_TAG, JSON.parse(key)),
+    [key],
   );
 }
 

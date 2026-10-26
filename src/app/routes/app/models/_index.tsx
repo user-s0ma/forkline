@@ -10,18 +10,17 @@ import { ListSkeleton } from "@/components/ui/ListSkeleton";
 import { Modal } from "@/components/ui/Modal";
 import { PageBody, PageHeader } from "@/components/ui/PageHeader";
 import { createModel, listModels } from "@/lib/api-client";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 import type { AppLayoutContext } from "../_layout";
 
 export default function ModelsPage() {
   const { t } = useTranslation();
-  const locale = useLocale();
   const navigate = useNavigate();
   const base = "/app/models";
   const detailPath = (modelId: string) => `${base}/${encodeURIComponent(modelId)}`;
   const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(localeTag(locale), { dateStyle: "medium" }),
-    [locale],
+    () => new Intl.DateTimeFormat(LOCALE_TAG, { dateStyle: "medium" }),
+    [],
   );
   const { openMobileNavigation } = useOutletContext<AppLayoutContext>();
   const [createOpen, setCreateOpen] = useState(false);
@@ -129,7 +128,7 @@ export default function ModelsPage() {
                       <EndpointBadge status={model.endpointStatus} />
                     </td>
                     <td className="num text-right text-ink">
-                      {model.totalRequests.toLocaleString(localeTag(locale))}
+                      {model.totalRequests.toLocaleString(LOCALE_TAG)}
                     </td>
                     <td className="hidden text-ink-mute lg:table-cell">
                       {dateFormatter.format(new Date(model.updatedAt))}

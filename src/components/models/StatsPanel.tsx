@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { getModelStats } from "@/lib/api-client";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 import { formatYen } from "@/lib/billing/pricing";
 import { Section } from "./ui";
 
@@ -12,7 +12,7 @@ export function StatsPanel({
   modelId: string;
 }) {
   const { t } = useTranslation();
-  const tag = localeTag(useLocale());
+  const tag = LOCALE_TAG;
   const { data, isPending, error } = useQuery({
     queryKey: ["model-stats", modelId],
     queryFn: () => getModelStats(modelId),

@@ -92,7 +92,7 @@ export function capCharge(charge: UsageCharge, capMicros: number): UsageCharge {
   };
 }
 
-export function formatYen(micros: number, locale = "ja-JP") {
+export function formatYen(micros: number, locale = "en-US") {
   const yen = microsToYen(micros);
   const digits =
     Math.abs(yen) > 0 && Math.abs(yen) < 1 ? 4 : Math.abs(yen) < 100 ? 2 : 0;

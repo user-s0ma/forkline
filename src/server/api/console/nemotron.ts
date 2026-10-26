@@ -377,8 +377,6 @@ nemotron.post("/evaluations/:runId/step", async (c) => {
 
 /* ---------------------------------------------------------------- モデルカード */
 
-const cardSchema = z.object({ locale: z.enum(["ja", "en"]).optional() });
-
 function describeDataset(job: FineTuneRow) {
   const summary = ((): DatasetSummary | null => {
     try {
@@ -401,8 +399,6 @@ nemotron.post("/models/:modelId/model-card/draft", async (c) => {
   const userId = currentUser(c).id;
   const model = await loadOwnModel(c.env, userId, c.req.param("modelId"));
   if (!model) return c.json(message(c, "server.models.notFound"), 404);
-  const input = cardSchema.safeParse(await c.req.json().catch(() => ({})));
-  if (!input.success) return c.json(message(c, "server.nemotron.invalidInput"), 400);
 
   // 載せている LoRA の学習、無ければ最後に成功した学習
   let job = await loadFineTuneRow(c.env, userId, model.fineTuneId);
@@ -428,7 +424,6 @@ nemotron.post("/models/:modelId/model-card/draft", async (c) => {
     const result = await draftModelCard(deps, {
       userId,
       referenceId: `card:${crypto.randomUUID()}`,
-      locale: input.data.locale ?? "en",
       modelName: model.name,
       datasetSummary: describeDataset(job),
       evaluation: evaluation

@@ -1,4 +1,4 @@
-import { clientLocale, translate } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import type { ModelCategory } from "@/lib/billing/pricing";
 import type { ModelConfig } from "@/lib/models/config";
 import type { DatasetIssue } from "@/lib/models/dataset";
@@ -37,7 +37,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     throw new ApiError(
       data?.message ||
         data?.error?.message ||
-        translate(clientLocale(), "common.apiError"),
+        translate("common.apiError"),
       response.status,
       data?.error?.code,
       data,
@@ -425,10 +425,10 @@ export type ModelCardDraft = {
   costMicros: number;
 };
 
-export function draftModelCard(modelId: string, locale: "ja" | "en") {
+export function draftModelCard(modelId: string) {
   return apiRequest<ModelCardDraft>(modelPath(modelId, "/model-card/draft"), {
     method: "POST",
-    body: JSON.stringify({ locale }),
+    body: JSON.stringify({}),
   });
 }
 
@@ -458,7 +458,7 @@ export async function playgroundChatStream(
       message?: string;
     } | null;
     throw new ApiError(
-      data?.error?.message || data?.message || translate(clientLocale(), "common.apiError"),
+      data?.error?.message || data?.message || translate("common.apiError"),
       response.status,
       data?.error?.code,
     );
@@ -495,7 +495,7 @@ export async function playgroundChatStream(
     }
     if (event.error) {
       throw new ApiError(
-        event.error.message || translate(clientLocale(), "common.apiError"),
+        event.error.message || translate("common.apiError"),
         502,
       );
     }

@@ -15,7 +15,6 @@ import {
   type EvalRunStatus,
   type ModelRecord,
 } from "@/lib/api-client";
-import { useLocale } from "@/lib/i18n";
 import { formatPValue, type EvalSummary } from "@/lib/nemotron/evaluation";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import { useDateFormatter, useYen } from "@/components/account/hooks";
@@ -401,7 +400,6 @@ function ModelCardSection({
 }) {
   const { t } = useTranslation();
   const yen = useYen();
-  const locale = useLocale();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<CardDraft | null>(null);
   const [cost, setCost] = useState(0);
@@ -411,7 +409,7 @@ function ModelCardSection({
   const generate = async () => {
     setBusy(true);
     try {
-      const result = await draftModelCard(model.id, locale === "ja" ? "ja" : "en");
+      const result = await draftModelCard(model.id);
       setDraft({ tagline: result.tagline, description: result.description, tags: result.tags });
       setCost(result.costMicros);
     } catch (error) {

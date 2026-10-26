@@ -2,130 +2,23 @@ import type { Route } from "./+types/privacy";
 import {
   LegalPage,
   LegalSections,
-  TRANSLATION_NOTICE,
   type LegalSection,
 } from "@/components/landing/LegalPage";
-import { localeFromMatches, useLocale } from "@/lib/i18n";
 
 // 注意: 以下のポリシー本文はたたき台です。公開前に必ず弁護士等の専門家による確認を受けること。
 
-export function meta({ matches }: Route.MetaArgs): Route.MetaDescriptors {
-  if (localeFromMatches(matches) === "en") {
-    return [
-      { title: "Privacy Policy | Forkline" },
-      {
-        name: "description",
-        content:
-          "How Forkline handles personal information, training data and model usage data.",
-      },
-    ];
-  }
+export function meta(): Route.MetaDescriptors {
   return [
-    { title: "プライバシーポリシー | Forkline" },
+    { title: "Privacy Policy | Forkline" },
     {
       name: "description",
       content:
-        "Forklineにおける個人情報、学習データ、モデル利用データの取り扱いを定めるプライバシーポリシーです。",
+        "How Forkline handles personal information, training data and model usage data.",
     },
   ];
 }
 
-const SECTIONS_JA: LegalSection[] = [
-  {
-    heading: "1. 収集する情報",
-    paragraphs: [
-      "本サービスのご利用には、メールアドレスとパスワード、またはGoogleアカウントによるログイン（アカウントの作成）が必要です。運営者（関口壮真）が収集する情報は、主に以下の通りです。",
-    ],
-    items: [
-      {
-        label: "アカウントの情報:",
-        text: "氏名、メールアドレス、パスワードのハッシュ値（メールアドレスで登録した場合）、Googleログイン時にGoogleから提供されるプロフィール情報。",
-      },
-      {
-        label: "モデルと学習の情報:",
-        text: "モデルの設定・説明文・価格、アップロードされた学習データ（chat形式のJSONL）、学習の設定と結果（LoRAの重み）、エンドポイントのアクセストークン（暗号化して保存します）。",
-      },
-      {
-        label: "モデルの利用に関する情報:",
-        text: "呼び出したモデル、日時、トークン数、応答時間、料金などの利用記録。モデルへの入力・出力の内容は、応答を返すためにモデルの実行先へ送りますが、運営者は原則としてその内容を保存しません。",
-      },
-      {
-        label: "決済・支払いに関する情報:",
-        text: "クレジット購入の履歴、学習とエンドポイントの計算資源の利用履歴、出金の履歴。カード番号や口座情報は決済代行会社（Stripe）が取得・管理し、運営者は保持しません。",
-      },
-      {
-        label: "自動的に収集される情報:",
-        text: "IPアドレス、ブラウザの種類、アクセス日時、Cookie、不正なアクセスを防ぐための確認（Cloudflare Turnstile）の結果など、サービスの提供・セキュリティ確保のための技術情報。",
-      },
-    ],
-  },
-  {
-    heading: "2. 利用目的",
-    paragraphs: [
-      "運営者は、収集した情報を、本サービスの提供・運営、モデルの学習と推論の実行、料金の精算とクリエイターへの支払い、不正利用の検知と防止、お問い合わせへの対応、サービスの改善、法令に基づく対応のために利用します。運営者は、ユーザーの学習データやモデルへの入力を、運営者自身のモデルの学習には利用しません。",
-    ],
-  },
-  {
-    heading: "3. 公開される情報",
-    paragraphs: [
-      "モデル、学習データ、APIキー、クレジット、売上、利用記録はアカウントごとに管理し、ほかのユーザーは閲覧できません。ストアに公開したモデルには、アカウントの名前を作成者として表示します。",
-    ],
-  },
-  {
-    heading: "4. 第三者への提供・業務委託",
-    items: [
-      {
-        label: "計算資源の提供元（Nebius）:",
-        text: "学習データとLoRAの重みはNebiusのObject Storageに保存され、学習と推論はNebiusのServerless AI（Jobs・Endpoints）で実行されます。モデルを呼び出した場合、入力内容は推論のためにNebius上のエンドポイントへ送信されます。",
-      },
-      {
-        label: "その他の業務委託先:",
-        text: "決済処理（Stripe）、計算資源とホスティング（Nebius）、セキュリティ確認とメール配信（Cloudflare）、データベース（TiDB Cloud）など、本サービスの提供に必要な業務を委託する事業者と情報を共有することがあります。",
-      },
-      {
-        label: "クリエイターへの開示:",
-        text: "クリエイターには、自身のモデルの利用回数や売上などの集計情報を提供します。利用者を特定できる情報は提供しません。",
-      },
-      {
-        label: "法令に基づく場合:",
-        text: "法令に基づく開示請求があった場合、または人の生命・身体・財産の保護のために必要な場合には、情報を開示することがあります。",
-      },
-    ],
-  },
-  {
-    heading: "5. 保存期間",
-    paragraphs: [
-      "学習データとLoRAの重みは、モデルまたはアカウントが削除されるまで保存します。利用記録と決済の記録は、会計・税務上必要な期間保存します。",
-    ],
-  },
-  {
-    heading: "6. 安全管理",
-    paragraphs: [
-      "運営者は、通信の暗号化、アクセストークン等の暗号化保存、APIキーのハッシュ化保存、アカウントごとのアクセス制御など、個人情報を適切に保護するための措置を講じます。",
-    ],
-  },
-  {
-    heading: "7. 年齢制限",
-    paragraphs: [
-      "本サービスは18歳未満の方を対象としていません。また、お住まいの国で個人データの処理に同意するために必要な年齢に達している必要があります。",
-    ],
-  },
-  {
-    heading: "8. 開示・訂正・削除の請求",
-    paragraphs: [
-      "ユーザーは、運営者が保有する自己の個人情報の開示・訂正・削除を請求できます。support@forkline.ai までご連絡ください。アカウントはコンソールから削除することもできます。",
-    ],
-  },
-  {
-    heading: "9. 本プライバシーポリシーの変更",
-    paragraphs: [
-      "運営者は、必要に応じて本プライバシーポリシーを改訂することがあります。最新版のポリシーが、常にユーザーの個人データの取り扱いに適用されます。",
-    ],
-  },
-];
-
-// 英語版は参考訳。日本語版と食い違うときは日本語版が優先する
-const SECTIONS_EN: LegalSection[] = [
+const SECTIONS: LegalSection[] = [
   {
     heading: "1. Information we collect",
     paragraphs: [
@@ -220,17 +113,9 @@ const SECTIONS_EN: LegalSection[] = [
 ];
 
 export default function Privacy() {
-  const locale = useLocale();
-  if (locale === "en") {
-    return (
-      <LegalPage title="Privacy Policy" notice={TRANSLATION_NOTICE}>
-        <LegalSections sections={SECTIONS_EN} effectiveDate="Effective: October 26, 2026" />
-      </LegalPage>
-    );
-  }
   return (
-    <LegalPage title="プライバシーポリシー">
-      <LegalSections sections={SECTIONS_JA} effectiveDate="発効日: 2026年10月26日" />
+    <LegalPage title="Privacy Policy">
+      <LegalSections sections={SECTIONS} effectiveDate="Effective: October 26, 2026" />
     </LegalPage>
   );
 }

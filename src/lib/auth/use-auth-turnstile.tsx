@@ -2,7 +2,6 @@ import { useCallback, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { useLocale } from "@/lib/i18n";
 
 const SITE_KEY = import.meta.env.VITE_PUBLIC_TURNSTILE_SITE_KEY;
 const CAPTCHA_ERROR_CODES = new Set([
@@ -17,7 +16,6 @@ export function isCaptchaError(error: { code?: string }) {
 /** ログインまわりの送信に付ける Turnstile。トークンは1回しか使えないので、送るたびに作り直す */
 export function useAuthTurnstile() {
   const { t } = useTranslation();
-  const locale = useLocale();
   const ref = useRef<TurnstileInstance | null>(null);
 
   const captchaHeaders = useCallback(async (): Promise<Record<string, string>> => {
@@ -40,7 +38,7 @@ export function useAuthTurnstile() {
       siteKey={SITE_KEY}
       options={{
         appearance: "interaction-only",
-        language: locale,
+        language: "en",
         responseField: false,
         refreshExpired: "auto",
         refreshTimeout: "auto",

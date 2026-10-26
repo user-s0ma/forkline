@@ -5,8 +5,7 @@
       "privacy": "Privacy Policy",
       "supportHeading": "Support",
       "tagline": "Many AI models, one API.",
-      "terms": "Terms of Service",
-      "tokushoho": "Commercial transactions notice"
+      "terms": "Terms of Service"
     },
     "login": "Log in",
     "name": "Forkline",
@@ -49,7 +48,6 @@
     "closeMenu": "Close menu",
     "profile": "Profile",
     "profileModal": {
-      "language": "Language",
       "updateFailed": "Failed to update profile",
       "signingOut": "Logging out...",
       "signOutFailed": "Failed to log out"

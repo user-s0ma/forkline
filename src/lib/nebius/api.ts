@@ -29,13 +29,13 @@ export async function nebiusApi<T>(
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new NebiusError(`Nebius API につながりませんでした (${method} ${path})`);
+    throw new NebiusError(`Could not reach the Nebius API (${method} ${path})`);
   }
   if (res.status === 401) invalidateAccessToken();
   if (!res.ok) {
     const detail = await errorDetail(res, env, [token]);
     throw new NebiusError(
-      `Nebius API の呼び出しに失敗しました (${method} ${path}: ${res.status}${detail ? ` ${detail}` : ""})`,
+      `Nebius API call failed (${method} ${path}: ${res.status}${detail ? ` ${detail}` : ""})`,
       res.status,
     );
   }
@@ -44,21 +44,21 @@ export async function nebiusApi<T>(
   try {
     return JSON.parse(text) as T;
   } catch {
-    throw new NebiusError(`Nebius API の応答を読めませんでした (${method} ${path})`);
+    throw new NebiusError(`Could not read the Nebius API response (${method} ${path})`);
   }
 }
 
 /** Nebius のリソース ID (aijob-xxx、aiendpoint-xxx など) の形を確かめる */
 export function assertResourceId(id: unknown, what: string): string {
   if (typeof id !== "string" || !/^[a-z0-9][a-z0-9-]{2,99}$/.test(id)) {
-    throw new NebiusError(`${what}の ID が正しくありません`);
+    throw new NebiusError(`Invalid ${what} ID`);
   }
   return id;
 }
 
 export function operationResourceId(op: NebiusOperation, what: string): string {
   if (typeof op.resourceId !== "string" || op.resourceId === "") {
-    throw new NebiusError(`Nebius の応答に${what}の ID がありません`);
+    throw new NebiusError(`The Nebius response has no ${what} ID`);
   }
   return op.resourceId;
 }

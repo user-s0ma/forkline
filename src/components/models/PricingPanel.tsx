@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ModelUpdateInput } from "@/lib/api-client";
-import { localeTag, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 import {
   formatYen,
   microsToYen,
@@ -32,7 +32,7 @@ export function PricingPanel({
   onChange: (pricing: Pricing) => void;
 }) {
   const { t } = useTranslation();
-  const tag = localeTag(useLocale());
+  const tag = LOCALE_TAG;
   const volumes: readonly number[] = TOKEN_VOLUMES;
   const [volumeIndex, setVolumeIndex] = useState(1);
   const volume = volumes[volumeIndex];

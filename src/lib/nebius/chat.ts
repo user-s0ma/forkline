@@ -31,15 +31,15 @@ export function readUsage(value: unknown): ChatUsage | null {
 }
 
 function endpointBase(url: unknown): string {
-  if (typeof url !== "string") throw new NebiusError("エンドポイントの URL がありません");
+  if (typeof url !== "string") throw new NebiusError("The endpoint URL is missing");
   let parsed: URL;
   try {
     parsed = new URL(url);
   } catch {
-    throw new NebiusError("エンドポイントの URL が正しくありません");
+    throw new NebiusError("The endpoint URL is invalid");
   }
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-    throw new NebiusError("エンドポイントの URL は http(s) にしてください");
+    throw new NebiusError("The endpoint URL must use http(s)");
   }
   return trimSlash(`${parsed.origin}${parsed.pathname}`);
 }
@@ -47,10 +47,10 @@ function endpointBase(url: unknown): string {
 /** 中継する本文を作る。model を LoRA の名前にし、stream なら最後に usage を返させる */
 export function buildUpstreamBody(body: Record<string, unknown>): Record<string, unknown> {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
-    throw new NebiusError("リクエストの本文は JSON のオブジェクトにしてください");
+    throw new NebiusError("The request body must be a JSON object");
   }
   if (!Array.isArray(body.messages) || body.messages.length === 0) {
-    throw new NebiusError("messages が空です");
+    throw new NebiusError("messages is empty");
   }
   const out: Record<string, unknown> = { ...body, model: LORA_MODEL_NAME };
   if (body.stream === true) {
@@ -93,7 +93,7 @@ export async function proxyChatCompletion(
   let token: string;
   try {
     base = endpointBase(input?.endpointUrl);
-    token = requireString(input?.endpointToken, "エンドポイントのトークン");
+    token = requireString(input?.endpointToken, "Endpoint token");
     upstreamBody = buildUpstreamBody(input?.body);
   } catch (e) {
     report(null);
@@ -114,7 +114,7 @@ export async function proxyChatCompletion(
     });
   } catch {
     report(null);
-    throw new NebiusError("モデルのエンドポイントにつながりませんでした");
+    throw new NebiusError("Could not reach the model endpoint");
   }
 
   if (!res.ok || !stream || !res.body) {
@@ -217,7 +217,7 @@ export async function checkEndpointReady(
   input: { endpointUrl: string; endpointToken: string },
 ): Promise<boolean> {
   const base = endpointBase(input?.endpointUrl);
-  const token = requireString(input?.endpointToken, "エンドポイントのトークン");
+  const token = requireString(input?.endpointToken, "Endpoint token");
   try {
     const res = await fetch(`${base}/v1/models`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -243,21 +243,21 @@ export async function tokenFactoryChat(
 ): Promise<{ content: string; usage: ChatUsage }> {
   const apiKey = requireString(env.NEBIUS_TOKEN_FACTORY_API_KEY, "NEBIUS_TOKEN_FACTORY_API_KEY");
   if (typeof input?.model !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._\-/:]{0,199}$/.test(input.model)) {
-    throw new NebiusError("Token Factory のモデル名が正しくありません");
+    throw new NebiusError("Invalid Token Factory model name");
   }
   if (!Array.isArray(input.messages) || input.messages.length === 0) {
-    throw new NebiusError("messages が空です");
+    throw new NebiusError("messages is empty");
   }
   for (const m of input.messages) {
     if (!["system", "user", "assistant"].includes(m?.role) || typeof m?.content !== "string") {
-      throw new NebiusError("messages の形が正しくありません");
+      throw new NebiusError("messages has an invalid shape");
     }
   }
   if (
     input.maxTokens !== undefined &&
     (!Number.isInteger(input.maxTokens) || input.maxTokens < 1 || input.maxTokens > 32768)
   ) {
-    throw new NebiusError("maxTokens は 1 から 32768 の整数にしてください");
+    throw new NebiusError("maxTokens must be an integer from 1 to 32768");
   }
 
   const base = trimSlash(env.NEBIUS_TOKEN_FACTORY_BASE_URL?.trim() || DEFAULT_TOKEN_FACTORY_BASE_URL);
@@ -285,18 +285,18 @@ export async function tokenFactoryChat(
       body: JSON.stringify(body),
     });
   } catch {
-    throw new NebiusError("Token Factory につながりませんでした");
+    throw new NebiusError("Could not reach Token Factory");
   }
   if (!res.ok) {
     const detail = await errorDetail(res, env);
-    throw new NebiusError(`Token Factory の呼び出しに失敗しました (${res.status}${detail ? ` ${detail}` : ""})`, res.status);
+    throw new NebiusError(`Token Factory call failed (${res.status}${detail ? ` ${detail}` : ""})`, res.status);
   }
   const json = (await res.json().catch(() => null)) as
     | { choices?: { message?: { content?: unknown } }[] }
     | null;
   const content = json?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
-    throw new NebiusError("Token Factory の応答に本文がありません");
+    throw new NebiusError("The Token Factory response has no content");
   }
   return { content, usage: readUsage(json) ?? ZERO_USAGE };
 }

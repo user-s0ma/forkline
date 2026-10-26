@@ -8,27 +8,20 @@ import {
   ExploreSearch,
   useExplore,
 } from "@/components/store/explore";
-import {
-  localeFromMatches,
-  localizeHref,
-  translate,
-  useLocale,
-} from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 
-export function meta({ matches }: Route.MetaArgs): Route.MetaDescriptors {
-  const locale = localeFromMatches(matches);
+export function meta(): Route.MetaDescriptors {
   return [
-    { title: translate(locale, "store.metaTitle") },
+    { title: translate("store.metaTitle") },
     {
       name: "description",
-      content: translate(locale, "store.metaDescription"),
+      content: translate("store.metaDescription"),
     },
   ];
 }
 
 export default function ExploreModels() {
   const { t } = useTranslation();
-  const locale = useLocale();
   const state = useExplore();
 
   return (
@@ -42,7 +35,7 @@ export default function ExploreModels() {
         <ExploreResults
           state={state}
           hrefFor={(slug) =>
-            localizeHref(`/models/${encodeURIComponent(slug)}`, locale)
+            `/models/${encodeURIComponent(slug)}`
           }
         />
       </main>

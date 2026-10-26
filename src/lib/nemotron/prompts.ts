@@ -139,16 +139,14 @@ export function judgeMessages(input: {
  * 数字は渡したものだけを使わせる (盛らせない)。作者が直してから保存する。
  */
 export function modelCardMessages(input: {
-  locale: "ja" | "en";
   modelName: string;
   datasetSummary: string;
   evaluation: string | null;
 }): ChatMessage[] {
-  const language = input.locale === "ja" ? "Japanese" : "English";
   const system = [
     "You write the store listing for a fine-tuned chat model on a model marketplace.",
     DATA_RULE,
-    `Write in ${language}.`,
+    "Write in English.",
     "Use <dataset> to describe what the model is for and who should use it. Use <evaluation> only if present; quote its numbers exactly and do not claim more than they show (if the sample is small or the result is inconclusive, say so plainly or leave the numbers out).",
     "Do not invent features, integrations, languages or guarantees. No marketing superlatives, no emojis.",
     "Fields:",

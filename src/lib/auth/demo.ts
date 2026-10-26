@@ -32,9 +32,9 @@ export async function prepareDemoAccount(env: AppEnv, demoUserId: string) {
   const [existing] = await db.select({ id: aiModel.id }).from(aiModel).where(eq(aiModel.userId, demoUserId)).limit(1);
   if (!existing) {
     const [source] = await db.select().from(aiModel).where(eq(aiModel.id, env.DEMO_SOURCE_MODEL_ID)).limit(1);
-    if (!source?.fineTuneId) throw new Error(`お試しに写すモデル ${env.DEMO_SOURCE_MODEL_ID} が無いか、学習が済んでいません`);
+    if (!source?.fineTuneId) throw new Error(`Demo source model ${env.DEMO_SOURCE_MODEL_ID} does not exist or has not finished training`);
     const [training] = await db.select().from(fineTune).where(eq(fineTune.id, source.fineTuneId)).limit(1);
-    if (!training) throw new Error(`学習 ${source.fineTuneId} が見つかりません`);
+    if (!training) throw new Error(`Fine-tune ${source.fineTuneId} was not found`);
     const runs = await db
       .select()
       .from(evalRun)

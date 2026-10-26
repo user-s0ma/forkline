@@ -5,7 +5,7 @@ import { gpuName } from "@/components/landing/gpu";
 import { PageBand } from "@/components/landing/PageBand";
 import { SiteFooter, SiteHeader } from "@/components/landing/SiteChrome";
 import { CodeBlock } from "@/components/store/CodeBlock";
-import { localeFromMatches, localeTag, translate, useLocale } from "@/lib/i18n";
+import { translate, LOCALE_TAG } from "@/lib/i18n";
 import {
   PAYOUT_MIN_YEN,
   PLATFORM_FEE_BPS,
@@ -29,11 +29,10 @@ import {
 import { listModels } from "@/lib/nebius/models";
 import { appContext } from "@/lib/util/app-context";
 
-export function meta({ matches }: Route.MetaArgs): Route.MetaDescriptors {
-  const locale = localeFromMatches(matches);
+export function meta(): Route.MetaDescriptors {
   return [
-    { title: translate(locale, "docs.metaTitle") },
-    { name: "description", content: translate(locale, "docs.metaDescription") },
+    { title: translate("docs.metaTitle") },
+    { name: "description", content: translate("docs.metaDescription") },
   ];
 }
 
@@ -284,7 +283,7 @@ function GroupHeading({ id, children }: { id: string; children: ReactNode }) {
 
 export default function Docs({ loaderData }: Route.ComponentProps) {
   const { t } = useTranslation();
-  const tag = localeTag(useLocale());
+  const tag = LOCALE_TAG;
   const active = useActiveSection();
   const idle = loaderData?.idleMinutes ?? DEFAULT_ENDPOINT_IDLE_MINUTES;
   const hp = DEFAULT_HYPERPARAMETERS;

@@ -137,7 +137,7 @@ test("学習データの形が違えば何行目かを示して断る", async ()
   mockFetch(() => new Response(null, { status: 200 }));
   await assert.rejects(
     () => uploadTrainingData(ENV, { key: "d/train.jsonl", jsonl: `${CHAT_LINE}\n{"messages": [` }),
-    /2 行目が JSON として読めません/,
+    /line 2 is not valid JSON/,
   );
   await assert.rejects(
     () =>
@@ -145,21 +145,21 @@ test("学習データの形が違えば何行目かを示して断る", async ()
         key: "d/train.jsonl",
         jsonl: JSON.stringify({ messages: [{ role: "user", content: "a" }] }),
       }),
-    /1 行目に assistant の発言がありません/,
+    /line 1 has no assistant message/,
   );
-  await assert.rejects(() => uploadTrainingData(ENV, { key: "../x.jsonl", jsonl: CHAT_LINE }), /キーが正しくありません/);
-  await assert.rejects(() => uploadTrainingData(ENV, { key: "d/x.jsonl", jsonl: "  " }), /空です/);
+  await assert.rejects(() => uploadTrainingData(ENV, { key: "../x.jsonl", jsonl: CHAT_LINE }), /Invalid training data key/);
+  await assert.rejects(() => uploadTrainingData(ENV, { key: "d/x.jsonl", jsonl: "  " }), /is empty/);
   assert.equal(calls.length, 0);
 });
 
-test("Object Storage の失敗は秘密を伏せた日本語のエラーになる", async () => {
+test("Object Storage の失敗は秘密を伏せたエラーになる", async () => {
   mockFetch(() =>
     new Response(`<Error><Message>bad key ${ENV.NEBIUS_S3_SECRET_ACCESS_KEY}</Message></Error>`, { status: 403 }),
   );
   await assert.rejects(
     () => uploadTrainingData(ENV, { key: "d/train.jsonl", jsonl: CHAT_LINE }),
     (e: Error) => {
-      assert.match(e.message, /Object Storage への保存に失敗しました \(403/);
+      assert.match(e.message, /Saving to Object Storage failed \(403/);
       assert.ok(!e.message.includes(ENV.NEBIUS_S3_SECRET_ACCESS_KEY));
       return true;
     },
@@ -250,9 +250,9 @@ test("PKCS#1 の秘密鍵も読める", async () => {
   assert.equal(calls[1].headers.get("authorization"), "Bearer t2");
 });
 
-test("認証情報が無ければ日本語で断る", async () => {
+test("認証情報が無ければ断る", async () => {
   mockFetch(() => json({}));
-  await assert.rejects(() => stopEndpoint({ ...ENV, NEBIUS_API_KEY: undefined }, "aiendpoint-e00abc"), /認証情報がありません/);
+  await assert.rejects(() => stopEndpoint({ ...ENV, NEBIUS_API_KEY: undefined }, "aiendpoint-e00abc"), /credentials are missing/);
   assert.equal(calls.length, 0);
 });
 
@@ -301,14 +301,14 @@ test("微調整の入力を確かめる", async () => {
     outputPrefix: "adapters/a",
     hyperparameters: HP,
   };
-  await assert.rejects(() => startFineTune(ENV, { ...base, baseModelId: "meta/llama" }), /対応していません/);
+  await assert.rejects(() => startFineTune(ENV, { ...base, baseModelId: "meta/llama" }), /does not support/);
   await assert.rejects(() => startFineTune(ENV, { ...base, datasetUri: "s3://other/d.jsonl" }), /s3:\/\/forkline-test\//);
-  await assert.rejects(() => startFineTune(ENV, { ...base, outputPrefix: "a b" }), /パスが正しくありません/);
+  await assert.rejects(() => startFineTune(ENV, { ...base, outputPrefix: "a b" }), /Invalid LoRA output path/);
   await assert.rejects(() => startFineTune(ENV, { ...base, hyperparameters: { ...HP, loraRank: 7 } }), /loraRank/);
   await assert.rejects(() => startFineTune(ENV, { ...base, hyperparameters: { ...HP, epochs: 0 } }), /epochs/);
   await assert.rejects(
     () => startFineTune({ ...ENV, NEBIUS_TRAIN_IMAGE: undefined }, base),
-    /NEBIUS_TRAIN_IMAGE が設定されていません/,
+    /NEBIUS_TRAIN_IMAGE is not set/,
   );
   assert.equal(calls.length, 0);
 });
@@ -327,10 +327,10 @@ test("ジョブの状態を微調整の状態に読み替える", async () => {
   mockFetch(() => json({ status: { state: "FAILED", stateDetails: { code: "Error", message: "exit code 1" } } }));
   assert.deepEqual(await getFineTune(ENV, "aijob-e00abc"), {
     state: "failed",
-    error: "学習ジョブが失敗しました (Error: exit code 1)",
+    error: "The training job failed (Error: exit code 1)",
   });
   assert.equal(calls[0].url, "https://api.nebius.cloud/ai/v1/jobs/aijob-e00abc");
-  await assert.rejects(() => getFineTune(ENV, "../x"), /ID が正しくありません/);
+  await assert.rejects(() => getFineTune(ENV, "../x"), /Invalid job ID/);
 });
 
 test("終わったジョブは LoRA のファイルを確かめてから成功にする", async () => {
@@ -359,12 +359,12 @@ test("微調整の取り消しは cancel を呼ぶ", async () => {
   assert.deepEqual(JSON.parse(calls[0].body ?? ""), { id: "aijob-e00abc" });
 });
 
-test("Nebius API の失敗は日本語のエラーになり、トークンを含まない", async () => {
+test("Nebius API の失敗はエラーになり、トークンを含まない", async () => {
   mockFetch(() => json({ code: 3, message: `invalid preset; token=${ENV.NEBIUS_API_KEY}` }, 400));
   await assert.rejects(
     () => cancelFineTune(ENV, "aijob-e00abc"),
     (e: Error) => {
-      assert.match(e.message, /Nebius API の呼び出しに失敗しました \(POST \/ai\/v1\/jobs\/cancel: 400 invalid preset/);
+      assert.match(e.message, /Nebius API call failed \(POST \/ai\/v1\/jobs\/cancel: 400 invalid preset/);
       assert.ok(!e.message.includes(ENV.NEBIUS_API_KEY!));
       return true;
     },
@@ -421,7 +421,7 @@ test("エンドポイントの状態と URL を読む", async () => {
   mockFetch(() => json({ status: { state: "ERROR", stateDetails: { code: "QuotaExceeded", message: "no gpu" } } }));
   assert.deepEqual(await getEndpoint(ENV, "aiendpoint-e00new"), {
     state: "failed",
-    error: "エンドポイントでエラーが起きました (QuotaExceeded: no gpu)",
+    error: "The endpoint reported an error (QuotaExceeded: no gpu)",
   });
 });
 
@@ -555,7 +555,7 @@ test("エンドポイントの失敗は状態をそのまま返し、usage は 0
   );
   await assert.rejects(
     () => proxyChatCompletion(ENV, { endpointUrl: EP_URL, endpointToken: "t", body: {}, onUsage: (u) => more.push(u) }),
-    /messages が空です/,
+    /messages is empty/,
   );
   assert.equal(more.length, 2);
 });
@@ -609,10 +609,10 @@ test("Token Factory の Nemotron を呼ぶ", async () => {
   mockFetch(() => json({ detail: "unauthorized" }, 401));
   await assert.rejects(
     () => tokenFactoryChat(ENV, { model: "nvidia/x", messages: [{ role: "user", content: "a" }] }),
-    /Token Factory の呼び出しに失敗しました \(401/,
+    /Token Factory call failed \(401/,
   );
   await assert.rejects(
     () => tokenFactoryChat(ENV, { model: "nvidia/x", messages: [], maxTokens: 1 }),
-    /messages が空です/,
+    /messages is empty/,
   );
 });

@@ -2,7 +2,7 @@
 
 **Fine-tune Nemotron on Nebius, publish your model, and earn every time someone calls it.**
 
-Live: [forkline.ai](https://forkline.ai/en)
+Live: [forkline.ai](https://forkline.ai)
 
 Forkline is a marketplace for fine-tuned models. A creator uploads a chat dataset, Forkline fine-tunes an NVIDIA Nemotron model with LoRA on Nebius, serves it on a Nebius endpoint, and lists it in a public store. Anyone with credits can call it through an OpenAI-compatible API, and the creator earns per token.
 
@@ -55,7 +55,7 @@ curl https://forkline.ai/v1/chat/completions \
 
 ## Tech stack
 
-React Router 8 and Hono on Node.js, served from a Nebius CPU VM behind Caddy. TiDB Serverless (MySQL) with Drizzle, better-auth (email/password, Google), Cloudflare Turnstile, email through the Cloudflare Email Service REST API, Stripe and Stripe Connect, i18n (Japanese and English).
+React Router 8 and Hono on Node.js, served from a Nebius CPU VM behind Caddy. TiDB Serverless (MySQL) with Drizzle, better-auth (email/password, Google), Cloudflare Turnstile, email through the Cloudflare Email Service REST API, Stripe and Stripe Connect.
 
 ## Setup
 

@@ -8,7 +8,7 @@ import { ModelCard, ModelCardSkeleton } from "@/components/store/ModelCard";
 import { Pagination } from "@/components/store/Pagination";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { listStoreModels } from "@/lib/api-client";
-import { localeTag, localizeHref, useLocale } from "@/lib/i18n";
+import { LOCALE_TAG } from "@/lib/i18n";
 import { MODEL_CATEGORIES } from "@/lib/billing/pricing";
 
 /*
@@ -110,7 +110,6 @@ export function ExploreSearch({ state }: { state: ExploreState }) {
 
 export function ExploreFilters({ state }: { state: ExploreState }) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const { category, sort, updateParams } = state;
   const data = state.query.data;
   return (
@@ -150,7 +149,7 @@ export function ExploreFilters({ state }: { state: ExploreState }) {
         {data && (
           <span className="num text-sm whitespace-nowrap text-ink-mute">
             {t("store.explore.count", {
-              total: new Intl.NumberFormat(localeTag(locale)).format(data.total),
+              total: new Intl.NumberFormat(LOCALE_TAG).format(data.total),
             })}
           </span>
         )}
@@ -183,7 +182,6 @@ export function ExploreFilters({ state }: { state: ExploreState }) {
 /** まだ1つも公開されていないとき。公開までの道筋を示す */
 function EmptyCatalog() {
   const { t } = useTranslation();
-  const locale = useLocale();
   return (
     <div className="rounded-2xl border border-dashed border-line-strong px-6 py-12 text-center sm:py-16">
       <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-brand-tint text-brand-ink">
@@ -195,7 +193,7 @@ function EmptyCatalog() {
         <a className="console-button-primary" href="/app">
           {t("store.explore.publishCta")}
         </a>
-        <a className="console-button-secondary" href={localizeHref("/docs#publish", locale)}>
+        <a className="console-button-secondary" href="/docs#publish">
           {t("catalog.emptyDocs")}
         </a>
       </div>

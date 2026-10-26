@@ -20,7 +20,7 @@ export async function sendEmail(
   const accountId = env.CLOUDFLARE_ACCOUNT_ID?.trim();
   const token = env.CLOUDFLARE_EMAIL_API_TOKEN?.trim();
   if (!accountId || !token) {
-    throw new Error("CLOUDFLARE_ACCOUNT_ID と CLOUDFLARE_EMAIL_API_TOKEN を設定してください");
+    throw new Error("Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_EMAIL_API_TOKEN");
   }
   const res = await fetch(`${API_BASE}/accounts/${encodeURIComponent(accountId)}/email/sending/send`, {
     method: "POST",
@@ -30,6 +30,6 @@ export async function sendEmail(
   });
   if (!res.ok) {
     const detail = (await res.text().catch(() => "")).slice(0, 300);
-    throw new Error(`メールを送れませんでした (${res.status} ${detail})`);
+    throw new Error(`Could not send email (${res.status} ${detail})`);
   }
 }

@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { LogOut, Menu, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { authClient } from "@/lib/auth/client";
 import type { AppLayoutContext } from "./_layout";
 
@@ -140,12 +139,6 @@ export default function AccountPage() {
                   disabled
                 />
               </label>
-              <div>
-                <span className="mb-1 block text-xs text-ink">
-                  {t("appShell.profileModal.language")}
-                </span>
-                <LanguageSwitcher className="w-full" />
-              </div>
               <div className="flex justify-end pt-1">
                 <button
                   className="console-button-primary"

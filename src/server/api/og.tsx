@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { GoogleFont, ImageResponse } from "@cf-wasm/og/node";
-import { OG_LOCALE, translate } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import { findPublicModel } from "./store";
 import type { ApiEnv } from "./types";
 
@@ -93,8 +93,8 @@ async function render(element: React.ReactNode, text: string, monoText: string) 
 /** サイト全体の OG 画像 */
 og.get("/site", async () => {
   // トップページの見出しと同じく、行の途中で折り返さないよう2行に分けて描く
-  const lines = [translate(OG_LOCALE, "landing.hero.title1"), translate(OG_LOCALE, "landing.hero.title2")];
-  const subtitle = translate(OG_LOCALE, "site.og.subtitle");
+  const lines = [translate("landing.hero.title1"), translate("landing.hero.title2")];
+  const subtitle = translate("site.og.subtitle");
   const url = "forkline.ai/v1";
   return render(
     <Frame>
@@ -133,9 +133,9 @@ og.get("/models/:slug", async (c) => {
   const { model } = row;
   const name = clip(model.name, 60);
   const tagline = clip(model.tagline, 90);
-  const category = translate(OG_LOCALE, `store.categories.${model.category}`);
+  const category = translate(`store.categories.${model.category}`);
   const publisher = row.publisherName
-    ? translate(OG_LOCALE, "store.detail.by", { publisher: clip(row.publisherName, 30) })
+    ? translate("store.detail.by", { publisher: clip(row.publisherName, 30) })
     : "";
   // 長い名前は文字を小さくして2行に収める
   const nameSize = name.length > 36 ? 60 : name.length > 22 ? 72 : 88;

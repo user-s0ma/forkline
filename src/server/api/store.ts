@@ -2,7 +2,7 @@ import { and, desc, eq, like, or, type SQL } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb, containsPattern } from "@/lib/db/client";
 import { aiModel, user } from "@/lib/db/schema";
-import { detectLocale, translate } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
 import { listNemotronBaseModels } from "@/lib/nebius";
 import { parseTags } from "@/lib/models/config";
 import { MODEL_CATEGORIES } from "@/lib/billing/pricing";
@@ -111,7 +111,7 @@ store.get("/models/:slug", async (c) => {
   const row = await findPublicModel(c.env, c.req.param("slug"));
   if (!row) {
     return c.json(
-      { message: translate(detectLocale(c.req.raw), "server.models.notFound") },
+      { message: translate("server.models.notFound") },
       404,
     );
   }

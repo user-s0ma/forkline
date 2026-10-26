@@ -78,7 +78,6 @@ export async function draftModelCard(
   input: {
     userId: string;
     referenceId: string;
-    locale: "ja" | "en";
     modelName: string;
     datasetSummary: string;
     evaluation: string | null;
