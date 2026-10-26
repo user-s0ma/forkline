@@ -184,8 +184,7 @@
       "cta": "コンソールを開く"
     },
     "judges": {
-      "eyebrow": "ハッカソンの審査員の方へ",
-      "title": "Forkline は Nebius と NVIDIA Nemotron をこう使っています",
+      "title": "ハッカソンの審査員の方へ",
       "uses": {
         "jobs": {
           "name": "Nebius Serverless AI Jobs",

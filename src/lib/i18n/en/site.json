@@ -184,8 +184,7 @@
       "cta": "Open the console"
     },
     "judges": {
-      "eyebrow": "For hackathon judges",
-      "title": "How Forkline uses Nebius and NVIDIA Nemotron",
+      "title": "For hackathon judges",
       "uses": {
         "jobs": {
           "name": "Nebius Serverless AI Jobs",

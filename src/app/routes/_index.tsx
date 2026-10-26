@@ -391,8 +391,7 @@ function ForJudges() {
     <section className="ui-container pb-16">
       <div className="ui-card grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.2fr_1fr]">
         <div>
-          <p className="text-sm font-semibold text-brand-ink">{t("landing.judges.eyebrow")}</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight">{t("landing.judges.title")}</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">{t("landing.judges.title")}</h2>
           <ul className="mt-5 space-y-3">
             {uses.map((key) => (
               <li key={key} className="text-sm leading-6">

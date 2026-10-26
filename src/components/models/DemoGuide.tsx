@@ -10,8 +10,7 @@ export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "training" | "evalua
   return (
     <section className="ui-card space-y-4 p-6">
       <div>
-        <p className="text-xs font-semibold tracking-wide text-brand-ink uppercase">{t("models.demoGuide.eyebrow")}</p>
-        <h2 className="mt-1 text-lg font-semibold">{t("models.demoGuide.title")}</h2>
+        <h2 className="text-lg font-semibold">{t("models.demoGuide.title")}</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft">{t("models.demoGuide.body")}</p>
       </div>
 
