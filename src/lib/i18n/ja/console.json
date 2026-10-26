@@ -551,8 +551,7 @@
     },
     "demoGuide": {
       "title": "ハッカソンの審査員の方へ",
-      "body": "Midori Bakery FAQ は、Nemotron 3 Nano 4B を Nebius の Serverless AI Job で LoRA 微調整したモデルです。学習データは、パン屋の FAQ から Token Factory の Nemotron が書いた231件の会話です。26問は評価用に取っておきました。下は、このモデルの Nebius のエンドポイントと実際に話した会話の記録です。",
-      "recorded": "{{date}} にこのモデルと話した記録",
+      "body": "Midori Bakery FAQ は、Nemotron 3 Nano 4B を Nebius の Serverless AI Job で LoRA 微調整したモデルです。学習データは、パン屋の FAQ から Token Factory の Nemotron が書いた231件の会話です。26問は評価用に取っておきました。下は、{{date}} にこのモデルの Nebius のエンドポイントと話した記録です。",
       "toEvaluation": "ベースの Nemotron との比較を見る →",
       "toDeploy": "デプロイして自分で話す →",
       "deployNote": "GPU のエンドポイントの起動には10分ほどかかります。15分呼ばれなければ自動で止まります。"

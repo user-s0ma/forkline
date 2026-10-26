@@ -11,12 +11,11 @@ export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "training" | "evalua
     <section className="ui-card space-y-4 p-6">
       <div>
         <h2 className="text-lg font-semibold">{t("models.demoGuide.title")}</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft">{t("models.demoGuide.body")}</p>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft">{t("models.demoGuide.body", { date: recording.recordedOn })}</p>
       </div>
 
       <div>
-        <p className="text-xs text-ink-mute">{t("models.demoGuide.recorded", { date: recording.recordedOn })}</p>
-        <ol className="mt-3 space-y-3 text-sm">
+        <ol className="space-y-3 text-sm">
           {recording.turns.map((turn, index) => (
             <li key={index} className="space-y-1.5">
               <p className="ml-auto w-fit max-w-[85%] rounded-xl bg-brand-tint px-3 py-2 text-ink">{turn.user}</p>

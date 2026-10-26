@@ -551,8 +551,7 @@
     },
     "demoGuide": {
       "title": "For hackathon judges",
-      "body": "Midori Bakery FAQ is Nemotron 3 Nano 4B fine-tuned with LoRA on a Nebius Serverless AI Job, using 231 chat examples that Nemotron on Token Factory wrote from a bakery FAQ. 26 held-out questions were kept for evaluation. Below is a conversation with this model, recorded from its Nebius endpoint.",
-      "recorded": "Recorded on {{date}} from this model",
+      "body": "Midori Bakery FAQ is Nemotron 3 Nano 4B fine-tuned with LoRA on a Nebius Serverless AI Job, using 231 chat examples that Nemotron on Token Factory wrote from a bakery FAQ. 26 questions were held out for evaluation. Below is a conversation with this model on its Nebius endpoint, recorded on {{date}}.",
       "toEvaluation": "See the evaluation against base Nemotron →",
       "toDeploy": "Deploy it and chat yourself →",
       "deployNote": "Starting the GPU endpoint takes about 10 minutes. It stops by itself after 15 minutes without calls."
