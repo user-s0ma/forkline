@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import type { Route } from "./+types/_index";
 import { FlowDiagram } from "@/components/landing/FlowDiagram";
 import { DemoButton } from "@/components/account/DemoButton";
@@ -387,11 +388,6 @@ const SAMPLE_QUESTION = {
 
 function DemoModelScores() {
   const { t } = useTranslation();
-  const stats = [
-    ["4.96", "fineTuned"],
-    ["2.19", "base"],
-    ["24 / 26", "wins"],
-  ] as const;
   const answers = [
     ["base", SAMPLE_QUESTION.base],
     ["fineTuned", SAMPLE_QUESTION.fineTuned],
@@ -399,13 +395,21 @@ function DemoModelScores() {
   return (
     <section className="border-t border-line">
       <div className="ui-container grid gap-12 py-12 lg:grid-cols-2 lg:items-center lg:py-16">
-        <dl className="grid grid-cols-3 gap-4">
-          {stats.map(([value, key]) => (
-            <div key={key}>
-              <dd className="text-3xl font-semibold tracking-tight tabular-nums">{value}</dd>
-              <dt className="mt-1 text-xs leading-5 text-ink-mute">{t(`landing.judges.stats.${key}`)}</dt>
-            </div>
-          ))}
+        {/* ベースの点数から、学習済みデモモデルの点数へ */}
+        <dl className="flex items-start gap-4 sm:gap-6">
+          <div>
+            <dd className="text-3xl font-semibold tracking-tight tabular-nums text-ink-soft">2.19</dd>
+            <dt className="mt-1 text-xs leading-5 text-ink-mute">{t("landing.judges.stats.base")}</dt>
+          </div>
+          <ArrowRight aria-hidden className="mt-2 h-6 w-6 shrink-0 text-ink-mute" />
+          <div>
+            <dd className="text-3xl font-semibold tracking-tight tabular-nums text-brand-ink">4.96</dd>
+            <dt className="mt-1 text-xs leading-5 text-ink-mute">{t("landing.judges.stats.fineTuned")}</dt>
+          </div>
+          <div className="ml-4 sm:ml-8">
+            <dd className="text-3xl font-semibold tracking-tight tabular-nums">24 / 26</dd>
+            <dt className="mt-1 text-xs leading-5 text-ink-mute">{t("landing.judges.stats.wins")}</dt>
+          </div>
         </dl>
         <div className="space-y-3 text-sm">
           <p className="ml-auto w-fit rounded-xl bg-brand-tint px-3 py-2 text-ink">{SAMPLE_QUESTION.question}</p>
@@ -462,11 +466,13 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 </a>
               </div>
               <div className="mt-5 flex gap-5">
-                <a href="https://devpost.com/software/forkline-w6jgys" className="text-sm font-semibold text-brand-ink hover:underline">
+                <a href="https://devpost.com/software/forkline-w6jgys" className="inline-flex items-center gap-0.5 text-sm font-semibold text-brand-ink underline underline-offset-4 hover:no-underline" target="_blank" rel="noreferrer">
                   {t("landing.judges.devpost")}
+                  <ArrowUpRight aria-hidden className="h-3.5 w-3.5" />
                 </a>
-                <a href="https://github.com/user-s0ma/forkline" className="text-sm font-semibold text-brand-ink hover:underline">
+                <a href="https://github.com/user-s0ma/forkline" className="inline-flex items-center gap-0.5 text-sm font-semibold text-brand-ink underline underline-offset-4 hover:no-underline" target="_blank" rel="noreferrer">
                   {t("landing.judges.github")}
+                  <ArrowUpRight aria-hidden className="h-3.5 w-3.5" />
                 </a>
               </div>
             </div>
@@ -548,13 +554,13 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               <p className="text-[clamp(2rem,4.5vw,3.5rem)] leading-[1.1] font-semibold tracking-[-0.035em]">
                 {t("landing.finalCta.title")}
               </p>
-              <p className="mt-5 font-mono text-base font-medium">
+              <p className="mt-5 inline-flex rounded-full bg-on-brand/10 px-4 py-2 font-mono text-base font-medium">
                 https://forkline.ai/v1
               </p>
             </div>
             <a
               href="/app"
-              className="inline-flex items-center justify-center rounded-full bg-on-brand px-7 py-3.5 text-base font-semibold text-brand transition-colors hover:bg-on-brand/85 focus-visible:outline-on-brand"
+              className="inline-flex shrink-0 items-center justify-center rounded-full bg-on-brand px-7 py-3.5 text-base font-semibold whitespace-nowrap text-brand transition-colors hover:bg-on-brand/85 focus-visible:outline-on-brand"
             >
               {t("landing.finalCta.cta")}
             </a>

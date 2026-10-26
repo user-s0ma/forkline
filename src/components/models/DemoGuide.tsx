@@ -2,10 +2,10 @@ import { useTranslation } from "react-i18next";
 import recording from "./demo-conversation.json";
 
 /**
- * 審査員向けのデモアカウントで、モデルの画面の上に出す案内。
+ * 審査員向けのデモアカウントで、モデルのテストのタブに出す会話の記録。
  * GPU を起こさなくても中身が分かるよう、このモデルと実際に話した会話 (記録したもの) を見せる
  */
-export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "evaluation") => void }) {
+export function DemoGuide() {
   const { t } = useTranslation();
   return (
     <section className="console-panel space-y-4 p-5 sm:p-6">
@@ -21,10 +21,6 @@ export function DemoGuide({ onOpenTab }: { onOpenTab: (tab: "evaluation") => voi
           </li>
         ))}
       </ol>
-
-      <button type="button" className="text-sm font-semibold text-brand-ink hover:underline" onClick={() => onOpenTab("evaluation")}>
-        {t("models.demoGuide.toEvaluation")}
-      </button>
     </section>
   );
 }

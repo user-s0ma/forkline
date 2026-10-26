@@ -528,8 +528,7 @@
       "applied": "Moved to Settings. Check it and save."
     },
     "demoGuide": {
-      "body": "A conversation with this model, recorded on {{date}}.",
-      "toEvaluation": "Evaluation"
+      "body": "A conversation with this model, recorded on {{date}}."
     }
   },
   "server": {

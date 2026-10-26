@@ -269,7 +269,6 @@ function ModelEditor({
         >
           {tab === "overview" && (
             <>
-              {isDemoUser(user) && <DemoGuide onOpenTab={onTabChange} />}
               <LaunchPanel
                 model={model}
                 isDirty={isDirty}
@@ -344,7 +343,8 @@ function ModelEditor({
           )}
 
           {/* テストの会話はタブを切り替えても残るよう、非表示にするだけでアンマウントしない */}
-          <div hidden={tab !== "test"}>
+          <div hidden={tab !== "test"} className="space-y-6">
+            {isDemoUser(user) && <DemoGuide />}
             <TestPanel
               slug={model.slug}
               disabledReason={testDisabled}
