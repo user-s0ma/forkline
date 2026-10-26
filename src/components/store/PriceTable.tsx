@@ -36,7 +36,7 @@ export function PriceTable({ pricing }: { pricing: StorePricing }) {
         </dl>
       )}
       {rows.length > 0 && (
-        <p className="mt-3 rounded-(--radius-control) bg-paper px-3 py-2 text-xs leading-5 text-ink-soft">
+        <p className="mt-3 text-xs leading-5 text-ink-mute">
           {t("store.pricing.noCompute")}
         </p>
       )}

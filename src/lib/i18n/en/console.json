@@ -48,7 +48,6 @@
   },
   "usage": {
     "title": "Usage",
-    "description": "Calls you made through the API and the playground.",
     "loadFailed": "Could not load usage",
     "chartTitle": "Daily spend (30 days)",
     "spend30": "Spend, 30 days",
@@ -183,7 +182,6 @@
     },
     "list": {
       "title": "Models",
-      "description": "Your models. Train Nemotron, deploy it, set a price and publish it to the store.",
       "newButton": "New model",
       "loadError": "Could not load models",
       "createFailed": "Could not create the model",
@@ -198,7 +196,6 @@
       "title": "Create a model",
       "namePlaceholder": "e.g. Support FAQ bot",
       "submit": "Create",
-      "flowTitle": "Fine-tune Nemotron",
       "flowSummary": "Upload a dataset and train a LoRA on NVIDIA Nemotron with Nebius GPUs, then serve it as an endpoint and publish it."
     },
     "editor": {
@@ -410,7 +407,7 @@
     },
     "endpoint": {
       "title": "Endpoint",
-      "description": "Serves the trained LoRA on Nemotron. GPU time is charged only while it runs, and it stops on its own when idle.",
+      "description": "Serves the trained LoRA on Nemotron.",
       "notDeployed": "Not deployed yet. When training succeeds, deploy it from the history below.",
       "baseModel": "Base model",
       "rate": "GPU rate",
@@ -513,7 +510,6 @@
       "startFailed": "Could not start the evaluation",
       "fineTunedMean": "Your model (avg)",
       "baseMean": "Base model (avg)",
-      "winRate": "Win rate",
       "record": "Won / tied / lost",
       "recordValue": "{{wins}} / {{ties}} / {{losses}}",
       "verdicts": {
@@ -522,7 +518,7 @@
         "inconclusive": "No clear difference on {{n}} questions (sign test p {{p}}). More held-out questions would be needed to tell.",
         "too_few": "Only {{n}} questions were graded. That is too few to conclude anything; treat the numbers as examples."
       },
-      "footnote": "{{n}} graded, {{failed}} not graded · sign test p {{p}} · 95% bootstrap interval of the score difference: {{interval}} · baseline {{baseline}} · grader {{judge}} · Token Factory {{amount}}",
+      "footnote": "{{n}} graded, {{failed}} not graded · 95% bootstrap interval of the score difference: {{interval}} · grader {{judge}} · Token Factory {{amount}}",
       "itemsTitle": "Questions",
       "columns": {
         "question": "Question",
@@ -550,11 +546,10 @@
       "applied": "Moved to Settings. Check it and save."
     },
     "demoGuide": {
-      "title": "For hackathon judges",
       "body": "Midori Bakery FAQ is Nemotron 3 Nano 4B fine-tuned with LoRA on a Nebius Serverless AI Job, using 231 chat examples that Nemotron on Token Factory wrote from a bakery FAQ. 26 questions were held out for evaluation. Below is a conversation with this model on its Nebius endpoint, recorded on {{date}}.",
       "toEvaluation": "See the evaluation against base Nemotron →",
       "toDeploy": "Deploy it and chat yourself →",
-      "deployNote": "Starting the GPU endpoint takes about 10 minutes. It stops by itself after 15 minutes without calls."
+      "deployNote": "Starting the GPU endpoint takes about 10 minutes. It stops by itself after {{idle}} minutes without calls."
     }
   },
   "server": {

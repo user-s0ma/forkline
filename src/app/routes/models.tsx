@@ -34,10 +34,7 @@ export default function ExploreModels() {
   return (
     <div className="site min-h-dvh bg-surface font-sans text-ink antialiased">
       <SiteHeader />
-      <PageBand
-        title={t("store.explore.title")}
-        subline={t("store.explore.subtitle")}
-      >
+      <PageBand title={t("store.explore.title")}>
         <ExploreSearch state={state} />
       </PageBand>
       <main className="ui-container pt-8 pb-20">

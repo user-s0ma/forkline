@@ -268,7 +268,7 @@ export function TrainingPanel({
                 />
               </Field>
               {selected && (
-                <dl className="grid grid-cols-2 gap-3 self-end rounded-(--radius-control) bg-paper px-3 py-2.5 text-xs">
+                <dl className="grid grid-cols-2 gap-3 self-end text-xs">
                   <div>
                     <dt className="text-ink-mute">{t("models.training.trainRate")}</dt>
                     <dd className="num mt-0.5 font-semibold text-ink">
@@ -461,7 +461,7 @@ function ActiveJob({
   const { t } = useTranslation();
   const yen = useYen();
   return (
-    <div className="space-y-3 rounded-(--radius-control) border border-line bg-paper p-4">
+    <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <FineTuneBadge status={job.status} />

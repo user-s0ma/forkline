@@ -17,7 +17,6 @@ export default function ConsoleExplorePage() {
     <>
       <PageHeader
         title={t("store.explore.title")}
-        description={t("store.explore.subtitle")}
         onOpenMenu={openMobileNavigation}
       />
       <PageBody>

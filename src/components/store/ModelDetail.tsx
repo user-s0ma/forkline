@@ -54,7 +54,7 @@ function StatChip({
   );
 }
 
-/** カテゴリ・実行方式・リクエスト数・公開日・公開者 */
+/** カテゴリ・ベースモデル・リクエスト数・公開日・公開者 */
 export function ModelStats({ model }: { model: StoreModelDetail }) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -74,7 +74,6 @@ export function ModelStats({ model }: { model: StoreModelDetail }) {
       >
         {t(`store.categories.${model.category}`)}
       </StatChip>
-      <StatChip icon={Cpu}>{t("store.detail.runtime")}</StatChip>
       {model.baseModel && (
         <StatChip>{t("store.detail.baseModel", { model: model.baseModel })}</StatChip>
       )}
@@ -95,16 +94,6 @@ export function ModelStats({ model }: { model: StoreModelDetail }) {
       <StatChip>
         {t("store.detail.by", { publisher: model.publisherName })}
       </StatChip>
-      {model.evaluation && (
-        <StatChip icon={FlaskConical}>
-          <span className="num">
-            {t("store.evaluation.chip", {
-              score: model.evaluation.fineTunedMean.toFixed(2),
-              n: model.evaluation.n,
-            })}
-          </span>
-        </StatChip>
-      )}
     </div>
   );
 }
@@ -115,7 +104,7 @@ function ModelIdPanel({ slug }: { slug: string }) {
   return (
     <div className="border-t border-line px-5 py-4">
       <p className="text-xs text-ink-mute">{t("store.detail.modelId")}</p>
-      <div className="mt-2 flex items-center gap-2 rounded-full border border-line bg-surface py-1 pr-1 pl-4">
+      <div className="mt-2 flex items-center gap-2">
         <code className="min-w-0 flex-1 truncate font-mono text-sm text-brand-ink">
           {slug}
         </code>
@@ -155,7 +144,6 @@ function EvaluationSection({ evaluation }: { evaluation: PublicEvaluation }) {
       value: `${Math.round(evaluation.winRate * 100)}%`,
       strong: false,
     },
-    { label: t("store.evaluation.sample"), value: String(evaluation.n), strong: false },
   ];
   return (
     <section>
@@ -164,7 +152,7 @@ function EvaluationSection({ evaluation }: { evaluation: PublicEvaluation }) {
         {t("store.evaluation.title")}
       </h2>
       <div className="glass glow-card mt-4 rounded-3xl p-5">
-        <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <dl className="grid grid-cols-3 gap-4">
           {stats.map((stat) => (
             <div key={stat.label}>
               <dt className="text-xs text-ink-mute">{stat.label}</dt>
@@ -286,6 +274,7 @@ export function ModelDetailBody({
               label={snippet === "curl" ? "cURL" : "Python"}
               code={snippets[snippet]}
               highlight={model.slug}
+              hideLabel
             />
           </div>
         </section>

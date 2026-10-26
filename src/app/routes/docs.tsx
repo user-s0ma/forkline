@@ -248,7 +248,7 @@ function ChatExamples() {
         ))}
       </div>
       <div role="tabpanel" id="chat-panel" aria-labelledby={`chat-tab-${tab}`}>
-        <CodeBlock label={tab} code={CHAT_EXAMPLES[tab]} highlight={MODEL} />
+        <CodeBlock label={tab} code={CHAT_EXAMPLES[tab]} highlight={MODEL} hideLabel />
       </div>
     </div>
   );

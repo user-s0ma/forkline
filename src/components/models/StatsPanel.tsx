@@ -71,7 +71,7 @@ export function StatsPanel({
         <p className="text-sm text-danger">{t("models.stats.loadFailed")}</p>
       ) : recorded.length === 0 ? (
         !isPending && (
-          <p className="rounded-(--radius-control) bg-surface px-4 py-6 text-center text-sm text-ink-mute">
+          <p className="text-sm text-ink-mute">
             {t("models.stats.empty")}
           </p>
         )

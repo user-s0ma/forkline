@@ -48,7 +48,6 @@
   },
   "usage": {
     "title": "利用履歴",
-    "description": "あなたが API とプレイグラウンドでモデルを呼び出した記録です。",
     "loadFailed": "利用履歴を読み込めませんでした",
     "chartTitle": "日別の利用額 (30日)",
     "spend30": "30日の利用額",
@@ -183,7 +182,6 @@
     },
     "list": {
       "title": "モデル",
-      "description": "あなたのモデルです。Nemotron を学習させてデプロイし、料金を決めてストアに公開します。",
       "newButton": "モデルを作成",
       "loadError": "モデルを読み込めませんでした",
       "createFailed": "モデルを作成できませんでした",
@@ -198,7 +196,6 @@
       "title": "モデルを作成",
       "namePlaceholder": "例: 社内FAQボット",
       "submit": "作成",
-      "flowTitle": "Nemotron を微調整する",
       "flowSummary": "学習データをアップロードし、NVIDIA Nemotron を Nebius の GPU で LoRA 学習します。そのままエンドポイントにして公開できます。"
     },
     "editor": {
@@ -410,7 +407,7 @@
     },
     "endpoint": {
       "title": "エンドポイント",
-      "description": "学習した LoRA を Nemotron に載せて動かします。GPU 代は動いている間だけ掛かり、呼ばれないと自動で止まります。",
+      "description": "学習した LoRA を Nemotron に載せて動かします。",
       "notDeployed": "まだデプロイしていません。学習が終わったら、下の履歴からデプロイしてください。",
       "baseModel": "ベースモデル",
       "rate": "GPU の料金",
@@ -513,7 +510,6 @@
       "startFailed": "評価を始められませんでした",
       "fineTunedMean": "このモデル (平均)",
       "baseMean": "ベース (平均)",
-      "winRate": "勝率",
       "record": "勝ち / 引き分け / 負け",
       "recordValue": "{{wins}} / {{ties}} / {{losses}}",
       "verdicts": {
@@ -522,7 +518,7 @@
         "inconclusive": "{{n}} 問でははっきりした差は出ませんでした (符号検定 p {{p}})。差を見るには評価用の質問を増やす必要があります。",
         "too_few": "採点できたのは {{n}} 問だけです。結論を出すには少なすぎるので、数字は参考程度に見てください。"
       },
-      "footnote": "採点 {{n}} 問・採点できず {{failed}} 問 · 符号検定 p {{p}} · 点差の 95% ブートストラップ区間 {{interval}} · 比べる相手 {{baseline}} · 採点 {{judge}} · Token Factory {{amount}}",
+      "footnote": "採点 {{n}} 問・採点できず {{failed}} 問 · 点差の 95% ブートストラップ区間 {{interval}} · 採点 {{judge}} · Token Factory {{amount}}",
       "itemsTitle": "質問ごとの結果",
       "columns": {
         "question": "質問",
@@ -550,11 +546,10 @@
       "applied": "設定に移しました。確かめてから保存してください。"
     },
     "demoGuide": {
-      "title": "ハッカソンの審査員の方へ",
       "body": "Midori Bakery FAQ は、Nemotron 3 Nano 4B を Nebius の Serverless AI Job で LoRA 微調整したモデルです。学習データは、パン屋の FAQ から Token Factory の Nemotron が書いた231件の会話です。26問は評価用に取っておきました。下は、{{date}} にこのモデルの Nebius のエンドポイントと話した記録です。",
       "toEvaluation": "ベースの Nemotron との比較を見る →",
       "toDeploy": "デプロイして自分で話す →",
-      "deployNote": "GPU のエンドポイントの起動には10分ほどかかります。15分呼ばれなければ自動で止まります。"
+      "deployNote": "GPU のエンドポイントの起動には10分ほどかかります。{{idle}}分呼ばれなければ自動で止まります。"
     }
   },
   "server": {

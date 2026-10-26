@@ -165,7 +165,7 @@ export function EvaluationPanel({
         }
       >
         {info?.blocker ? (
-          <p className="rounded-(--radius-control) bg-paper px-3 py-2.5 text-sm text-ink-soft">
+          <p className="text-sm text-ink-soft">
             {t(`models.evaluation.blockers.${info.blocker}`)}
           </p>
         ) : info ? (
@@ -179,7 +179,7 @@ export function EvaluationPanel({
         ) : null}
 
         {latest && running && (
-          <div className="space-y-2 rounded-(--radius-control) border border-line bg-paper p-4" role="status">
+          <div className="space-y-2" role="status">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <Badge tone="signal" dot>
                 {warming ? t("models.evaluation.warming") : t("models.evaluation.status.running")}
@@ -235,11 +235,7 @@ export function EvaluationPanel({
   );
 }
 
-function pct(value: number) {
-  return `${Math.round(value * 100)}%`;
-}
-
-/** 平均点・勝率・符号検定・信頼区間と、その読み方 */
+/** 平均点・勝ち負け・符号検定・信頼区間と、その読み方 */
 export function EvalSummaryView({ run, summary }: { run: EvalRunRecord; summary: EvalSummary }) {
   const { t } = useTranslation();
   const yen = useYen();
@@ -249,7 +245,6 @@ export function EvalSummaryView({ run, summary }: { run: EvalRunRecord; summary:
   const stats = [
     { label: t("models.evaluation.fineTunedMean"), value: `${summary.fineTunedMean.toFixed(2)} / 5` },
     { label: t("models.evaluation.baseMean"), value: `${summary.baseMean.toFixed(2)} / 5` },
-    { label: t("models.evaluation.winRate"), value: pct(summary.winRate) },
     {
       label: t("models.evaluation.record"),
       value: t("models.evaluation.recordValue", {
@@ -261,9 +256,9 @@ export function EvalSummaryView({ run, summary }: { run: EvalRunRecord; summary:
   ];
   return (
     <div className="space-y-3">
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-(--radius-control) bg-paper px-3 py-2.5">
+          <div key={stat.label}>
             <dt className="text-xs text-ink-mute">{stat.label}</dt>
             <dd className="num mt-0.5 text-lg font-semibold text-ink">{stat.value}</dd>
           </div>
@@ -279,9 +274,7 @@ export function EvalSummaryView({ run, summary }: { run: EvalRunRecord; summary:
         {t("models.evaluation.footnote", {
           n: summary.n,
           failed: summary.failed,
-          p: formatPValue(summary.signTestP),
           interval,
-          baseline: run.baselineModel,
           judge: run.judgeModel,
           amount: yen(run.costMicros),
         })}

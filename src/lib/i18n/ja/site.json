@@ -30,14 +30,12 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "NVIDIA Nemotron × Nebius AI Cloud",
       "title1": "Nemotronを微調整して、",
       "title2": "呼ばれるたびに稼ぐ。",
       "subtitle": "自分のデータでNemotronをLoRA微調整し、OpenAI互換のAPIとしてストアに公開できます。GPUの用意は要りません。誰かがモデルを呼ぶたびに、使われたトークンの分が売上になります。",
       "ctaPrimary": "モデルを作る",
       "ctaSecondary": "公開中のモデルを見る",
-      "ctaTertiary": "APIドキュメントを読む",
-      "demoNote": "ハッカソンの審査員の方へ：学習と評価が済んだモデルを持つ、共有のデモアカウントです。登録は要りません。"
+      "demoNote": "学習と評価が済んだモデルを持つ、共有のデモアカウントです。登録は要りません。"
     },
     "flow": {
       "aria": "図: ベースモデルのNemotronから、あなたのデータで学習したLoRAが分岐し、Nebiusのエンドポイントに載り、APIの呼び出しが売上になる流れ",
@@ -52,38 +50,31 @@
     },
     "steps": {
       "title": "データから売上までの5つの手順",
-      "lead": "どの手順も、コンソールのモデルの画面で進めます。",
       "s1": {
         "title": "学習する",
         "body": "chat形式のJSONLを上げ、Nemotronを選んで学習を始めます。終わったら、実際に使ったGPU時間で精算します。",
-        "where": "Nebius Serverless AI Jobs",
         "assist": "手元に資料しかなければ、Nemotronが資料から学習データの下書きを作ります。"
       },
       "s2": {
         "title": "デプロイする",
-        "body": "ベースモデルに学習したLoRAを載せて、vLLMのエンドポイントを立てます。{{idle}}分呼ばれないと自動で止まります。",
-        "where": "Nebius Serverless AI Endpoints"
+        "body": "ベースモデルに学習したLoRAを載せて、vLLMのエンドポイントを立てます。{{idle}}分呼ばれないと自動で止まります。"
       },
       "s3": {
         "title": "試す",
         "body": "ブラウザのプレイグラウンドで、実際の応答を確かめます。",
-        "where": "プレイグラウンド",
         "assist": "Nemotronが同じ質問をベースモデルと微調整後のモデルに送り、回答を比べて評価します。"
       },
       "s4": {
         "title": "公開する",
-        "body": "入力・出力100万トークンあたりと、1リクエストあたりの価格を決めて、ストアに公開します。",
-        "where": "Forklineのストア"
+        "body": "入力・出力100万トークンあたりと、1リクエストあたりの価格を決めて、ストアに公開します。"
       },
       "s5": {
         "title": "稼ぐ",
-        "body": "利用者は自分のAPIキーで /v1 から呼び出します。呼ばれるたびに、価格の{{share}}%があなたの売上になります。",
-        "where": "Stripe Connect"
+        "body": "利用者は自分のAPIキーで /v1 から呼び出します。呼ばれるたびに、価格の{{share}}%があなたの売上になります。"
       }
     },
     "why": {
       "title": "GPUを持たずに、モデルを売る",
-      "lead": "作る人がやるのは、データを用意して価格を決めることだけです。",
       "gpu": {
         "title": "GPUの管理は要らない",
         "body": "学習も推論もNebiusのサーバーレスGPUで動きます。マシンの確保、コンテナの起動と停止はForklineが行います。"
@@ -107,7 +98,6 @@
     },
     "stack": {
       "title": "Nebius と NVIDIA の上で動く",
-      "lead": "学習、推論、保存はNebius AI Cloudで行い、ベースモデルにはNVIDIA Nemotronを使います。",
       "role": "役割",
       "service": "Nebiusのサービス",
       "detail": "内容",
@@ -160,7 +150,6 @@
       "requestLabel": "リクエスト",
       "responseLabel": "レスポンス",
       "docs": "APIドキュメントを読む",
-      "comment": "ストアに表示されるモデルID",
       "prompt": "返品の手順を教えてください",
       "warm": "しばらく呼ばれていないモデルは起動に数分かかります。その間は 503 と Retry-After を返すので、指定の秒数を待って送り直してください。"
     },
@@ -185,24 +174,6 @@
     },
     "judges": {
       "title": "ハッカソンの審査員の方へ",
-      "uses": {
-        "jobs": {
-          "name": "Nebius Serverless AI Jobs",
-          "body": "Nemotron の LoRA 微調整。学習1回につき1つの Job（PEFT と TRL のイメージ）。"
-        },
-        "endpoints": {
-          "name": "Nebius Serverless AI Endpoints",
-          "body": "vLLM がベースの Nemotron とアダプターを載せて動かす。呼ばれないと自動で止まり、次の呼び出しで起きる。"
-        },
-        "storage": {
-          "name": "Nebius Object Storage",
-          "body": "学習データと学習したアダプター。"
-        },
-        "tokenFactory": {
-          "name": "Nebius Token Factory の Nemotron",
-          "body": "資料から学習データを書き、ベースモデルとして答え、両方の答えを採点し、モデルカードの下書きを書く。"
-        }
-      },
       "evalTitle": "デモのモデル：Midori Bakery FAQ（Nemotron 3 Nano 4B + LoRA）",
       "stats": {
         "fineTuned": "微調整したモデル",

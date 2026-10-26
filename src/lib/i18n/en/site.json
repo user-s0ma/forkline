@@ -30,14 +30,12 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "NVIDIA Nemotron × Nebius AI Cloud",
       "title1": "Fine-tune Nemotron.",
       "title2": "Earn every time it's called.",
       "subtitle": "Fine-tune Nemotron with LoRA on your own data and publish it to the store as an OpenAI-compatible API. No GPUs to set up. Each time someone calls your model, the tokens it serves become your earnings.",
       "ctaPrimary": "Build a model",
       "ctaSecondary": "Browse published models",
-      "ctaTertiary": "Read the API docs",
-      "demoNote": "For hackathon judges: a shared demo account with a trained and evaluated model. No sign-up."
+      "demoNote": "A shared demo account with a trained and evaluated model. No sign-up."
     },
     "flow": {
       "aria": "Diagram: your data forks a LoRA off the Nemotron base model, it is deployed to a Nebius endpoint, and API calls to it become earnings",
@@ -52,38 +50,31 @@
     },
     "steps": {
       "title": "Five steps from data to earnings",
-      "lead": "Every step happens on the model page in the console.",
       "s1": {
         "title": "Train",
         "body": "Upload a chat-format JSONL, pick a Nemotron base model and start training. You pay for the GPU time the run actually used.",
-        "where": "Nebius Serverless AI Jobs",
         "assist": "Only have documents? Nemotron drafts training examples from them."
       },
       "s2": {
         "title": "Deploy",
-        "body": "Your LoRA is loaded onto the base model in a vLLM endpoint. It stops on its own after {{idle}} minutes without calls.",
-        "where": "Nebius Serverless AI Endpoints"
+        "body": "Your LoRA is loaded onto the base model in a vLLM endpoint. It stops on its own after {{idle}} minutes without calls."
       },
       "s3": {
         "title": "Test",
         "body": "Check real responses in the in-browser playground.",
-        "where": "Playground",
         "assist": "Nemotron sends the same prompts to the base model and to your fine-tuned model, and compares the answers."
       },
       "s4": {
         "title": "Publish",
-        "body": "Set prices per 1M input and output tokens and per request, then publish to the store.",
-        "where": "Forkline store"
+        "body": "Set prices per 1M input and output tokens and per request, then publish to the store."
       },
       "s5": {
         "title": "Earn",
-        "body": "Users call your model at /v1 with their own API key. Each call credits {{share}}% of your price to your earnings.",
-        "where": "Stripe Connect"
+        "body": "Users call your model at /v1 with their own API key. Each call credits {{share}}% of your price to your earnings."
       }
     },
     "why": {
       "title": "Sell a model without running GPUs",
-      "lead": "Your part is the data and the price.",
       "gpu": {
         "title": "No GPUs to manage",
         "body": "Training and inference run on Nebius serverless GPUs. Forkline reserves the machines and starts and stops the containers."
@@ -107,7 +98,6 @@
     },
     "stack": {
       "title": "Built on Nebius and NVIDIA",
-      "lead": "Training, inference and storage run on Nebius AI Cloud. The base models are NVIDIA Nemotron.",
       "role": "Role",
       "service": "Nebius service",
       "detail": "What it does",
@@ -160,7 +150,6 @@
       "requestLabel": "Request",
       "responseLabel": "Response",
       "docs": "Read the API docs",
-      "comment": "the model ID shown in the store",
       "prompt": "How do I return an item?",
       "warm": "A model that hasn't been called for a while takes a few minutes to start. Until then it returns 503 with Retry-After; wait that long and send the request again."
     },
@@ -185,24 +174,6 @@
     },
     "judges": {
       "title": "For hackathon judges",
-      "uses": {
-        "jobs": {
-          "name": "Nebius Serverless AI Jobs",
-          "body": "LoRA fine-tuning of Nemotron, one job per training run (PEFT + TRL image)."
-        },
-        "endpoints": {
-          "name": "Nebius Serverless AI Endpoints",
-          "body": "vLLM serves the base Nemotron with the adapter. Idle endpoints stop by themselves and wake on the next call."
-        },
-        "storage": {
-          "name": "Nebius Object Storage",
-          "body": "Datasets and trained adapters."
-        },
-        "tokenFactory": {
-          "name": "Nemotron on Nebius Token Factory",
-          "body": "Writes training data from a document, answers as the base-model baseline, grades both models and drafts the model card."
-        }
-      },
       "evalTitle": "Demo model: Midori Bakery FAQ (Nemotron 3 Nano 4B + LoRA)",
       "stats": {
         "fineTuned": "Fine-tuned model",

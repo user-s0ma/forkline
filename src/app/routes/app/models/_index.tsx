@@ -50,7 +50,6 @@ export default function ModelsPage() {
     <>
       <PageHeader
         title={t("models.list.title")}
-        description={t("models.list.description")}
         onOpenMenu={openMobileNavigation}
         actions={
           models.length > 0 && (
@@ -161,10 +160,6 @@ function EmptyModels({ onCreate }: { onCreate: () => void }) {
       <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-mute">
         {t("models.list.emptyDescription")}
       </p>
-      <div className="mt-6 max-w-2xl rounded-(--radius-panel) border border-line p-5">
-        <p className="text-sm font-semibold text-ink">{t("models.create.flowTitle")}</p>
-        <p className="mt-1 text-sm leading-6 text-ink-mute">{t("models.create.flowSummary")}</p>
-      </div>
       <button className="console-button-primary mt-6" type="button" onClick={onCreate}>
         <Plus className="h-4 w-4" />
         {t("models.list.createFirst")}

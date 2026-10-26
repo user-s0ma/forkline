@@ -58,7 +58,6 @@ export default function UsagePage() {
     <>
       <PageHeader
         title={t("usage.title")}
-        description={t("usage.description")}
         onOpenMenu={openMobileNavigation}
       />
       <PageBody>

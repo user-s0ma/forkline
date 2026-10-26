@@ -254,8 +254,7 @@ export default function Login() {
             </p>
           </section>
           <section className="ui-card p-2">
-            <div className="mb-2 grid gap-2 rounded-xl bg-paper p-6">
-              <p className="text-lg font-semibold text-ink">{t("auth.login.demoTitle")}</p>
+            <div className="mb-2 grid gap-2 p-6">
               <p className="text-sm leading-6 text-ink-soft">{t("auth.login.tryDemoNote")}</p>
               <DemoButton className="ui-button-primary mt-2 w-full" />
             </div>
@@ -284,10 +283,10 @@ export default function Login() {
                 {t("auth.login.signupTab")}
               </button>
             </div>
-            <div className="p-6 mt-2 rounded-xl bg-paper">
+            <div className="p-6 mt-2">
               <form className="grid gap-5" onSubmit={handleSubmit}>
                 {verificationEmail && (
-                  <div className="rounded-xl border border-line bg-brand-tint p-4 text-sm">
+                  <div className="text-sm">
                     <p className="font-semibold text-ink">
                       {t("auth.login.verificationEmailSent")}
                     </p>

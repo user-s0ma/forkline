@@ -70,7 +70,7 @@ export function EndpointPanel({
   if (!model.endpointId && status !== "failed") {
     return (
       <Section title={t("models.endpoint.title")} description={t("models.endpoint.description")}>
-        <p className="rounded-(--radius-control) bg-paper px-4 py-3 text-sm text-ink-mute">
+        <p className="text-sm text-ink-mute">
           {t("models.endpoint.notDeployed")}
         </p>
       </Section>

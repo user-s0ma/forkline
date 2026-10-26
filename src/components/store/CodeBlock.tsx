@@ -23,10 +23,13 @@ export function CodeBlock({
   label,
   code,
   highlight,
+  hideLabel = false,
 }: {
   label: string;
   code: string;
   highlight?: string;
+  /** 上のタブで言語が分かるときは、見出しの言語名を出さない */
+  hideLabel?: boolean;
 }) {
   const { t } = useTranslation();
   const { copied, copy } = useCopy();
@@ -34,7 +37,7 @@ export function CodeBlock({
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-code">
       <div className="flex items-center justify-between border-b border-line py-1.5 pr-1.5 pl-4">
-        <span className="font-mono text-xs text-ink-mute">{label}</span>
+        <span className="font-mono text-xs text-ink-mute">{hideLabel ? null : label}</span>
         <button
           type="button"
           className="flex h-8 items-center gap-1.5 rounded-full px-3 text-xs text-ink-soft hover:bg-line hover:text-ink"

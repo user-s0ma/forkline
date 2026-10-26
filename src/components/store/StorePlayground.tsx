@@ -18,16 +18,13 @@ export function StorePlayground({ slug }: { slug: string }) {
   if (!root?.session) {
     const callbackUrl = encodeURIComponent(`/models/${slug}`);
     return (
-      <div className="rounded-2xl border border-line bg-surface/60 px-4 py-8 text-center">
-        <p className="text-sm font-semibold">{t("store.playground.loginTitle")}</p>
-        <a
-          className="ui-button-primary mt-4 px-5 py-2.5 text-sm"
-          href={`/login?callbackUrl=${callbackUrl}`}
-        >
-          <LogIn className="h-4 w-4" />
-          {t("store.playground.login")}
-        </a>
-      </div>
+      <a
+        className="ui-button-primary px-5 py-2.5 text-sm"
+        href={`/login?callbackUrl=${callbackUrl}`}
+      >
+        <LogIn className="h-4 w-4" />
+        {t("store.playground.login")}
+      </a>
     );
   }
 

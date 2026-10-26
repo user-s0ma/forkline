@@ -5,7 +5,6 @@
     "detailMetaTitle": "モデル詳細 | Forkline",
     "explore": {
       "title": "モデルを探す",
-      "subtitle": "公開中のモデルを API やブラウザから使えます。",
       "searchPlaceholder": "モデル名・タグで検索",
       "searchAria": "モデルを検索",
       "allCategories": "すべて",
@@ -58,8 +57,7 @@
       "loadError": "モデルを読み込めませんでした",
       "modelId": "モデルID",
       "copyId": "モデルIDをコピー",
-      "coldStart": "いまは停止中です。最初の呼び出しで起動し、数分間は 503 (Retry-After 付き) が返ります。",
-      "runtime": "Nemotron on Nebius"
+      "coldStart": "いまは停止中です。最初の呼び出しで起動し、数分間は 503 (Retry-After 付き) が返ります。"
     },
     "api": {
       "title": "API で使う",
@@ -70,7 +68,6 @@
     },
     "playground": {
       "title": "プレイグラウンド",
-      "loginTitle": "ログインして試す",
       "login": "ログイン",
       "billedTo": "料金はあなたのクレジットから引かれます。",
       "messagePlaceholder": "メッセージを入力",
@@ -90,18 +87,16 @@
     },
     "evaluation": {
       "title": "Nemotron による評価",
-      "chip": "Nemotron の採点 {{score}} / 5 ({{n}} 問)",
-      "fineTuned": "このモデル (平均、1〜5)",
-      "base": "ベースの Nemotron (平均)",
+      "fineTuned": "このモデル",
+      "base": "ベースの Nemotron",
       "winRate": "勝率",
-      "sample": "問題数",
       "verdicts": {
         "better": "作者が取っておいた評価用の質問で、ベースモデルより高い点でした (符号検定 p = {{p}})。",
         "worse": "作者が取っておいた評価用の質問で、ベースモデルより低い点でした (符号検定 p = {{p}})。",
         "inconclusive": "{{n}} 問では、ベースモデルとのはっきりした差は出ませんでした (符号検定 p = {{p}})。",
         "too_few": "採点できたのは {{n}} 問だけで、結論を出すには少なすぎます。"
       },
-      "method": "学習に使っていない {{n}} 問を、このモデルと Nebius Token Factory の {{baseline}} に解かせ、{{judge}} が基準の答えと比べて採点しました。勝ち / 引き分け / 負け: {{wins}} / {{ties}} / {{losses}}。",
+      "method": "学習に使っていない {{n}} 問を、このモデルと Nebius Token Factory の {{baseline}} に解かせ、{{judge}} が基準の答えと比べて 1〜5 で採点しました。上の点は平均です。勝ち / 引き分け / 負け: {{wins}} / {{ties}} / {{losses}}。",
       "date": "評価日 {{date}}。"
     }
   }

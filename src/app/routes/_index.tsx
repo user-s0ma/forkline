@@ -77,7 +77,6 @@ function Steps({ idleMinutes }: { idleMinutes: number }) {
                 {t(`landing.steps.${key}.assist`)}
               </p>
             )}
-            <p className="mt-3 text-xs font-medium text-ink-mute">{t(`landing.steps.${key}.where`)}</p>
           </li>
         );
       })}
@@ -95,7 +94,7 @@ function Why({ idleMinutes }: { idleMinutes: number }) {
   return (
     <div className="grid gap-12 lg:grid-cols-12">
       <div className="lg:col-span-5">
-        <SectionTitle title={t("landing.why.title")} lead={t("landing.why.lead")} />
+        <SectionTitle title={t("landing.why.title")} />
         {/* 利用者が払う価格の内訳。数字は手数料の定数から出す */}
         <figure className="mt-10">
           <figcaption className="text-sm font-semibold">{t("landing.why.splitTitle")}</figcaption>
@@ -141,7 +140,7 @@ function Stack() {
   return (
     <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
       <div className="lg:col-span-4">
-        <SectionTitle title={t("landing.stack.title")} lead={t("landing.stack.lead")} />
+        <SectionTitle title={t("landing.stack.title")} />
       </div>
       <div className="space-y-10 lg:col-span-8">
         <table className="w-full text-left text-sm">
@@ -325,9 +324,7 @@ function ApiExample() {
           {"res = client.chat.completions.create(\n"}
           {"    model="}
           <span className="text-brand-ink">&quot;your-model&quot;</span>
-          {",  "}
-          <span className="text-ink-mute"># {t("landing.api.comment")}</span>
-          {`\n    messages=[{"role": "user", "content": "${t("landing.api.prompt")}"}],\n)\n`}
+          {`,\n    messages=[{"role": "user", "content": "${t("landing.api.prompt")}"}],\n)\n`}
           {"print(res.choices[0].message.content)"}
         </code>
       </pre>
@@ -378,10 +375,9 @@ function Faq({ idleMinutes }: { idleMinutes: number }) {
   );
 }
 
-/** 審査員向けの帯: Nebius と NVIDIA の使いどころ、デモのモデルの評価、入口 */
+/** 審査員向けの帯: デモのモデルの評価と入口 */
 function ForJudges() {
   const { t } = useTranslation();
-  const uses = ["jobs", "endpoints", "storage", "tokenFactory"] as const;
   const stats = [
     ["4.96", "fineTuned"],
     ["2.19", "base"],
@@ -389,19 +385,9 @@ function ForJudges() {
   ] as const;
   return (
     <section className="border-t border-line">
-      <div className="ui-container grid gap-12 py-16 lg:grid-cols-[1.2fr_1fr] lg:py-20">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">{t("landing.judges.title")}</h2>
-          <ul className="mt-6 space-y-3">
-            {uses.map((key) => (
-              <li key={key} className="text-sm leading-6">
-                <span className="font-semibold">{t(`landing.judges.uses.${key}.name`)}</span>
-                <span className="text-ink-soft"> — {t(`landing.judges.uses.${key}.body`)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
+      <div className="ui-container py-16 lg:py-20">
+        <h2 className="text-2xl font-semibold tracking-tight">{t("landing.judges.title")}</h2>
+        <div className="mt-6 max-w-xl">
           <p className="text-sm font-semibold">{t("landing.judges.evalTitle")}</p>
           <dl className="mt-4 grid grid-cols-3 gap-4">
             {stats.map(([value, key]) => (
@@ -450,8 +436,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
         <section className="ui-container relative grid gap-14 pt-12 pb-16 sm:pt-16 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16 lg:py-24">
           <div className="max-w-[38rem]">
-            <p className="text-sm font-semibold text-brand-ink">{t("landing.hero.eyebrow")}</p>
-            <h1 className="h-display mt-4 text-[clamp(2.1rem,4.4vw,3.6rem)] font-semibold tracking-[-0.035em]">
+            <h1 className="h-display text-[clamp(2.1rem,4.4vw,3.6rem)] font-semibold tracking-[-0.035em]">
               <span className="block">{t("landing.hero.title1")}</span>
               <span className="block">{t("landing.hero.title2")}</span>
             </h1>
@@ -465,12 +450,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               </a>
             </div>
             <p className="mt-3 max-w-md text-xs leading-5 text-ink-mute">{t("landing.hero.demoNote")}</p>
-            <a
-              href={localizeHref("/docs", locale)}
-              className="mt-5 inline-flex text-sm font-semibold text-brand-ink hover:underline"
-            >
-              {t("landing.hero.ctaTertiary")}
-            </a>
           </div>
           <FlowDiagram />
         </section>
@@ -480,7 +459,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         {/* データから売上まで */}
         <section className="border-t border-line">
           <div className="ui-container py-16 lg:py-24">
-            <SectionTitle title={t("landing.steps.title")} lead={t("landing.steps.lead")} />
+            <SectionTitle title={t("landing.steps.title")} />
             <div className="mt-12">
               <Steps idleMinutes={idleMinutes} />
             </div>
@@ -550,7 +529,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               <p className="text-[clamp(2rem,4.5vw,3.5rem)] leading-[1.1] font-semibold tracking-[-0.035em]">
                 {t("landing.finalCta.title")}
               </p>
-              <p className="mt-5 inline-flex rounded-full bg-on-brand/10 px-4 py-2 font-mono text-base font-medium">
+              <p className="mt-5 font-mono text-base font-medium">
                 https://forkline.ai/v1
               </p>
             </div>

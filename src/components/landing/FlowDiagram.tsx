@@ -137,14 +137,6 @@ export function FlowDiagram() {
           </p>
         </Label>
       </div>
-      <pre className="mt-12 overflow-x-auto rounded-xl border border-line bg-code px-4 py-3 font-mono text-[12px] leading-5 text-code-ink sm:text-[13px]">
-        <code>
-          {"POST /v1/chat/completions\n"}
-          {'{ "model": '}
-          <span className="text-brand-ink">&quot;your-model&quot;</span>
-          {', "messages": [ … ] }'}
-        </code>
-      </pre>
     </figure>
   );
 }
