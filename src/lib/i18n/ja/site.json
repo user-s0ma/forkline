@@ -169,7 +169,6 @@
       "cta": "コンソールを開く"
     },
     "judges": {
-      "title": "ハッカソンの審査員の方へ",
       "stats": {
         "fineTuned": "学習済みデモモデル",
         "base": "ベースの Nemotron",

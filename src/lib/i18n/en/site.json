@@ -169,7 +169,6 @@
       "cta": "Open the console"
     },
     "judges": {
-      "title": "For hackathon judges",
       "stats": {
         "fineTuned": "Trained demo model",
         "base": "Base Nemotron",

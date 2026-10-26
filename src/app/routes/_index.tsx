@@ -375,7 +375,8 @@ function Faq({ idleMinutes }: { idleMinutes: number }) {
 }
 
 /** 審査員向けの帯: デモのモデルの評価と入口 */
-function ForJudges() {
+/** デモのモデルの評価 (学習に使わなかった26問を、ベースの Nemotron と比べて Nemotron が採点) */
+function DemoModelScores() {
   const { t } = useTranslation();
   const stats = [
     ["4.96", "fineTuned"],
@@ -384,26 +385,15 @@ function ForJudges() {
   ] as const;
   return (
     <section className="border-t border-line">
-      <div className="ui-container py-16 lg:py-20">
-        <h2 className="text-2xl font-semibold tracking-tight">{t("landing.judges.title")}</h2>
-        <div className="mt-6 max-w-xl">
-          <dl className="grid grid-cols-3 gap-4">
-            {stats.map(([value, key]) => (
-              <div key={key}>
-                <dd className="text-3xl font-semibold tracking-tight tabular-nums">{value}</dd>
-                <dt className="mt-1 text-xs leading-5 text-ink-mute">{t(`landing.judges.stats.${key}`)}</dt>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-6 flex gap-5">
-            <a href="https://devpost.com/software/forkline-w6jgys" className="text-sm font-semibold text-brand-ink hover:underline">
-              {t("landing.judges.devpost")}
-            </a>
-            <a href="https://github.com/user-s0ma/forkline" className="text-sm font-semibold text-brand-ink hover:underline">
-              {t("landing.judges.github")}
-            </a>
-          </div>
-        </div>
+      <div className="ui-container py-12 lg:py-16">
+        <dl className="grid max-w-xl grid-cols-3 gap-4">
+          {stats.map(([value, key]) => (
+            <div key={key}>
+              <dd className="text-3xl font-semibold tracking-tight tabular-nums">{value}</dd>
+              <dt className="mt-1 text-xs leading-5 text-ink-mute">{t(`landing.judges.stats.${key}`)}</dt>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );
@@ -441,12 +431,20 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   {t("landing.hero.ctaPrimary")}
                 </a>
               </div>
+              <div className="mt-5 flex gap-5">
+                <a href="https://devpost.com/software/forkline-w6jgys" className="text-sm font-semibold text-brand-ink hover:underline">
+                  {t("landing.judges.devpost")}
+                </a>
+                <a href="https://github.com/user-s0ma/forkline" className="text-sm font-semibold text-brand-ink hover:underline">
+                  {t("landing.judges.github")}
+                </a>
+              </div>
             </div>
             <FlowDiagram />
           </section>
         </div>
 
-        <ForJudges />
+        <DemoModelScores />
 
         {/* データから売上まで */}
         <section className="border-t border-line">
