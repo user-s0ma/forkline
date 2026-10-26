@@ -396,10 +396,7 @@ function ForJudges() {
               </div>
             ))}
           </dl>
-          <div className="mt-8">
-            <DemoButton />
-          </div>
-          <div className="mt-4 flex gap-5">
+          <div className="mt-6 flex gap-5">
             <a href="https://devpost.com/software/forkline-w6jgys" className="text-sm font-semibold text-brand-ink hover:underline">
               {t("landing.judges.devpost")}
             </a>
@@ -420,36 +417,35 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="site relative min-h-screen overflow-x-clip bg-surface font-sans text-ink antialiased">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[760px]"
-      >
-        <div className="hero-backdrop absolute inset-0" />
-        <div className="hero-noise absolute inset-0 opacity-60" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-canvas" />
-      </div>
-
       <div className="relative">
         <SiteHeader transparentAtTop />
 
-        <section className="ui-container relative grid gap-14 pt-12 pb-16 sm:pt-16 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16 lg:py-24">
-          <div className="max-w-[38rem]">
-            <h1 className="h-display text-[clamp(2.1rem,4.4vw,3.6rem)] font-semibold tracking-[-0.035em]">
-              <span className="block">{t("landing.hero.title1")}</span>
-              <span className="block">{t("landing.hero.title2")}</span>
-            </h1>
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-ink-soft sm:text-lg">
-              {t("landing.hero.subtitle")}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <DemoButton />
-              <a href="/app" className="ui-button-secondary">
-                {t("landing.hero.ctaPrimary")}
-              </a>
-            </div>
+        {/* 背景の絵柄は1枚目の高さに合わせ、上はヘッダーの裏まで伸ばす */}
+        <div className="relative">
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -top-28">
+            <div className="hero-backdrop absolute inset-0" />
+            <div className="hero-noise absolute inset-0 opacity-60" />
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-surface" />
           </div>
-          <FlowDiagram />
-        </section>
+          <section className="ui-container relative grid gap-14 pt-12 pb-16 sm:pt-16 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16 lg:py-24">
+            <div className="max-w-[38rem]">
+              <h1 className="h-display text-[clamp(2.1rem,4.4vw,3.6rem)] font-semibold tracking-[-0.035em]">
+                <span className="block">{t("landing.hero.title1")}</span>
+                <span className="block">{t("landing.hero.title2")}</span>
+              </h1>
+              <p className="mt-6 max-w-lg text-base leading-relaxed text-ink-soft sm:text-lg">
+                {t("landing.hero.subtitle")}
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <DemoButton />
+                <a href="/app" className="ui-button-secondary">
+                  {t("landing.hero.ctaPrimary")}
+                </a>
+              </div>
+            </div>
+            <FlowDiagram />
+          </section>
+        </div>
 
         <ForJudges />
 
