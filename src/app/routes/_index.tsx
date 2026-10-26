@@ -378,6 +378,58 @@ function Faq({ idleMinutes }: { idleMinutes: number }) {
   );
 }
 
+/** 審査員向けの帯: Nebius と NVIDIA の使いどころ、デモのモデルの評価、入口 */
+function ForJudges() {
+  const { t } = useTranslation();
+  const uses = ["jobs", "endpoints", "storage", "tokenFactory"] as const;
+  const stats = [
+    ["4.96", "fineTuned"],
+    ["2.19", "base"],
+    ["24 / 26", "wins"],
+  ] as const;
+  return (
+    <section className="ui-container pb-16">
+      <div className="ui-card grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.2fr_1fr]">
+        <div>
+          <p className="text-sm font-semibold text-brand-ink">{t("landing.judges.eyebrow")}</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">{t("landing.judges.title")}</h2>
+          <ul className="mt-5 space-y-3">
+            {uses.map((key) => (
+              <li key={key} className="text-sm leading-6">
+                <span className="font-semibold">{t(`landing.judges.uses.${key}.name`)}</span>
+                <span className="text-ink-soft"> — {t(`landing.judges.uses.${key}.body`)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="flex flex-col gap-5">
+          <div className="rounded-xl bg-paper p-5">
+            <p className="text-sm font-semibold">{t("landing.judges.evalTitle")}</p>
+            <dl className="mt-4 grid grid-cols-3 gap-3">
+              {stats.map(([value, key]) => (
+                <div key={key}>
+                  <dd className="text-2xl font-semibold tracking-tight tabular-nums">{value}</dd>
+                  <dt className="mt-1 text-xs leading-5 text-ink-mute">{t(`landing.judges.stats.${key}`)}</dt>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-4 text-xs leading-5 text-ink-mute">{t("landing.judges.evalNote")}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <DemoButton />
+            <a href="https://devpost.com/software/forkline-w6jgys" className="text-sm font-semibold text-brand-ink hover:underline">
+              {t("landing.judges.devpost")}
+            </a>
+            <a href="https://github.com/user-s0ma/forkline" className="text-sm font-semibold text-brand-ink hover:underline">
+              {t("landing.judges.github")}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -423,6 +475,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           </div>
           <FlowDiagram />
         </section>
+
+        <ForJudges />
 
         {/* データから売上まで */}
         <section className="border-t border-line">

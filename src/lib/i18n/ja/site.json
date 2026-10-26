@@ -182,6 +182,37 @@
     "finalCta": {
       "title": "自分のデータで、Nemotronを公開する",
       "cta": "コンソールを開く"
+    },
+    "judges": {
+      "eyebrow": "ハッカソンの審査員の方へ",
+      "title": "Forkline は Nebius と NVIDIA Nemotron をこう使っています",
+      "uses": {
+        "jobs": {
+          "name": "Nebius Serverless AI Jobs",
+          "body": "Nemotron の LoRA 微調整。学習1回につき1つの Job（PEFT と TRL のイメージ）。"
+        },
+        "endpoints": {
+          "name": "Nebius Serverless AI Endpoints",
+          "body": "vLLM がベースの Nemotron とアダプターを載せて動かす。呼ばれないと自動で止まり、次の呼び出しで起きる。"
+        },
+        "storage": {
+          "name": "Nebius Object Storage",
+          "body": "学習データと学習したアダプター。"
+        },
+        "tokenFactory": {
+          "name": "Nebius Token Factory の Nemotron",
+          "body": "資料から学習データを書き、ベースモデルとして答え、両方の答えを採点し、モデルカードの下書きを書く。"
+        }
+      },
+      "evalTitle": "デモのモデル：Midori Bakery FAQ（Nemotron 3 Nano 4B + LoRA）",
+      "stats": {
+        "fineTuned": "微調整したモデルの平均点（1〜5）",
+        "base": "ベースの Nemotron の平均点",
+        "wins": "勝った問題（引き分け2、負け0）"
+      },
+      "evalNote": "学習に使わずに取っておいた26問を両方のモデルに解かせ、Nemotron が模範解答と比べて採点しました。",
+      "devpost": "Devpost と動画 →",
+      "github": "GitHub のソース →"
     }
   },
   "catalog": {
