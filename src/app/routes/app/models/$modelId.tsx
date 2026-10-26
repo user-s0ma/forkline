@@ -13,6 +13,8 @@ import { PricingPanel } from "@/components/models/PricingPanel";
 import { RuntimeForm } from "@/components/models/RuntimeForm";
 import { StatsPanel } from "@/components/models/StatsPanel";
 import { TestPanel } from "@/components/models/TestPanel";
+import { DemoGuide } from "@/components/models/DemoGuide";
+import { isDemoUser } from "@/lib/auth/demo-account";
 import { TrainingPanel } from "@/components/models/TrainingPanel";
 import { useBaseModels } from "@/components/models/hooks";
 import { Field, ModelLamp, Section } from "@/components/models/ui";
@@ -161,7 +163,7 @@ function ModelEditor({
 }) {
   const { t } = useTranslation();
   const locale = useLocale();
-  const { openMobileNavigation } = useOutletContext<AppLayoutContext>();
+  const { openMobileNavigation, user } = useOutletContext<AppLayoutContext>();
   const [draft, setDraft] = useState<ModelUpdateInput>(() => toDraft(model));
   const [isSaving, setIsSaving] = useState(false);
   const baseModels = useBaseModels();
@@ -267,6 +269,7 @@ function ModelEditor({
         >
           {tab === "overview" && (
             <>
+              {isDemoUser(user) && <DemoGuide onOpenTab={onTabChange} />}
               <LaunchPanel
                 model={model}
                 isDirty={isDirty}

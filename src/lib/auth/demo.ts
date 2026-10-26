@@ -4,16 +4,12 @@ import { yenToMicros } from "../billing/pricing";
 import { getDb } from "../db/client";
 import { aiModel, evalItem, evalRun, fineTune } from "../db/schema";
 
+export { DEMO_EMAIL, DEMO_NAME, isDemoUser } from "./demo-account";
+
 /**
- * お試しの共有アカウント。パスワードを持たず、/api/auth/sign-in/demo からだけ入れる。
+ * 審査員向けのデモアカウント (共有)。パスワードを持たず、/api/auth/sign-in/demo からだけ入れる。
  * 学習済みのモデルを1つ持ち、見ること・載せること・プレイグラウンドで試すことだけができる
  */
-export const DEMO_EMAIL = "demo@forkline.invalid";
-export const DEMO_NAME = "Forkline Demo";
-
-export function isDemoUser(user: { email: string }) {
-  return user.email === DEMO_EMAIL;
-}
 
 /** お試しでも使える、書き込みの API (それ以外の書き込みは止める) */
 const DEMO_WRITE_PATHS = [

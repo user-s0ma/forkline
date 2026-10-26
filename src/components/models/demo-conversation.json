@@ -1,0 +1,10 @@
+{
+  "recordedOn": "2026-10-27",
+  "turns": [
+    { "user": "Are you open on Wednesdays?", "assistant": "No, the bakery is closed every Wednesday, including public holidays." },
+    { "user": "When are the croissants ready?", "assistant": "Croissants are baked around 8 am." },
+    { "user": "Can I reserve a whole cake?", "assistant": "Whole cakes can be reserved by phone until 5 pm the day before." },
+    { "user": "Which breads have no egg in them?", "assistant": "The baguette, campagne, and bagels are egg-free." },
+    { "user": "Is there parking?", "assistant": "There are 3 parking spaces behind the shop." }
+  ]
+}

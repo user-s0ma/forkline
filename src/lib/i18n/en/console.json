@@ -548,6 +548,15 @@
       "cost": "Token Factory {{amount}}",
       "apply": "Move to Settings",
       "applied": "Moved to Settings. Check it and save."
+    },
+    "demoGuide": {
+      "eyebrow": "For hackathon judges",
+      "title": "A model built end to end with Forkline",
+      "body": "Midori Bakery FAQ is Nemotron 3 Nano 4B fine-tuned with LoRA on a Nebius Serverless AI Job, using 231 chat examples that Nemotron on Token Factory wrote from a bakery FAQ. 26 held-out questions were kept for evaluation. Below is a conversation with this model, recorded from its Nebius endpoint.",
+      "recorded": "Recorded on {{date}} from this model",
+      "toEvaluation": "See the evaluation against base Nemotron →",
+      "toDeploy": "Deploy it and chat yourself →",
+      "deployNote": "Starting the GPU endpoint takes about 10 minutes. It stops by itself after 15 minutes without calls."
     }
   },
   "server": {
