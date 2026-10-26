@@ -170,9 +170,8 @@
     },
     "judges": {
       "title": "ハッカソンの審査員の方へ",
-      "evalTitle": "デモのモデル",
       "stats": {
-        "fineTuned": "微調整したモデル",
+        "fineTuned": "学習済みデモモデル",
         "base": "ベースの Nemotron",
         "wins": "勝った問題"
       },

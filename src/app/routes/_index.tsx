@@ -387,8 +387,7 @@ function ForJudges() {
       <div className="ui-container py-16 lg:py-20">
         <h2 className="text-2xl font-semibold tracking-tight">{t("landing.judges.title")}</h2>
         <div className="mt-6 max-w-xl">
-          <p className="text-sm font-semibold">{t("landing.judges.evalTitle")}</p>
-          <dl className="mt-4 grid grid-cols-3 gap-4">
+          <dl className="grid grid-cols-3 gap-4">
             {stats.map(([value, key]) => (
               <div key={key}>
                 <dd className="text-3xl font-semibold tracking-tight tabular-nums">{value}</dd>

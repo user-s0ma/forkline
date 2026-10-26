@@ -170,9 +170,8 @@
     },
     "judges": {
       "title": "For hackathon judges",
-      "evalTitle": "Demo model",
       "stats": {
-        "fineTuned": "Fine-tuned model",
+        "fineTuned": "Trained demo model",
         "base": "Base Nemotron",
         "wins": "Questions won"
       },
